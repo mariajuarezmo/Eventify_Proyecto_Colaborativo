@@ -1,0 +1,75 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8d7da; /* Fondo rojizo claro */
+    color: #721c24; /* Texto en tonalidad roja */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column; /* Apilado vertical */
+}
+
+.container {
+    max-width: 500px;
+    width: 100%;
+    padding: 20px;
+    background: #ffffff; /* Fondo blanco para el formulario */
+    border: 1px solid #f5c6cb; /* Borde en tonalidad rojiza */
+    border-radius: 8px; /* Bordes redondeados */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Sombra */
+    margin-bottom: 20px; /* Espaciado entre secciones */
+}
+
+h2 {
+    text-align: center;
+    color: #721c24; /* Títulos en rojo oscuro */
+    margin-bottom: 20px;
+}
+
+div {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+input, select, textarea {
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #f5c6cb; /* Bordes rojizos */
+    border-radius: 5px;
+    outline: none;
+    background-color: #fff5f5; /* Fondo claro para inputs */
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #f1aeb5; /* Color más fuerte al enfocar */
+    box-shadow: 0 0 5px #f5c6cb;
+}
+
+button {
+    padding: 12px;
+    font-size: 1rem;
+    background-color: #d9534f; /* Tonalidad roja para botones */
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #c9302c; /* Más oscuro al pasar el cursor */
+}
+
+.hidden {
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
+}
+
+.visible {
+    visibility: visible;
+    height: auto;
+}

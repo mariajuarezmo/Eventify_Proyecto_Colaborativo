@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del usuario</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Crear o Editar Eventos -->
+    
+    <h2>Crear o Editar Evento</h2>
+    <div id="eventFormContainer">
+        <form id="eventForm" action="/eventRegister" method="POST">
+            <input type="text" id="eventTitle" name="titulo" placeholder="Título del evento" required>
+            <input type="date" id="eventDate" name="fecha" required>
+            <input type="time" id="eventTime" name="hora" required>
+            <input type="text" id="eventLocation" name="ubicacion" placeholder="Ubicación" required>
+            <input type="text" id="eventOrganizer" name="organizador" placeholder="Organizador" required>
+            <textarea id="eventDescription" name="descripcion" placeholder="Descripción" required></textarea>
+            <select id="eventCategory" name="categoria">
+                <option value="Estudiantes">Evento para Estudiantes</option>
+                <option value="Profesores">Evento para Profesores</option>
+                <option value="Universidad">Evento para Comunidad Universitaria</option>
+            </select>
+            <button type="submit">Crear Evento</button>
+        </form>
+            
+    </div>
+    
+    <script src="js/scripts.js"></script>
+</body>
+</html>
