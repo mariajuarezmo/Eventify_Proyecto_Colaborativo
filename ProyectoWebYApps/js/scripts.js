@@ -278,6 +278,3 @@ eventForm.addEventListener('submit', (e) => {
         });
 });
 
-
-
-

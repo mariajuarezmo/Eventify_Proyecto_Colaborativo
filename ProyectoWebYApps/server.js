@@ -45,25 +45,30 @@ con.connect(function (err) {
             });
 
 
-            const createEventsTableQuery = `
+            // Crear la tabla Eventos
+                const createEventsTableQuery = `
                 CREATE TABLE IF NOT EXISTS Eventos (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    titulo VARCHAR(100) NOT NULL,
-                    fecha DATE NOT NULL,
-                    hora TIME NOT NULL,
-                    ubicacion VARCHAR(100) NOT NULL,
-                    organizador VARCHAR(100) NOT NULL,
-                    descripcion TEXT NOT NULL,
-                    categoria VARCHAR(50) NOT NULL,
-                    id_usuario INT,
-                    FOREIGN KEY (id_usuario) REFERENCES Usuarios(id) ON DELETE CASCADE
+                    ID_EVENTO INT AUTO_INCREMENT PRIMARY KEY,
+                    ID_USUARIO_CREADOR_EVENTO INT,
+                    ID_ADMIN_APROBADOR INT,
+                    Nombre VARCHAR(100) NOT NULL,
+                    Descripcion TEXT NOT NULL,
+                    Estado ENUM('Aceptado', 'Denegado', 'Pendiente') DEFAULT 'Pendiente',
+                    Fecha DATE NOT NULL,
+                    Hora TIME NOT NULL,
+                    Categoria VARCHAR(50) NOT NULL,
+                    Ubicacion VARCHAR(100) NOT NULL,
+                    Organizador VARCHAR(100) NOT NULL,
+                    QR VARCHAR(255),
+                    FOREIGN KEY (ID_USUARIO_CREADOR_EVENTO) REFERENCES Usuarios(ID) ON DELETE CASCADE,
+                    FOREIGN KEY (ID_ADMIN_APROBADOR) REFERENCES Usuarios(ID) ON DELETE SET NULL
                 )
-            `;
-
-            con.query(createEventsTableQuery, function (err) {
+                `;
+            con.query(createEventsTableQuery, (err) => {
                 if (err) throw err;
                 console.log("Table 'Eventos' created or already exists!");
             });
+
         });
 
     });
@@ -128,7 +133,6 @@ app.post('/login', (req, res) => {
     });
 });
 
-//Ruta para registrar evento
 app.post('/eventRegister', (req, res) => {
     const { titulo, fecha, hora, ubicacion, organizador, descripcion, categoria } = req.body;
 
@@ -140,17 +144,63 @@ app.post('/eventRegister', (req, res) => {
         return res.send("<script>alert('Debes iniciar sesión antes de crear un evento.'); window.location.href='/index.html';</script>");
     }
 
-    // Insertar el evento en la base de datos
-    const insertEventQuery = `
-        INSERT INTO Eventos (titulo, fecha, hora, ubicacion, organizador, descripcion, categoria, id_usuario)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    con.query(insertEventQuery, [titulo, fecha, hora, ubicacion, organizador, descripcion, categoria, loggedInUserId], (err) => {
+    // Consultar el rol del usuario logueado
+    const userRoleQuery = "SELECT rol FROM Usuarios WHERE id = ?";
+    con.query(userRoleQuery, [loggedInUserId], (err, results) => {
         if (err) throw err;
-        res.send("<script>alert('Evento creado con éxito.'); window.location.href='/html/panelUsuario.html';</script>");
+
+        const userRole = results[0].rol;
+        const estado = userRole === 'Admin' ? 'Aceptado' : 'Pendiente';
+
+        // Insertar el evento con el estado correspondiente
+        const insertEventQuery = `
+            INSERT INTO Eventos (Nombre, Descripcion, Estado, Fecha, Hora, Categoria, Ubicacion, Organizador, ID_USUARIO_CREADOR_EVENTO)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        con.query(
+            insertEventQuery,
+            [titulo, descripcion, estado, fecha, hora, categoria, ubicacion, organizador, loggedInUserId],
+            (err) => {
+                if (err) throw err;
+                res.send("<script>alert('Evento creado con éxito.'); window.location.href='/html/panelUsuario.html';</script>");
+            }
+        );
     });
 });
+app.post('/updateEventStatus', (req, res) => {
+    const { id_evento, nuevo_estado } = req.body;
+
+    if (!id_evento || !nuevo_estado) {
+        return res.send("<script>alert('El ID del evento y el nuevo estado son obligatorios.'); window.history.back();</script>");
+    }
+
+    const updateEventQuery = `
+        UPDATE Eventos
+        SET Estado = ?, ID_ADMIN_APROBADOR = ?
+        WHERE ID_EVENTO = ?
+    `;
+    con.query(updateEventQuery, [nuevo_estado, loggedInUserId, id_evento], (err) => {
+        if (err) {
+            console.error('Error al actualizar el evento:', err);
+            return res.send("<script>alert('Error interno al actualizar el evento.'); window.history.back();</script>");
+        }
+        res.send(`<script>alert('Evento actualizado a ${nuevo_estado} con éxito.'); window.location.href='/html/panelAdministrador.html';</script>`);
+    });
+});
+
+
+app.get('/pendingEvents', (req, res) => {
+    const pendingEventsQuery = "SELECT * FROM Eventos WHERE Estado = 'Pendiente'";
+    con.query(pendingEventsQuery, (err, events) => {
+        if (err) {
+            console.error('Error al obtener eventos pendientes:', err);
+            return res.status(500).send("Error al cargar los eventos.");
+        }
+        res.json(events); // Devuelve los eventos pendientes como JSON
+    });
+});
+
 
 
 // Iniciar el servidor

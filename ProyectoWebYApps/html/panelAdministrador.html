@@ -7,40 +7,125 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    
-    
-    <!-- Panel de Administrador -->
-    <div id="adminActions" class="hidden">
-        <h2>Panel de Administrador</h2>
+    <!-- Título del Panel -->
+    <h1>Panel del Administrador</h1>
+
+    <!-- Botones principales del administrador -->
+    <div id="adminActions">
+        <h2>Acciones</h2>
         <button id="createEventButton">Crear Evento</button>
-        <button id="approveEventButton">Aprobar Eventos</button>
+        <button id="approveEventButton">Aprobar/Denegrar Eventos</button>
     </div>
 
-    <!-- Crear o Editar Eventos -->
-    <div id="userActions" class="hidden">
-        <h2>Crear o Editar Evento</h2>
-        <div id="eventForm">
-            <input type="text" id="eventTitle" placeholder="Título del evento" required>
-            <input type="date" id="eventDate" required>
-            <input type="time" id="eventTime" required>
-            <input type="text" id="eventLocation" placeholder="Ubicación" required>
-            <input type="text" id="eventOrganizer" placeholder="Organizador" required>
-            <textarea id="eventDescription" placeholder="Descripción" required></textarea>
-            <select id="eventCategory">
+    <!-- Formulario para crear un evento -->
+    <div id="eventFormContainer" class="hidden">
+        <h2>Crear Evento</h2>
+        <form id="eventForm" action="/eventRegister" method="POST">
+            <input type="text" id="eventTitle" name="titulo" placeholder="Título del evento" required>
+            <input type="date" id="eventDate" name="fecha" required>
+            <input type="time" id="eventTime" name="hora" required>
+            <input type="text" id="eventLocation" name="ubicacion" placeholder="Ubicación" required>
+            <input type="text" id="eventOrganizer" name="organizador" placeholder="Organizador" required>
+            <textarea id="eventDescription" name="descripcion" placeholder="Descripción" required></textarea>
+            <select id="eventCategory" name="categoria">
                 <option value="Estudiantes">Evento para Estudiantes</option>
                 <option value="Profesores">Evento para Profesores</option>
                 <option value="Universidad">Evento para Comunidad Universitaria</option>
             </select>
-            <button id="createEvent">Crear Evento</button>
-        </div>
+            <button type="submit">Crear Evento</button>
+        </form>
     </div>
 
-    <!-- Lista de Aprobación -->
+    <!-- Lista de eventos pendientes -->
     <div id="approvalList" class="hidden">
         <h2>Aprobar o Denegar Eventos</h2>
-        <ul id="eventApprovalList"></ul>
+        <ul id="eventApprovalList">
+            <!-- Los eventos pendientes se cargarán aquí dinámicamente -->
+        </ul>
     </div>
 
-    <script src="js/scripts.js"></script>
+    <!-- Script JavaScript -->
+        <!-- Script JavaScript -->
+        <script>
+            const createEventButton = document.getElementById('createEventButton');
+            const approveEventButton = document.getElementById('approveEventButton');
+            const eventFormContainer = document.getElementById('eventFormContainer');
+            const approvalList = document.getElementById('approvalList');
+            const eventApprovalList = document.getElementById('eventApprovalList'); // Lista de eventos
+    
+            // Mostrar el formulario para crear eventos
+            createEventButton.addEventListener('click', () => {
+                eventFormContainer.classList.remove('hidden');
+                approvalList.classList.add('hidden');
+            });
+    
+            // Mostrar la lista de eventos pendientes
+            approveEventButton.addEventListener('click', () => {
+                eventFormContainer.classList.add('hidden');
+                approvalList.classList.remove('hidden');
+    
+                fetch('/pendingEvents') // Llamar a la ruta del servidor que devuelve los eventos pendientes
+                    .then(response => response.json()) // Recibimos JSON desde el servidor
+                    .then(events => {
+                        // Limpiar la lista de eventos pendientes
+                        eventApprovalList.innerHTML = '';
+    
+                        if (events.length === 0) {
+                            eventApprovalList.innerHTML = '<li>No hay eventos pendientes.</li>';
+                            return;
+                        }
+    
+                        // Crear elementos para cada evento
+                        events.forEach(event => {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = `${event.Nombre} - ${event.Fecha} - ${event.Categoria}`;
+    
+                            // Botón para aprobar el evento
+                            const approveButton = document.createElement('button');
+                            approveButton.textContent = 'Aceptar';
+                            approveButton.addEventListener('click', () => {
+                                updateEvent(event.ID_EVENTO, 'Aceptado', listItem);
+                            });
+    
+                            // Botón para denegar el evento
+                            const denyButton = document.createElement('button');
+                            denyButton.textContent = 'Denegar';
+                            denyButton.addEventListener('click', () => {
+                                updateEvent(event.ID_EVENTO, 'Denegado', listItem);
+                            });
+    
+                            // Añadir los botones al elemento de la lista
+                            listItem.appendChild(approveButton);
+                            listItem.appendChild(denyButton);
+    
+                            // Añadir el elemento a la lista de eventos
+                            eventApprovalList.appendChild(listItem);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error al cargar eventos pendientes:', error);
+                        alert('Hubo un error al cargar los eventos. Inténtalo nuevamente.');
+                    });
+            });
+    
+            // Función para aprobar o denegar un evento
+            function updateEvent(id_evento, nuevo_estado, listItem) {
+                fetch('/updateEventStatus', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `id_evento=${id_evento}&nuevo_estado=${nuevo_estado}`,
+                })
+                .then(response => response.text()) // Esperamos HTML con un mensaje del servidor
+                .then(message => {
+                    alert(message); // Mostrar el mensaje de éxito al usuario
+                    listItem.remove(); // Eliminar el evento de la lista de pendientes
+                })
+                .catch(error => {
+                    console.error('Error al actualizar el evento:', error);
+                    alert('Hubo un error al procesar la solicitud. Inténtalo nuevamente.');
+                });
+            }
+        </script>
+    
 </body>
 </html>
