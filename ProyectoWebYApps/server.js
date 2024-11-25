@@ -7,7 +7,10 @@ const port = 3000;
 app.use(express.urlencoded({ extended: true }));
 
 // Servir archivos estáticos desde la carpeta actual
-app.use(express.static(__dirname));
+app.use('/html', express.static(__dirname + '/html'));
+app.use('/js', express.static(__dirname + '/js'));
+app.use('/css', express.static(__dirname + '/css'));
+
 
 // Configuración de conexión a la base de datos
 const con = mysql.createConnection({
@@ -68,6 +71,28 @@ con.connect(function (err) {
                 if (err) throw err;
                 console.log("Table 'Eventos' created or already exists!");
             });
+
+            // Lógica para actualizar Estado_Temporal periódicamente
+        setInterval(() => {
+            const updateTemporalStatusQuery = `
+                UPDATE Eventos
+                SET Estado_Temporal = CASE
+                    WHEN Fecha < CURDATE() THEN 'Pasado'
+                    ELSE 'Por Suceder'
+                END
+            `;
+
+            con.query(updateTemporalStatusQuery, (err) => {
+                if (err) console.error('Error al actualizar Estado_Temporal:', err);
+                else console.log('Estado_Temporal actualizado.');
+            });
+        }, 1000 * 60 * 60); // Ejecuta cada hora
+
+            con.query("ALTER TABLE Eventos ADD COLUMN Estado_Temporal ENUM('Por Suceder', 'Pasado') DEFAULT 'Por Suceder'", (err) => {
+                if (err && err.code !== 'ER_DUP_FIELDNAME') throw err;
+            });
+
+             
 
         });
 
@@ -144,7 +169,16 @@ app.post('/eventRegister', (req, res) => {
         return res.send("<script>alert('Debes iniciar sesión antes de crear un evento.'); window.location.href='/index.html';</script>");
     }
 
-    // Consultar el rol del usuario logueado
+    // Combinar fecha y hora para validar
+    const now = new Date(); // Fecha y hora actuales
+    const eventDate = new Date(`${fecha}T${hora}`); // Combinar fecha y hora del evento
+
+    // Validar si la fecha y hora ya han pasado
+    if (eventDate < now) {
+        return res.send("<script>alert('La fecha y hora del evento ya han pasado. No se puede registrar el evento.'); window.history.back();</script>");
+    }
+
+    // Obtener el rol del usuario
     const userRoleQuery = "SELECT rol FROM Usuarios WHERE id = ?";
     con.query(userRoleQuery, [loggedInUserId], (err, results) => {
         if (err) throw err;
@@ -152,15 +186,17 @@ app.post('/eventRegister', (req, res) => {
         const userRole = results[0].rol;
         const estado = userRole === 'Admin' ? 'Aceptado' : 'Pendiente';
 
-        // Insertar el evento con el estado correspondiente
+        // Insertar el evento
         const insertEventQuery = `
-            INSERT INTO Eventos (Nombre, Descripcion, Estado, Fecha, Hora, Categoria, Ubicacion, Organizador, ID_USUARIO_CREADOR_EVENTO)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO Eventos (Nombre, Descripcion, Estado, Fecha, Hora, Categoria, Ubicacion, Organizador, ID_USUARIO_CREADOR_EVENTO, Estado_Temporal)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
+
+        const estadoTemporal = 'Por Suceder'; // Ya validamos que no es pasado
 
         con.query(
             insertEventQuery,
-            [titulo, descripcion, estado, fecha, hora, categoria, ubicacion, organizador, loggedInUserId],
+            [titulo, descripcion, estado, fecha, hora, categoria, ubicacion, organizador, loggedInUserId, estadoTemporal],
             (err) => {
                 if (err) throw err;
                 res.send("<script>alert('Evento creado con éxito.'); window.location.href='/html/panelUsuario.html';</script>");
@@ -168,6 +204,10 @@ app.post('/eventRegister', (req, res) => {
         );
     });
 });
+
+
+
+
 app.post('/updateEventStatus', (req, res) => {
     const { id_evento, nuevo_estado } = req.body;
 
@@ -201,6 +241,24 @@ app.get('/pendingEvents', (req, res) => {
     });
 });
 
+// Ruta para obtener eventos aceptados y por suceder
+/*app.get('/events', (req, res) => {
+    const query = `
+        SELECT Nombre, Descripcion, Fecha, Hora, Categoria, Ubicacion, Organizador
+        FROM Eventos
+        WHERE Estado = 'Aceptado' AND Estado_Temporal = 'Por Suceder'
+    `;
+    con.query(query, (err, results) => {
+        if (err) {
+            console.error('Error al obtener eventos:', err);
+            return res.status(500).json({ error: "Error al cargar los eventos." });
+        }
+        console.log('Eventos obtenidos:', results); // Log para verificar resultados
+        res.json(results);
+    });
+});
+
+*/
 
 
 // Iniciar el servidor
