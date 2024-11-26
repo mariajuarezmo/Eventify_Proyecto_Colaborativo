@@ -13,8 +13,8 @@
     <!-- Botones principales del administrador -->
     <div id="adminActions">
         <h2>Acciones</h2>
-        <button id="createEventButton">Crear Evento</button>
-        <button id="approveEventButton">Aprobar/Denegrar Eventos</button>
+        <button id="createEventButton" onclick="showCreateEventForm()">Crear Evento</button>
+        <button id="approveEventButton" onclick="showPendingEvents()">Aprobar/Denegrar Eventos</button>
     </div>
 
     <!-- Formulario para crear un evento -->
@@ -44,88 +44,69 @@
         </ul>
     </div>
 
-    <!-- Script JavaScript -->
-        <!-- Script JavaScript -->
-        <script>
-            const createEventButton = document.getElementById('createEventButton');
-            const approveEventButton = document.getElementById('approveEventButton');
-            const eventFormContainer = document.getElementById('eventFormContainer');
-            const approvalList = document.getElementById('approvalList');
-            const eventApprovalList = document.getElementById('eventApprovalList'); // Lista de eventos
-    
-            // Mostrar el formulario para crear eventos
-            createEventButton.addEventListener('click', () => {
-                eventFormContainer.classList.remove('hidden');
-                approvalList.classList.add('hidden');
-            });
-    
-            // Mostrar la lista de eventos pendientes
-            approveEventButton.addEventListener('click', () => {
-                eventFormContainer.classList.add('hidden');
-                approvalList.classList.remove('hidden');
-    
-                fetch('/pendingEvents') // Llamar a la ruta del servidor que devuelve los eventos pendientes
-                    .then(response => response.json()) // Recibimos JSON desde el servidor
-                    .then(events => {
-                        // Limpiar la lista de eventos pendientes
-                        eventApprovalList.innerHTML = '';
-    
-                        if (events.length === 0) {
-                            eventApprovalList.innerHTML = '<li>No hay eventos pendientes.</li>';
-                            return;
-                        }
-    
-                        // Crear elementos para cada evento
-                        events.forEach(event => {
-                            const listItem = document.createElement('li');
-                            listItem.textContent = `${event.Nombre} - ${event.Fecha} - ${event.Categoria}`;
-    
-                            // Botón para aprobar el evento
-                            const approveButton = document.createElement('button');
-                            approveButton.textContent = 'Aceptar';
-                            approveButton.addEventListener('click', () => {
-                                updateEvent(event.ID_EVENTO, 'Aceptado', listItem);
-                            });
-    
-                            // Botón para denegar el evento
-                            const denyButton = document.createElement('button');
-                            denyButton.textContent = 'Denegar';
-                            denyButton.addEventListener('click', () => {
-                                updateEvent(event.ID_EVENTO, 'Denegado', listItem);
-                            });
-    
-                            // Añadir los botones al elemento de la lista
-                            listItem.appendChild(approveButton);
-                            listItem.appendChild(denyButton);
-    
-                            // Añadir el elemento a la lista de eventos
-                            eventApprovalList.appendChild(listItem);
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error al cargar eventos pendientes:', error);
-                        alert('Hubo un error al cargar los eventos. Inténtalo nuevamente.');
+    <script>
+        // Mostrar el formulario para crear eventos
+        function showCreateEventForm() {
+            document.getElementById('eventFormContainer').classList.remove('hidden');
+            document.getElementById('approvalList').classList.add('hidden');
+        }
+
+        // Mostrar la lista de eventos pendientes
+        function showPendingEvents() {
+            document.getElementById('eventFormContainer').classList.add('hidden');
+            document.getElementById('approvalList').classList.remove('hidden');
+
+            fetch('/pendingEvents')
+                .then(response => response.json())
+                .then(events => {
+                    const eventApprovalList = document.getElementById('eventApprovalList');
+                    eventApprovalList.innerHTML = '';
+                    if (events.length === 0) {
+                        eventApprovalList.innerHTML = '<li>No hay eventos pendientes.</li>';
+                        return;
+                    }
+
+                    events.forEach(event => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${event.Nombre} - ${event.Fecha} - ${event.Categoria}`;
+
+                        const approveButton = document.createElement('button');
+                        approveButton.textContent = 'Aceptar';
+                        approveButton.onclick = () => updateEventStatus(event.ID_EVENTO, 'Aceptado', listItem);
+
+                        const denyButton = document.createElement('button');
+                        denyButton.textContent = 'Denegar';
+                        denyButton.onclick = () => updateEventStatus(event.ID_EVENTO, 'Denegado', listItem);
+
+                        listItem.appendChild(approveButton);
+                        listItem.appendChild(denyButton);
+
+                        eventApprovalList.appendChild(listItem);
                     });
-            });
-    
-            // Función para aprobar o denegar un evento
-            function updateEvent(id_evento, nuevo_estado, listItem) {
-                fetch('/updateEventStatus', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `id_evento=${id_evento}&nuevo_estado=${nuevo_estado}`,
                 })
-                .then(response => response.text()) // Esperamos HTML con un mensaje del servidor
+                .catch(error => {
+                    console.error('Error al cargar eventos pendientes:', error);
+                    alert('Hubo un error al cargar los eventos. Inténtalo nuevamente.');
+                });
+        }
+
+        // Aprobar o denegar un evento
+        function updateEventStatus(id_evento, nuevo_estado, listItem) {
+            fetch('/updateEventStatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id_evento=${id_evento}&nuevo_estado=${nuevo_estado}`,
+            })
+                .then(response => response.text())
                 .then(message => {
-                    alert(message); // Mostrar el mensaje de éxito al usuario
-                    listItem.remove(); // Eliminar el evento de la lista de pendientes
+                    alert(message);
+                    listItem.remove();
                 })
                 .catch(error => {
                     console.error('Error al actualizar el evento:', error);
-                    alert('Hubo un error al procesar la solicitud. Inténtalo nuevamente.');
+                    alert('Hubo un error al procesar la solicitud.');
                 });
-            }
-        </script>
-    
+        }
+    </script>
 </body>
 </html>

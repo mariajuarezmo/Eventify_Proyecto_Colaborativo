@@ -7,7 +7,7 @@ registerButton.addEventListener('click', () => {
     const password = document.getElementById('password').value.trim();
     const role = document.getElementById('role').value;
 
-    if (!username || !password) {
+    if (!username || !password || !role) {
         alert('Por favor, completa todos los campos.');
         return;
     }
@@ -43,7 +43,6 @@ loginButton.addEventListener('click', () => {
         .then(data => alert(data.message))
         .catch(error => console.error('Error:', error));
 });
-
 
 
 // Obtener el formulario

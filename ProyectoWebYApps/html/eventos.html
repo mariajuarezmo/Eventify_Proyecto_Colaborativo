@@ -15,32 +15,50 @@
         <button onclick="window.history.back()">Volver</button>
     </div>
     <script>
-        // Función para cargar eventos al abrir la página
-        /*document.addEventListener("DOMContentLoaded", function () {
-            fetch('/events')
-                .then(response => response.json())
-                .then(events => {
-                    const eventList = document.getElementById('eventList');
-                    eventList.innerHTML = ""; // Limpiar la lista
+        // Función para obtener los eventos desde el servidor
+        async function fetchEvents() {
+            try {
+                const response = await fetch('/events'); // Realiza la solicitud al backend
+                if (!response.ok) {
+                    throw new Error('Error al obtener eventos');
+                }
+                const events = await response.json(); // Convierte la respuesta en JSON
+                renderEvents(events); // Llama a la función para renderizar los eventos
+            } catch (error) {
+                console.error('Error al cargar los eventos:', error);
+                alert('No se pudieron cargar los eventos.');
+            }
+        }
 
-                    events.forEach(event => {
-                        const listItem = document.createElement('li');
-                        listItem.innerHTML = `
-                            <h3>${event.Nombre}</h3>
-                            <p>${event.Descripcion}</p>
-                            <p><strong>Fecha:</strong> ${event.Fecha}</p>
-                            <p><strong>Hora:</strong> ${event.Hora}</p>
-                            <p><strong>Categoría:</strong> ${event.Categoria}</p>
-                            <p><strong>Ubicación:</strong> ${event.Ubicacion}</p>
-                            <p><strong>Organizador:</strong> ${event.Organizador}</p>
-                        `;
-                        eventList.appendChild(listItem);
-                    });
-                })
-                .catch(err => {
-                    console.error('Error al cargar eventos:', err);
-                });
-        });*/
+        // Función para mostrar los eventos en la lista
+        function renderEvents(events) {
+            const eventList = document.getElementById('eventList');
+            eventList.innerHTML = ''; // Limpia la lista antes de agregar los nuevos eventos
+
+            if (events.length === 0) {
+                const noEventsItem = document.createElement('li');
+                noEventsItem.textContent = 'No hay eventos disponibles.';
+                eventList.appendChild(noEventsItem);
+                return;
+            }
+
+            // Agrega cada evento a la lista
+            events.forEach(event => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <h3>${event.Nombre}</h3>
+                    <p>${event.Descripcion}</p>
+                    <p><strong>Fecha:</strong> ${event.Fecha} <strong>Hora:</strong> ${event.Hora}</p>
+                    <p><strong>Categoría:</strong> ${event.Categoria}</p>
+                    <p><strong>Ubicación:</strong> ${event.Ubicacion}</p>
+                    <p><strong>Organizador:</strong> ${event.Organizador}</p>
+                `;
+                eventList.appendChild(listItem);
+            });
+        }
+
+        // Llama a la función para cargar los eventos al cargar la página
+        fetchEvents();
     </script>
 </body>
 </html>

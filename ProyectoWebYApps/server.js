@@ -1,16 +1,15 @@
 const express = require('express');
 const mysql = require('mysql');
+const path = require('path');
+
 const app = express();
 const port = 3000;
 
 // Middleware para procesar datos de formularios
 app.use(express.urlencoded({ extended: true }));
 
-// Servir archivos estáticos desde la carpeta actual
-app.use('/html', express.static(__dirname + '/html'));
-app.use('/js', express.static(__dirname + '/js'));
-app.use('/css', express.static(__dirname + '/css'));
-
+// Servir archivos estáticos desde la raíz del proyecto
+app.use(express.static(path.join(__dirname)));
 
 // Configuración de conexión a la base de datos
 const con = mysql.createConnection({
@@ -18,7 +17,6 @@ const con = mysql.createConnection({
     user: "root",
     password: "",
 });
-
 // Conexión al servidor MySQL
 con.connect(function (err) {
     if (err) throw err;
@@ -242,7 +240,7 @@ app.get('/pendingEvents', (req, res) => {
 });
 
 // Ruta para obtener eventos aceptados y por suceder
-/*app.get('/events', (req, res) => {
+app.get('/events', (req, res) => {
     const query = `
         SELECT Nombre, Descripcion, Fecha, Hora, Categoria, Ubicacion, Organizador
         FROM Eventos
@@ -258,7 +256,53 @@ app.get('/pendingEvents', (req, res) => {
     });
 });
 
-*/
+
+app.get('/userEvents', (req, res) => {
+    if (!loggedInUserId) {
+        return res.send("<script>alert('Debes iniciar sesión para ver tus eventos.'); window.location.href='/index.html';</script>");
+    }
+
+    const userEventsQuery = `
+        SELECT ID_EVENTO, Nombre, Descripcion, Fecha, Hora, Categoria, Ubicacion, Organizador
+        FROM Eventos
+        WHERE ID_USUARIO_CREADOR_EVENTO = ?
+    `;
+
+    con.query(userEventsQuery, [loggedInUserId], (err, results) => {
+        if (err) {
+            console.error('Error al obtener los eventos del usuario:', err);
+            return res.status(500).send("Error al cargar los eventos.");
+        }
+        res.json(results); // Devuelve los eventos del usuario como JSON
+    });
+});
+
+app.post('/updateEvent', (req, res) => {
+    const { id_evento, titulo, descripcion, fecha, hora, ubicacion, organizador, categoria } = req.body;
+
+    if (!id_evento || !titulo || !descripcion || !fecha || !hora || !ubicacion || !organizador || !categoria) {
+        return res.send("<script>alert('Todos los campos son obligatorios.'); window.history.back();</script>");
+    }
+
+    if (!loggedInUserId) {
+        return res.send("<script>alert('Debes iniciar sesión para editar eventos.'); window.location.href='/index.html';</script>");
+    }
+
+    const updateEventQuery = `
+        UPDATE Eventos
+        SET Nombre = ?, Descripcion = ?, Fecha = ?, Hora = ?, Categoria = ?, Ubicacion = ?, Organizador = ?
+        WHERE ID_EVENTO = ? AND ID_USUARIO_CREADOR_EVENTO = ?
+    `;
+
+    con.query(updateEventQuery, [titulo, descripcion, fecha, hora, categoria, ubicacion, organizador, id_evento, loggedInUserId], (err) => {
+        if (err) {
+            console.error('Error al actualizar el evento:', err);
+            return res.send("<script>alert('Error interno al actualizar el evento.'); window.history.back();</script>");
+        }
+        res.send("<script>alert('Evento actualizado con éxito.'); window.location.href='/html/panelUsuario.html';</script>");
+    });
+});
+
 
 
 // Iniciar el servidor
