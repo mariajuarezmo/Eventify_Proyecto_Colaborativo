@@ -15,6 +15,7 @@
         <h2>Acciones</h2>
         <button id="createEventButton" onclick="showCreateEventForm()">Crear Evento</button>
         <button id="approveEventButton" onclick="showPendingEvents()">Aprobar/Denegrar Eventos</button>
+        <button id="editEventsButton" onclick="showEditEvents()">Editar Eventos</button>
     </div>
 
     <!-- Formulario para crear un evento -->
@@ -36,77 +37,84 @@
         </form>
     </div>
 
-    <!-- Lista de eventos pendientes -->
-    <div id="approvalList" class="hidden">
-        <h2>Aprobar o Denegar Eventos</h2>
-        <ul id="eventApprovalList">
-            <!-- Los eventos pendientes se cargarán aquí dinámicamente -->
+    <!-- Lista de eventos para editar -->
+    <div id="editEventsContainer" class="hidden">
+        <h2>Editar Eventos</h2>
+        <ul id="eventList">
+            <!-- Los eventos se cargarán aquí dinámicamente -->
         </ul>
     </div>
 
+    <!-- Formulario para editar evento -->
+    <div id="editEventFormContainer" class="hidden">
+        <h2>Editar Evento</h2>
+        <form id="editEventForm" action="/updateEvent" method="POST">
+            <input type="hidden" name="id_evento" id="editEventId">
+            <input type="text" name="titulo" id="editEventTitle" required>
+            <input type="date" name="fecha" id="editEventDate" required>
+            <input type="time" name="hora" id="editEventTime" required>
+            <input type="text" name="ubicacion" id="editEventLocation" required>
+            <input type="text" name="organizador" id="editEventOrganizer" required>
+            <textarea name="descripcion" id="editEventDescription" required></textarea>
+            <select name="categoria" id="editEventCategory">
+                <option value="Estudiantes">Evento para Estudiantes</option>
+                <option value="Profesores">Evento para Profesores</option>
+                <option value="Universidad">Evento para Comunidad Universitaria</option>
+            </select>
+            <button type="submit">Guardar Cambios</button>
+        </form>
+    </div>
+
     <script>
-        // Mostrar el formulario para crear eventos
-        function showCreateEventForm() {
-            document.getElementById('eventFormContainer').classList.remove('hidden');
-            document.getElementById('approvalList').classList.add('hidden');
-        }
-
-        // Mostrar la lista de eventos pendientes
-        function showPendingEvents() {
+        // Mostrar la lista de eventos para editar
+        function showEditEvents() {
             document.getElementById('eventFormContainer').classList.add('hidden');
-            document.getElementById('approvalList').classList.remove('hidden');
+            document.getElementById('editEventsContainer').classList.remove('hidden');
+            document.getElementById('editEventFormContainer').classList.add('hidden');
 
-            fetch('/pendingEvents')
+            fetch('/getAllEvents')
                 .then(response => response.json())
                 .then(events => {
-                    const eventApprovalList = document.getElementById('eventApprovalList');
-                    eventApprovalList.innerHTML = '';
+                    const eventList = document.getElementById('eventList');
+                    eventList.innerHTML = '';
                     if (events.length === 0) {
-                        eventApprovalList.innerHTML = '<li>No hay eventos pendientes.</li>';
+                        eventList.innerHTML = '<li>No hay eventos registrados.</li>';
                         return;
                     }
 
                     events.forEach(event => {
                         const listItem = document.createElement('li');
-                        listItem.textContent = `${event.Nombre} - ${event.Fecha} - ${event.Categoria}`;
-
-                        const approveButton = document.createElement('button');
-                        approveButton.textContent = 'Aceptar';
-                        approveButton.onclick = () => updateEventStatus(event.ID_EVENTO, 'Aceptado', listItem);
-
-                        const denyButton = document.createElement('button');
-                        denyButton.textContent = 'Denegar';
-                        denyButton.onclick = () => updateEventStatus(event.ID_EVENTO, 'Denegado', listItem);
-
-                        listItem.appendChild(approveButton);
-                        listItem.appendChild(denyButton);
-
-                        eventApprovalList.appendChild(listItem);
+                        listItem.innerHTML = `
+                            <strong>${event.Nombre}</strong> - ${event.Fecha} ${event.Hora} - ${event.Categoria}
+                            <button onclick="editEvent(${event.ID_EVENTO}, '${event.Nombre}', '${event.Descripcion}', '${event.Fecha}', '${event.Hora}', '${event.Ubicacion}', '${event.Organizador}', '${event.Categoria}')">Editar</button>
+                        `;
+                        eventList.appendChild(listItem);
                     });
                 })
-                .catch(error => {
-                    console.error('Error al cargar eventos pendientes:', error);
-                    alert('Hubo un error al cargar los eventos. Inténtalo nuevamente.');
-                });
+                .catch(error => console.error('Error al cargar los eventos:', error));
         }
 
-        // Aprobar o denegar un evento
-        function updateEventStatus(id_evento, nuevo_estado, listItem) {
-            fetch('/updateEventStatus', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `id_evento=${id_evento}&nuevo_estado=${nuevo_estado}`,
-            })
-                .then(response => response.text())
-                .then(message => {
-                    alert(message);
-                    listItem.remove();
-                })
-                .catch(error => {
-                    console.error('Error al actualizar el evento:', error);
-                    alert('Hubo un error al procesar la solicitud.');
-                });
+        // Mostrar el formulario de edición con los datos del evento
+        function editEvent(id, title, description, date, time, location, organizer, category) {
+            document.getElementById('editEventsContainer').classList.add('hidden');
+            document.getElementById('editEventFormContainer').classList.remove('hidden');
+
+            const formattedDate = new Date(date).toISOString().split('T')[0];
+
+            document.getElementById('editEventId').value = id;
+            document.getElementById('editEventTitle').value = title;
+            document.getElementById('editEventDate').value = formattedDate;
+            document.getElementById('editEventTime').value = time;
+            document.getElementById('editEventLocation').value = location;
+            document.getElementById('editEventOrganizer').value = organizer;
+            document.getElementById('editEventDescription').value = description;
+            document.getElementById('editEventCategory').value = category;
         }
+
+        // Llamar a las funciones cuando se cargue la página
+        window.onload = () => {
+            showEditEvents(); // Mostrar por defecto "Editar Eventos"
+        };
     </script>
 </body>
 </html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Administrador Jefe</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <h1>Panel del Administrador Jefe</h1>
+
+    <div id="pendingRegistrations">
+        <h2>Solicitudes de Registro</h2>
+        <ul id="registrationRequestsList">
+            <!-- Las solicitudes de registro se cargarán aquí dinámicamente -->
+        </ul>
+    </div>
+
+    <script>
+        // Cargar solicitudes pendientes
+        function loadPendingRegistrations() {
+            fetch('/pendingRegistrations')
+                .then(response => response.json())
+                .then(requests => {
+                    const registrationRequestsList = document.getElementById('registrationRequestsList');
+                    registrationRequestsList.innerHTML = '';
+                    if (requests.length === 0) {
+                        registrationRequestsList.innerHTML = '<li>No hay solicitudes de registro pendientes.</li>';
+                        return;
+                    }
+
+                    requests.forEach(request => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${request.nombre} - ${request.rol}`;
+
+                        const approveButton = document.createElement('button');
+                        approveButton.textContent = 'Aceptar';
+                        approveButton.onclick = () => processRegistration(request.id, 'aceptar', listItem);
+
+                        const denyButton = document.createElement('button');
+                        denyButton.textContent = 'Denegar';
+                        denyButton.onclick = () => processRegistration(request.id, 'denegar', listItem);
+
+                        listItem.appendChild(approveButton);
+                        listItem.appendChild(denyButton);
+
+                        registrationRequestsList.appendChild(listItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al cargar solicitudes de registro:', error);
+                    alert('Hubo un error al cargar las solicitudes. Inténtalo nuevamente.');
+                });
+        }
+
+        // Procesar solicitud de registro
+        function processRegistration(userId, action, listItem) {
+            fetch('/processRegistration', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id=${userId}&action=${action}`,
+            })
+                .then(response => response.text())
+                .then(message => {
+                    alert(message);
+                    listItem.remove();
+                })
+                .catch(error => {
+                    console.error('Error al procesar la solicitud:', error);
+                    alert('Hubo un error al procesar la solicitud. Inténtalo nuevamente.');
+                });
+        }
+
+        // Cargar las solicitudes al cargar la página
+        window.onload = loadPendingRegistrations;
+    </script>
+</body>
+</html>
