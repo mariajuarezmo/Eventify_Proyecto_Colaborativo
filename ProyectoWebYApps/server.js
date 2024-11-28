@@ -101,6 +101,15 @@ con.connect(function (err) {
                 console.log("Table 'SolicitudesRegistro' created or already exists!");
             });
 
+            // Agregar columna 'correo' a la tabla SolicitudesRegistro si no existe
+            con.query("ALTER TABLE SolicitudesRegistro ADD COLUMN correo TEXT", (err) => {
+                if (err && err.code !== 'ER_DUP_FIELDNAME') {
+                    console.error('Error al agregar la columna "correo" a la tabla "SolicitudesRegistro":', err);
+                } else {
+                    console.log('Columna "correo" añadida a la tabla "SolicitudesRegistro" (si no existía).');
+                }
+            });
+
             // Lógica para actualizar Estado_Temporal periódicamente
             setInterval(() => {
                 const updateTemporalStatusQuery = `
