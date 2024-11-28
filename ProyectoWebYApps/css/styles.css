@@ -19,7 +19,7 @@ h1 {
 #adminActions, #eventFormContainer, #approvalList {
     margin: 20px auto;
     padding: 20px;
-    width: 50%;
+    width: 90%;
     max-width: 800px;
     background: white;
     border-radius: 10px;
@@ -37,9 +37,6 @@ button {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    width: 50%;
-    margin: 0 auto;
-    
 }
 
 button:hover {
@@ -72,15 +69,12 @@ button.deny:hover {
 form {
     display: flex;
     flex-direction: column;
-    flex-wrap: wrap;
     gap: 15px;
-    
 }
 
 form input, form select, form textarea {
-    width: 50%;
+    width: 100%;
     padding: 10px;
-    margin:  auto;
     font-size: 16px;
     border: 1px solid #ddd;
     border-radius: 5px;

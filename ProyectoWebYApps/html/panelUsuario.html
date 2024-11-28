@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel del usuario</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Panel del Usuario</title>
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-    <!-- Crear o Editar Eventos -->
-    
-    <h2>Crear o Editar Evento</h2>
+    <h1>Panel del Usuario</h1>
+
+    <!-- Crear Evento -->
+    <h2>Crear Evento</h2>
     <div id="eventFormContainer">
         <form id="eventForm" action="/eventRegister" method="POST">
             <input type="text" id="eventTitle" name="titulo" placeholder="Título del evento" required>
@@ -25,9 +26,74 @@
             </select>
             <button type="submit">Crear Evento</button>
         </form>
-            
     </div>
-    
-    <script src="js/scripts.js"></script>
+
+    <!-- Editar Eventos -->
+    <h2>Mis Eventos</h2>
+    <button id="showEventsButton">Mostrar Mis Eventos</button>
+    <div id="userEventsContainer" class="hidden">
+        <ul id="userEventsList">
+            <!-- Los eventos se cargarán aquí dinámicamente -->
+        </ul>
+    </div>
+
+    <!-- Script -->
+    <script>
+        const showEventsButton = document.getElementById('showEventsButton');
+        const userEventsContainer = document.getElementById('userEventsContainer');
+        const userEventsList = document.getElementById('userEventsList');
+
+        // Mostrar los eventos del usuario
+        showEventsButton.addEventListener('click', () => {
+            fetch('/userEvents')
+                .then(response => response.json())
+                .then(events => {
+                    userEventsContainer.classList.remove('hidden');
+                    userEventsList.innerHTML = '';
+
+                    if (events.length === 0) {
+                        userEventsList.innerHTML = '<li>No tienes eventos creados.</li>';
+                        return;
+                    }
+
+                    events.forEach(event => {
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `
+                            <strong>${event.Nombre}</strong> - ${event.Fecha} ${event.Hora} - ${event.Categoria}
+                            <button onclick="editEvent(${event.ID_EVENTO}, '${event.Nombre}', '${event.Descripcion}', '${event.Fecha}', '${event.Hora}', '${event.Ubicacion}', '${event.Organizador}', '${event.Categoria}')">Editar</button>
+                        `;
+                        userEventsList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Error al cargar los eventos:', error));
+        });
+
+        // Función para mostrar el formulario de edición
+        function editEvent(id, title, description, date, time, location, organizer, category) {
+            const eventForm = document.getElementById('eventForm');
+            eventForm.action = '/updateEvent';
+            eventForm.method = 'POST';
+
+            // Convertir la fecha al formato yyyy-MM-dd
+            const formattedDate = new Date(date).toISOString().split('T')[0];
+
+            eventForm.innerHTML = `
+                <input type="hidden" name="id_evento" value="${id}">
+                <input type="text" name="titulo" value="${title}" required>
+                <input type="date" name="fecha" value="${formattedDate}" required>
+                <input type="time" name="hora" value="${time}" required>
+                <input type="text" name="ubicacion" value="${location}" required>
+                <input type="text" name="organizador" value="${organizer}" required>
+                <textarea name="descripcion" required>${description}</textarea>
+                <select name="categoria">
+                    <option value="Estudiantes" ${category === 'Estudiantes' ? 'selected' : ''}>Estudiantes</option>
+                    <option value="Profesores" ${category === 'Profesores' ? 'selected' : ''}>Profesores</option>
+                    <option value="Universidad" ${category === 'Universidad' ? 'selected' : ''}>Universidad</option>
+                </select>
+                <button type="submit">Guardar Cambios</button>
+            `;
+        }
+
+    </script>
 </body>
 </html>
