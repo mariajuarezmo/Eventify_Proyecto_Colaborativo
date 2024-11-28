@@ -322,17 +322,25 @@ app.get('/pendingEvents', (req, res) => {
 
 // Ruta para obtener eventos aceptados y por suceder
 app.get('/events', (req, res) => {
-    const query = `
+    const { category } = req.query;
+
+    // Consulta básica para eventos aceptados y por suceder
+    let query = `
         SELECT Nombre, Descripcion, Fecha, Hora, Categoria, Ubicacion, Organizador
         FROM Eventos
         WHERE Estado = 'Aceptado' AND Estado_Temporal = 'Por Suceder'
     `;
+
+    // Filtrar por categoría si está definida
+    if (category) {
+        query += ` AND Categoria = ${mysql.escape(category)}`;
+    }
+
     con.query(query, (err, results) => {
         if (err) {
             console.error('Error al obtener eventos:', err);
             return res.status(500).json({ error: "Error al cargar los eventos." });
         }
-        console.log('Eventos obtenidos:', results); // Log para verificar resultados
         res.json(results);
     });
 });

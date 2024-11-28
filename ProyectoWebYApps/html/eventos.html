@@ -9,6 +9,13 @@
 <body>
     <div class="container">
         <h1>Eventos</h1>
+        <div>
+            <button onclick="fetchEvents()">Todos</button>
+            <button onclick="filterEvents('Estudiantes')">Estudiantes</button>
+            <button onclick="filterEvents('Profesores')">Profesores</button>
+            <button onclick="filterEvents('Comunidad Universitaria')">Comunidad Universitaria</button>
+        </div>
+        
         <ul id="eventList">
             <!-- Los eventos se agregarán dinámicamente aquí -->
         </ul>
@@ -16,19 +23,30 @@
     </div>
     <script>
         // Función para obtener los eventos desde el servidor
-        async function fetchEvents() {
+        async function fetchEvents(category = null) {
             try {
-                const response = await fetch('/events'); // Realiza la solicitud al backend
+                // Incluye la categoría en la consulta solo si se especifica
+                const endpoint = category ? `/events?category=${category}` : '/events';
+                const response = await fetch(endpoint);
+
                 if (!response.ok) {
                     throw new Error('Error al obtener eventos');
                 }
-                const events = await response.json(); // Convierte la respuesta en JSON
-                renderEvents(events); // Llama a la función para renderizar los eventos
+                const events = await response.json();
+                renderEvents(events);
             } catch (error) {
                 console.error('Error al cargar los eventos:', error);
                 alert('No se pudieron cargar los eventos.');
             }
         }
+
+        function filterEvents(category) {
+            fetchEvents(category);
+        }
+
+        // Llama a fetchEvents al cargar la página
+        fetchEvents();
+
 
         // Función para mostrar los eventos en la lista
         function renderEvents(events) {
