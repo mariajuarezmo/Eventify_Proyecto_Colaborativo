@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eventos Aceptados</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* Agregar estilos para las categorías */
+        .category-estudiantes {
+            color: red; /* Rojo para estudiantes */
+        }
+        .category-profesores {
+            color: blue; /* Azul para profesores */
+        }
+        .category-comunidad {
+            color: green; /* Verde para comunidad universitaria */
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -13,7 +25,13 @@
             <button onclick="fetchEvents()">Todos</button>
             <button onclick="filterEvents('Estudiantes')">Estudiantes</button>
             <button onclick="filterEvents('Profesores')">Profesores</button>
-            <button onclick="filterEvents('Comunidad Universitaria')">Comunidad Universitaria</button>
+            <button onclick="filterEvents('Universidad')">Comunidad Universitaria</button>
+        </div>
+
+        <div>
+            <button onclick="filterByDate('dia')">Hoy</button>
+            <button onclick="filterByDate('semana')">Esta Semana</button>
+            <button onclick="filterByDate('mes')">Este Mes</button>
         </div>
         
         <ul id="eventList">
@@ -47,7 +65,6 @@
         // Llama a fetchEvents al cargar la página
         fetchEvents();
 
-
         // Función para mostrar los eventos en la lista
         function renderEvents(events) {
             const eventList = document.getElementById('eventList');
@@ -63,6 +80,19 @@
             // Agrega cada evento a la lista
             events.forEach(event => {
                 const listItem = document.createElement('li');
+
+                // Asigna una clase CSS según la categoría
+                let categoryClass = '';
+                if (event.Categoria === 'Estudiantes') {
+                    categoryClass = 'category-estudiantes';
+                } else if (event.Categoria === 'Profesores') {
+                    categoryClass = 'category-profesores';
+                } else if (event.Categoria === 'Universidad') {
+                    categoryClass = 'category-comunidad';
+                }
+
+                listItem.className = categoryClass; // Agregar la clase CSS
+
                 listItem.innerHTML = `
                     <h3>${event.Nombre}</h3>
                     <p>${event.Descripcion}</p>

@@ -5,11 +5,18 @@ const path = require('path');
 const app = express();
 const port = 3000;
 
+require('dotenv').config();
+
+// Middleware para analizar JSON
+app.use(express.json());
+
 // Middleware para procesar datos de formularios
 app.use(express.urlencoded({ extended: true }));
 
 // Servir archivos estáticos desde la raíz del proyecto
 app.use(express.static(path.join(__dirname)));
+
+// Configuración de conexión a la base de datos
 
 // Configuración de conexión a la base de datos
 const con = mysql.createConnection({
@@ -130,6 +137,7 @@ con.connect(function (err) {
             con.query("ALTER TABLE Eventos ADD COLUMN Estado_Temporal ENUM('Por Suceder', 'Pasado') DEFAULT 'Por Suceder'", (err) => {
                 if (err && err.code !== 'ER_DUP_FIELDNAME') throw err;
             });
+            
         });
     });
 });
@@ -137,19 +145,31 @@ con.connect(function (err) {
 
 // Ruta para registrar un usuario
 app.post('/register', (req, res) => {
-    const { nombre, contraseña, rol } = req.body;
+    const { nombre, contraseña, rol, email } = req.body;
 
-    if (!nombre || !contraseña || !rol) {
+    if (!nombre || !contraseña || !rol || !email) {
         return res.send("<script>alert('Todos los campos son obligatorios.'); window.history.back();</script>");
     }
 
-    // Guardar en la tabla temporal
-    const insertRequestQuery = "INSERT INTO SolicitudesRegistro (nombre, contraseña, rol) VALUES (?, ?, ?)";
-    con.query(insertRequestQuery, [nombre, contraseña, rol], (err) => {
+    // Verificar si el nombre de usuario o el correo ya existen en la tabla Usuarios
+    const checkUserQuery = "SELECT * FROM Usuarios WHERE nombre = ? OR correo = ?";
+    con.query(checkUserQuery, [nombre, email], (err, results) => {
         if (err) throw err;
-        res.send("<script>alert('Solicitud de registro enviada. Pendiente de aprobación.'); window.location.href='/index.html';</script>");
+
+        if (results.length > 0) {
+            // Si el nombre de usuario o correo ya existen, denegar la solicitud
+            return res.send("<script>alert('El nombre de usuario y/o correo ya están registrados.'); window.history.back();</script>");
+        }
+
+        // Guardar en la tabla temporal si no hay conflicto
+        const insertRequestQuery = "INSERT INTO SolicitudesRegistro (nombre, contraseña, rol, correo) VALUES (?, ?, ?, ?)";
+        con.query(insertRequestQuery, [nombre, contraseña, rol, email], (err) => {
+            if (err) throw err;
+            res.send("<script>alert('Solicitud de registro enviada. Pendiente de aprobación.'); window.location.href='/index.html';</script>");
+        });
     });
 });
+
 
 
 app.get('/pendingRegistrations', (req, res) => {
@@ -176,18 +196,34 @@ app.post('/processRegistration', (req, res) => {
             return res.status(404).send('Solicitud no encontrada.');
         }
 
-        const { nombre, contraseña, rol } = results[0];
+        const { nombre, contraseña, rol, correo } = results[0];
 
         if (action === 'aceptar') {
-            const insertUserQuery = "INSERT INTO Usuarios (nombre, contraseña, rol) VALUES (?, ?, ?)";
-            con.query(insertUserQuery, [nombre, contraseña, rol], (err) => {
+            // Verificar si el nombre de usuario o correo ya existen en la tabla Usuarios
+            const checkUserQuery = "SELECT * FROM Usuarios WHERE nombre = ? OR correo = ?";
+            con.query(checkUserQuery, [nombre, correo], (err, results) => {
                 if (err) throw err;
 
-                const deleteRequestQuery = "DELETE FROM SolicitudesRegistro WHERE id = ?";
-                con.query(deleteRequestQuery, [id], (err) => {
-                    if (err) throw err;
-                    res.send('Usuario aceptado y registrado con éxito.');
-                });
+                if (results.length > 0) {
+                    // Si el nombre de usuario o correo ya existen, denegar automáticamente la solicitud
+                    const deleteRequestQuery = "DELETE FROM SolicitudesRegistro WHERE id = ?";
+                    con.query(deleteRequestQuery, [id], (err) => {
+                        if (err) throw err;
+                        return res.send('Solicitud rechazada automáticamente: el nombre de usuario y/o correo ya están registrados.');
+                    });
+                } else {
+                    // Insertar el usuario en la tabla Usuarios si no hay conflicto
+                    const insertUserQuery = "INSERT INTO Usuarios (nombre, contraseña, rol, correo) VALUES (?, ?, ?, ?)";
+                    con.query(insertUserQuery, [nombre, contraseña, rol, correo], (err) => {
+                        if (err) throw err;
+
+                        const deleteRequestQuery = "DELETE FROM SolicitudesRegistro WHERE id = ?";
+                        con.query(deleteRequestQuery, [id], (err) => {
+                            if (err) throw err;
+                            res.send('Usuario aceptado y registrado con éxito.');
+                        });
+                    });
+                }
             });
         } else if (action === 'denegar') {
             const deleteRequestQuery = "DELETE FROM SolicitudesRegistro WHERE id = ?";
@@ -202,9 +238,10 @@ app.post('/processRegistration', (req, res) => {
 });
 
 
+// Ruta para iniciar sesión
+
 let loggedInUserId = null;
 
-// Ruta para iniciar sesión
 app.post('/login', (req, res) => {
     const { nombre, contraseña } = req.body;
 
@@ -236,6 +273,8 @@ app.post('/login', (req, res) => {
         }
     });
 });
+
+//Ruta para registrar un evento
 
 app.post('/eventRegister', (req, res) => {
     const { titulo, fecha, hora, ubicacion, organizador, descripcion, categoria } = req.body;
@@ -286,28 +325,47 @@ app.post('/eventRegister', (req, res) => {
 
 
 
-
 app.post('/updateEventStatus', (req, res) => {
     const { id_evento, nuevo_estado } = req.body;
 
-    if (!id_evento || !nuevo_estado) {
-        return res.send("<script>alert('El ID del evento y el nuevo estado son obligatorios.'); window.history.back();</script>");
+    // Verificar si el ID del administrador está disponible
+    if (!loggedInUserId) {
+        return res.status(401).json({ error: 'No estás autorizado para realizar esta acción.' });
     }
 
+    // Verificar los datos recibidos
+    if (!id_evento || !nuevo_estado) {
+        return res.status(400).json({ error: 'El ID del evento y el nuevo estado son obligatorios.' });
+    }
+
+    // Consulta SQL para actualizar el estado del evento e incluir el ID del administrador aprobador
     const updateEventQuery = `
         UPDATE Eventos
         SET Estado = ?, ID_ADMIN_APROBADOR = ?
         WHERE ID_EVENTO = ?
     `;
-    con.query(updateEventQuery, [nuevo_estado, loggedInUserId, id_evento], (err) => {
+
+    // Ejecutar la consulta
+    con.query(updateEventQuery, [nuevo_estado, loggedInUserId, id_evento], (err, result) => {
         if (err) {
             console.error('Error al actualizar el evento:', err);
-            return res.send("<script>alert('Error interno al actualizar el evento.'); window.history.back();</script>");
+            return res.status(500).json({ error: 'Error interno al actualizar el evento.' });
         }
-        res.send(`<script>alert('Evento actualizado a ${nuevo_estado} con éxito.'); window.location.href='/html/panelAdministrador.html';</script>`);
+
+        // Verificar si el evento fue encontrado y actualizado
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'El evento no fue encontrado.' });
+        }
+
+        // Responder con éxito si la actualización fue realizada
+        res.json({ success: true, id_evento, nuevo_estado, admin_id: loggedInUserId });
     });
 });
 
+
+
+
+//Ruta para obtener todos los eventos con estado pendiente
 
 app.get('/pendingEvents', (req, res) => {
     const pendingEventsQuery = "SELECT * FROM Eventos WHERE Estado = 'Pendiente'";
@@ -346,7 +404,7 @@ app.get('/events', (req, res) => {
     });
 });
 
-
+//Ruta para obtener los eventos creados por usuarios
 app.get('/userEvents', (req, res) => {
     if (!loggedInUserId) {
         return res.send("<script>alert('Debes iniciar sesión para ver tus eventos.'); window.location.href='/index.html';</script>");
@@ -367,6 +425,7 @@ app.get('/userEvents', (req, res) => {
     });
 });
 
+//Ruta para modificar eventos
 app.post('/updateEvent', (req, res) => {
     const { id_evento, titulo, descripcion, fecha, hora, ubicacion, organizador, categoria } = req.body;
 
@@ -425,11 +484,12 @@ app.post('/updateEvent', (req, res) => {
                 return res.send("<script>alert('No tienes permiso para editar este evento o el evento no existe.'); window.history.back();</script>");
             }
 
-            res.send("<script>alert('Evento actualizado con éxito.'); window.location.href='/html/panelUsuario.html';</script>");
+            res.send("<script>alert('Evento actualizado con éxito.'); window.location.href='/html/panelAdministrador.html';</script>");
         });
     });
 });
 
+//Ruta para obtener todos los eventos
 app.get('/getAllEvents', (req, res) => {
     const getAllEventsQuery = "SELECT * FROM Eventos";
 
@@ -443,6 +503,34 @@ app.get('/getAllEvents', (req, res) => {
     });
 });
 
+//Ruta para eliminar un evento de la tabla eventos
+
+app.delete('/deleteEvent', (req, res) => {
+    const id_evento = req.query.id_evento; // Leer el ID del evento de los parámetros de consulta
+    console.log('ID recibido en el servidor:', id_evento); 
+
+    if (!id_evento) {
+        return res.status(400).json({ error: 'El ID del evento es obligatorio.' });
+    }
+
+    const deleteEventQuery = `
+        DELETE FROM Eventos
+        WHERE ID_EVENTO = ?
+    `;
+
+    con.query(deleteEventQuery, [id_evento], (err, result) => {
+        if (err) {
+            console.error('Error al eliminar el evento:', err);
+            return res.status(500).json({ error: 'Error interno al eliminar el evento.' });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'El evento no fue encontrado.' });
+        }
+
+        res.json({ success: true, message: 'Evento eliminado con éxito.' });
+    });
+});
 
 
 // Iniciar el servidor
