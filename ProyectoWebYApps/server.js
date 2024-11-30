@@ -45,7 +45,8 @@ con.connect(function (err) {
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     nombre VARCHAR(50) NOT NULL,
                     contraseña VARCHAR(255) NOT NULL,
-                    rol VARCHAR(20) NOT NULL
+                    rol VARCHAR(20) NOT NULL,
+                    correo TEXT
                 )
             `;
             con.query(createTableQuery, function (err) {
@@ -63,11 +64,14 @@ con.connect(function (err) {
                     Descripcion TEXT NOT NULL,
                     Estado ENUM('Aceptado', 'Denegado', 'Pendiente') DEFAULT 'Pendiente',
                     Fecha DATE NOT NULL,
-                    Hora TIME NOT NULL,
+                    Hora_Inicio TIME NOT NULL,
+                    Hora_Fin TIME,
                     Categoria VARCHAR(50) NOT NULL,
                     Ubicacion VARCHAR(100) NOT NULL,
                     Organizador VARCHAR(100) NOT NULL,
                     QR VARCHAR(255),
+                    Estado_Temporal ENUM('Por Suceder', 'Pasado') DEFAULT 'Por Suceder',
+                    imagen_url TEXT,
                     FOREIGN KEY (ID_USUARIO_CREADOR_EVENTO) REFERENCES Usuarios(ID) ON DELETE CASCADE,
                     FOREIGN KEY (ID_ADMIN_APROBADOR) REFERENCES Usuarios(ID) ON DELETE SET NULL
                 )
@@ -77,31 +81,14 @@ con.connect(function (err) {
                 console.log("Table 'Eventos' created or already exists!");
             });
 
-            // Agregar columna 'correo' a la tabla Usuarios si no existe
-            con.query("ALTER TABLE Usuarios ADD COLUMN correo TEXT", (err) => {
-                if (err && err.code !== 'ER_DUP_FIELDNAME') {
-                    console.error('Error al agregar la columna "correo" a la tabla "Usuarios":', err);
-                } else {
-                    console.log('Columna "correo" añadida a la tabla "Usuarios" (si no existía).');
-                }
-            });
-
-            // Agregar columna 'imagen_url' a la tabla Eventos si no existe
-            con.query("ALTER TABLE Eventos ADD COLUMN imagen_url TEXT", (err) => {
-                if (err && err.code !== 'ER_DUP_FIELDNAME') {
-                    console.error('Error al agregar la columna "imagen_url" a la tabla "Eventos":', err);
-                } else {
-                    console.log('Columna "imagen_url" añadida a la tabla "Eventos" (si no existía).');
-                }
-            });
-
             // Crear tabla SolicitudesRegistro (si no existe)
             const createRegistrationRequestsTable = `
                 CREATE TABLE IF NOT EXISTS SolicitudesRegistro (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     nombre VARCHAR(50) NOT NULL,
                     contraseña VARCHAR(255) NOT NULL,
-                    rol VARCHAR(20) NOT NULL
+                    rol VARCHAR(20) NOT NULL,
+                    correo TEXT
                 )
             `;
             con.query(createRegistrationRequestsTable, function (err) {
@@ -109,39 +96,29 @@ con.connect(function (err) {
                 console.log("Table 'SolicitudesRegistro' created or already exists!");
             });
 
-            // Agregar columna 'correo' a la tabla SolicitudesRegistro si no existe
-            con.query("ALTER TABLE SolicitudesRegistro ADD COLUMN correo TEXT", (err) => {
-                if (err && err.code !== 'ER_DUP_FIELDNAME') {
-                    console.error('Error al agregar la columna "correo" a la tabla "SolicitudesRegistro":', err);
-                } else {
-                    console.log('Columna "correo" añadida a la tabla "SolicitudesRegistro" (si no existía).');
-                }
-            });
 
             // Lógica para actualizar Estado_Temporal periódicamente
             setInterval(() => {
                 const updateTemporalStatusQuery = `
                     UPDATE Eventos
                     SET Estado_Temporal = CASE
-                        WHEN Fecha < CURDATE() THEN 'Pasado'
+                        WHEN CONCAT(Fecha, ' ', Hora_Inicio) < NOW() THEN 'Pasado'
                         ELSE 'Por Suceder'
                     END
                 `;
-
+            
                 con.query(updateTemporalStatusQuery, (err) => {
-                    if (err) console.error('Error al actualizar Estado_Temporal:', err);
-                    else console.log('Estado_Temporal actualizado.');
+                    if (err) {
+                        console.error('Error al actualizar Estado_Temporal:', err);
+                    } else {
+                        console.log('Estado_Temporal actualizado.');
+                    }
                 });
             }, 1000 * 60 * 60); // Ejecuta cada hora
-
-            con.query("ALTER TABLE Eventos ADD COLUMN Estado_Temporal ENUM('Por Suceder', 'Pasado') DEFAULT 'Por Suceder'", (err) => {
-                if (err && err.code !== 'ER_DUP_FIELDNAME') throw err;
-            });
             
         });
     });
 });
-
 
 // Ruta para registrar un usuario
 app.post('/register', (req, res) => {
@@ -276,10 +253,11 @@ app.post('/login', (req, res) => {
 
 //Ruta para registrar un evento
 
+// Ruta para registrar un evento
 app.post('/eventRegister', (req, res) => {
-    const { titulo, fecha, hora, ubicacion, organizador, descripcion, categoria } = req.body;
+    const { titulo, fecha, hora_inicio, hora_fin, ubicacion, organizador, descripcion, categoria } = req.body;
 
-    if (!titulo || !fecha || !hora || !ubicacion || !organizador || !descripcion || !categoria) {
+    if (!titulo || !fecha || !hora_inicio || !hora_fin || !ubicacion || !organizador || !descripcion || !categoria) {
         return res.send("<script>alert('Todos los campos son obligatorios.'); window.history.back();</script>");
     }
 
@@ -289,11 +267,12 @@ app.post('/eventRegister', (req, res) => {
 
     // Combinar fecha y hora para validar
     const now = new Date(); // Fecha y hora actuales
-    const eventDate = new Date(`${fecha}T${hora}`); // Combinar fecha y hora del evento
+    const eventStart = new Date(`${fecha}T${hora_inicio}`); // Inicio del evento
+    const eventEnd = new Date(`${fecha}T${hora_fin}`); // Fin del evento
 
-    // Validar si la fecha y hora ya han pasado
-    if (eventDate < now) {
-        return res.send("<script>alert('La fecha y hora del evento ya han pasado. No se puede registrar el evento.'); window.history.back();</script>");
+    // Validar si la fecha y hora ya han pasado o si el fin es antes del inicio
+    if (eventStart < now || eventEnd <= eventStart) {
+        return res.send("<script>alert('La fecha y horas del evento son inválidas.'); window.history.back();</script>");
     }
 
     // Obtener el rol del usuario
@@ -306,15 +285,15 @@ app.post('/eventRegister', (req, res) => {
 
         // Insertar el evento
         const insertEventQuery = `
-            INSERT INTO Eventos (Nombre, Descripcion, Estado, Fecha, Hora, Categoria, Ubicacion, Organizador, ID_USUARIO_CREADOR_EVENTO, Estado_Temporal)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO Eventos (Nombre, Descripcion, Estado, Fecha, Hora_Inicio, Hora_Fin, Categoria, Ubicacion, Organizador, ID_USUARIO_CREADOR_EVENTO, Estado_Temporal)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const estadoTemporal = 'Por Suceder'; // Ya validamos que no es pasado
 
         con.query(
             insertEventQuery,
-            [titulo, descripcion, estado, fecha, hora, categoria, ubicacion, organizador, loggedInUserId, estadoTemporal],
+            [titulo, descripcion, estado, fecha, hora_inicio, hora_fin, categoria, ubicacion, organizador, loggedInUserId, estadoTemporal],
             (err) => {
                 if (err) throw err;
                 res.send("<script>alert('Evento creado con éxito.'); window.location.href='/html/panelUsuario.html';</script>");
@@ -322,7 +301,6 @@ app.post('/eventRegister', (req, res) => {
         );
     });
 });
-
 
 
 app.post('/updateEventStatus', (req, res) => {
@@ -383,14 +361,12 @@ app.get('/pendingEvents', (req, res) => {
 app.get('/events', (req, res) => {
     const { category } = req.query;
 
-    // Consulta básica para eventos aceptados y por suceder
     let query = `
-        SELECT Nombre, Descripcion, Fecha, Hora, Categoria, Ubicacion, Organizador
+        SELECT Nombre, Descripcion, Fecha, Hora_Inicio, Hora_Fin, Categoria, Ubicacion, Organizador
         FROM Eventos
         WHERE Estado = 'Aceptado' AND Estado_Temporal = 'Por Suceder'
     `;
 
-    // Filtrar por categoría si está definida
     if (category) {
         query += ` AND Categoria = ${mysql.escape(category)}`;
     }
@@ -404,6 +380,7 @@ app.get('/events', (req, res) => {
     });
 });
 
+
 //Ruta para obtener los eventos creados por usuarios
 app.get('/userEvents', (req, res) => {
     if (!loggedInUserId) {
@@ -411,7 +388,7 @@ app.get('/userEvents', (req, res) => {
     }
 
     const userEventsQuery = `
-        SELECT ID_EVENTO, Nombre, Descripcion, Fecha, Hora, Categoria, Ubicacion, Organizador
+        SELECT ID_EVENTO, Nombre, Descripcion, Fecha, Hora_Inicio, Hora_Fin, Categoria, Ubicacion, Organizador
         FROM Eventos
         WHERE ID_USUARIO_CREADOR_EVENTO = ?
     `;
@@ -421,15 +398,16 @@ app.get('/userEvents', (req, res) => {
             console.error('Error al obtener los eventos del usuario:', err);
             return res.status(500).send("Error al cargar los eventos.");
         }
-        res.json(results); // Devuelve los eventos del usuario como JSON
+        res.json(results);
     });
 });
 
+
 //Ruta para modificar eventos
 app.post('/updateEvent', (req, res) => {
-    const { id_evento, titulo, descripcion, fecha, hora, ubicacion, organizador, categoria } = req.body;
+    const { id_evento, titulo, descripcion, fecha, hora_inicio, hora_fin, ubicacion, organizador, categoria } = req.body;
 
-    if (!id_evento || !titulo || !descripcion || !fecha || !hora || !ubicacion || !organizador || !categoria) {
+    if (!id_evento || !titulo || !descripcion || !fecha || !hora_inicio || !hora_fin || !ubicacion || !organizador || !categoria) {
         return res.send("<script>alert('Todos los campos son obligatorios.'); window.history.back();</script>");
     }
 
@@ -437,7 +415,6 @@ app.post('/updateEvent', (req, res) => {
         return res.send("<script>alert('Debes iniciar sesión para editar eventos.'); window.location.href='/index.html';</script>");
     }
 
-    // Obtener el rol del usuario logueado
     const getUserRoleQuery = "SELECT rol FROM Usuarios WHERE id = ?";
     con.query(getUserRoleQuery, [loggedInUserId], (err, results) => {
         if (err) {
@@ -451,29 +428,25 @@ app.post('/updateEvent', (req, res) => {
 
         const userRole = results[0].rol;
 
-        // Construir la consulta dependiendo del rol
         let updateEventQuery;
         let queryParams;
 
         if (userRole === 'Admin') {
-            // Administradores pueden editar cualquier evento
             updateEventQuery = `
                 UPDATE Eventos
-                SET Nombre = ?, Descripcion = ?, Fecha = ?, Hora = ?, Categoria = ?, Ubicacion = ?, Organizador = ?
+                SET Nombre = ?, Descripcion = ?, Fecha = ?, Hora_Inicio = ?, Hora_Fin = ?, Categoria = ?, Ubicacion = ?, Organizador = ?
                 WHERE ID_EVENTO = ?
             `;
-            queryParams = [titulo, descripcion, fecha, hora, categoria, ubicacion, organizador, id_evento];
+            queryParams = [titulo, descripcion, fecha, hora_inicio, hora_fin, categoria, ubicacion, organizador, id_evento];
         } else {
-            // Usuarios solo pueden editar sus propios eventos
             updateEventQuery = `
                 UPDATE Eventos
-                SET Nombre = ?, Descripcion = ?, Fecha = ?, Hora = ?, Categoria = ?, Ubicacion = ?, Organizador = ?
+                SET Nombre = ?, Descripcion = ?, Fecha = ?, Hora_Inicio = ?, Hora_Fin = ?, Categoria = ?, Ubicacion = ?, Organizador = ?
                 WHERE ID_EVENTO = ? AND ID_USUARIO_CREADOR_EVENTO = ?
             `;
-            queryParams = [titulo, descripcion, fecha, hora, categoria, ubicacion, organizador, id_evento, loggedInUserId];
+            queryParams = [titulo, descripcion, fecha, hora_inicio, hora_fin, categoria, ubicacion, organizador, id_evento, loggedInUserId];
         }
 
-        // Ejecutar la consulta
         con.query(updateEventQuery, queryParams, (err, result) => {
             if (err) {
                 console.error('Error al actualizar el evento:', err);
@@ -488,6 +461,7 @@ app.post('/updateEvent', (req, res) => {
         });
     });
 });
+
 
 //Ruta para obtener todos los eventos
 app.get('/getAllEvents', (req, res) => {
@@ -531,6 +505,38 @@ app.delete('/deleteEvent', (req, res) => {
         res.json({ success: true, message: 'Evento eliminado con éxito.' });
     });
 });
+
+// Ruta para obtener eventos filtrados por día, semana o mes
+app.get('/eventsByDate', (req, res) => {
+    const { filter } = req.query;
+
+    let dateCondition;
+    if (filter === 'dia') {
+        dateCondition = `Fecha = CURDATE()`;
+    } else if (filter === 'semana') {
+        dateCondition = `YEARWEEK(Fecha, 1) = YEARWEEK(CURDATE(), 1)`; // Misma semana actual
+    } else if (filter === 'mes') {
+        dateCondition = `MONTH(Fecha) = MONTH(CURDATE()) AND YEAR(Fecha) = YEAR(CURDATE())`; // Mismo mes actual
+    } else {
+        return res.status(400).json({ error: 'Filtro no válido' });
+    }
+
+    const query = `
+        SELECT Nombre, Descripcion, Fecha, Hora_Inicio, Hora_Fin, Categoria, Ubicacion, Organizador
+        FROM Eventos
+        WHERE Estado = 'Aceptado' AND Estado_Temporal = 'Por Suceder' AND ${dateCondition}
+    `;
+
+    con.query(query, (err, results) => {
+        if (err) {
+            console.error('Error al obtener eventos por fecha:', err);
+            return res.status(500).json({ error: 'Error al cargar los eventos.' });
+        }
+        res.json(results);
+    });
+});
+
+
 
 
 // Iniciar el servidor

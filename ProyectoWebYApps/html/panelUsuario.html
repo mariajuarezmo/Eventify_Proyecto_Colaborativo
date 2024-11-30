@@ -15,7 +15,8 @@
         <form id="eventForm" action="/eventRegister" method="POST">
             <input type="text" id="eventTitle" name="titulo" placeholder="Título del evento" required>
             <input type="date" id="eventDate" name="fecha" required>
-            <input type="time" id="eventTime" name="hora" required>
+            <input type="time" id="eventStartTime" name="hora_inicio" placeholder="Hora Inicio" required>
+            <input type="time" id="eventEndTime" name="hora_fin" placeholder="Hora Fin" required>
             <input type="text" id="eventLocation" name="ubicacion" placeholder="Ubicación" required>
             <input type="text" id="eventOrganizer" name="organizador" placeholder="Organizador" required>
             <textarea id="eventDescription" name="descripcion" placeholder="Descripción" required></textarea>
@@ -59,8 +60,8 @@
                     events.forEach(event => {
                         const listItem = document.createElement('li');
                         listItem.innerHTML = `
-                            <strong>${event.Nombre}</strong> - ${event.Fecha} ${event.Hora} - ${event.Categoria}
-                            <button onclick="editEvent(${event.ID_EVENTO}, '${event.Nombre}', '${event.Descripcion}', '${event.Fecha}', '${event.Hora}', '${event.Ubicacion}', '${event.Organizador}', '${event.Categoria}')">Editar</button>
+                            <strong>${event.Nombre}</strong> - ${event.Fecha} ${event.Hora_Inicio} a ${event.Hora_Fin} - ${event.Categoria}
+                            <button onclick="editEvent(${event.ID_EVENTO}, '${event.Nombre}', '${event.Descripcion}', '${event.Fecha}', '${event.Hora_Inicio}', '${event.Hora_Fin}', '${event.Ubicacion}', '${event.Organizador}', '${event.Categoria}')">Editar</button>
                         `;
                         userEventsList.appendChild(listItem);
                     });
@@ -69,7 +70,7 @@
         });
 
         // Función para mostrar el formulario de edición
-        function editEvent(id, title, description, date, time, location, organizer, category) {
+        function editEvent(id, title, description, date, startTime, endTime, location, organizer, category) {
             const eventForm = document.getElementById('eventForm');
             eventForm.action = '/updateEvent';
             eventForm.method = 'POST';
@@ -81,7 +82,8 @@
                 <input type="hidden" name="id_evento" value="${id}">
                 <input type="text" name="titulo" value="${title}" required>
                 <input type="date" name="fecha" value="${formattedDate}" required>
-                <input type="time" name="hora" value="${time}" required>
+                <input type="time" name="hora_inicio" value="${startTime}" required>
+                <input type="time" name="hora_fin" value="${endTime}" required>
                 <input type="text" name="ubicacion" value="${location}" required>
                 <input type="text" name="organizador" value="${organizer}" required>
                 <textarea name="descripcion" required>${description}</textarea>
@@ -93,7 +95,6 @@
                 <button type="submit">Guardar Cambios</button>
             `;
         }
-
     </script>
 </body>
 </html>
