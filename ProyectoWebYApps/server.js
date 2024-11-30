@@ -13,10 +13,11 @@ app.use(express.static(path.join(__dirname)));
 
 // Configuración de conexión a la base de datos
 const con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
 });
+
 // Conexión al servidor MySQL
 con.connect(function (err) {
     if (err) throw err;
