@@ -251,8 +251,6 @@ app.post('/login', (req, res) => {
     });
 });
 
-//Ruta para registrar un evento
-
 // Ruta para registrar un evento
 app.post('/eventRegister', (req, res) => {
     const { titulo, fecha, hora_inicio, hora_fin, ubicacion, organizador, descripcion, categoria } = req.body;
@@ -339,8 +337,6 @@ app.post('/updateEventStatus', (req, res) => {
         res.json({ success: true, id_evento, nuevo_estado, admin_id: loggedInUserId });
     });
 });
-
-
 
 
 //Ruta para obtener todos los eventos con estado pendiente
