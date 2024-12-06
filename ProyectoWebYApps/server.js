@@ -1,3 +1,4 @@
+/*
 const express = require('express');
 const mysql = require('mysql');
 const path = require('path');
@@ -118,6 +119,51 @@ con.connect(function (err) {
             
         });
     });
+});
+*/
+
+const express = require('express');
+const mysql = require('mysql2');
+const path = require('path');
+
+const app = express();
+const port = 5501;
+
+require('dotenv').config();
+
+// Middleware para analizar JSON
+app.use(express.json());
+
+// Middleware para procesar datos enviados por formularios
+app.use(express.urlencoded({ extended: true }));
+
+// Middleware para servir archivos estáticos desde la carpeta "css"
+app.use('/css', express.static(path.join(__dirname, 'css')));
+
+// Middleware para servir archivos HTML directamente desde "html"
+app.use(express.static(path.join(__dirname, 'html')));
+
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'html', 'index.html'));
+});
+
+// Configuración de conexión a la base de datos
+const con = mysql.createConnection({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
+});
+
+// Conexión al servidor MySQL
+con.connect(function (err) {
+    if (err) {
+        console.error('Error connecting to MySQL:', err);
+        process.exit(1);
+    }
+    console.log("Connected to MySQL server on HeidiSQL!");
 });
 
 // Ruta para registrar un usuario
@@ -240,11 +286,11 @@ app.post('/login', (req, res) => {
 
         const validRoles = ['Estudiante', 'Profesor', 'Coordinador', 'Dirección'];
         if (validRoles.includes(user.rol)) {
-            return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/html/panelUsuario.html';</script>");
+            return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/panelUsuario.html';</script>");
         } else if (user.rol === 'Admin') {
-            return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/html/panelAdministrador.html';</script>");
+            return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/panelAdministrador.html';</script>");
         } else if (user.rol === 'AdminJefe') {
-            return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/html/panelAdministradorJefe.html';</script>"); 
+            return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/panelAdministradorJefe.html';</script>"); 
         }else {
             return res.send("<script>alert('Rol desconocido.'); window.history.back();</script>");
         }
@@ -294,7 +340,7 @@ app.post('/eventRegister', (req, res) => {
             [titulo, descripcion, estado, fecha, hora_inicio, hora_fin, categoria, ubicacion, organizador, loggedInUserId, estadoTemporal],
             (err) => {
                 if (err) throw err;
-                res.send("<script>alert('Evento creado con éxito.'); window.location.href='/html/panelUsuario.html';</script>");
+                res.send("<script>alert('Evento creado con éxito.'); window.location.href='/panelUsuario.html';</script>");
             }
         );
     });
@@ -453,7 +499,7 @@ app.post('/updateEvent', (req, res) => {
                 return res.send("<script>alert('No tienes permiso para editar este evento o el evento no existe.'); window.history.back();</script>");
             }
 
-            res.send("<script>alert('Evento actualizado con éxito.'); window.location.href='/html/panelAdministrador.html';</script>");
+            res.send("<script>alert('Evento actualizado con éxito.'); window.history.back();</script>");
         });
     });
 });
