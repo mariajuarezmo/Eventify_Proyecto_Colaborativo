@@ -75,40 +75,43 @@
 
         // Función para mostrar los eventos en la lista
         function renderEvents(events) {
-    const eventList = document.getElementById('eventList');
-    eventList.innerHTML = ''; // Limpia la lista antes de agregar los nuevos eventos
+            const eventList = document.getElementById('eventList');
+            eventList.innerHTML = ''; // Limpia la lista antes de agregar los nuevos eventos
 
-    if (events.length === 0) {
-        const noEventsItem = document.createElement('li');
-        noEventsItem.textContent = 'No hay eventos disponibles.';
-        eventList.appendChild(noEventsItem);
-        return;
-    }
+            if (events.length === 0) {
+                const noEventsItem = document.createElement('li');
+                noEventsItem.textContent = 'No hay eventos disponibles.';
+                eventList.appendChild(noEventsItem);
+                return;
+            }
 
-    events.forEach(event => {
-        const listItem = document.createElement('li');
+            events.forEach(event => {
+                const listItem = document.createElement('li');
 
-        let categoryClass = '';
-        if (event.Categoria === 'Estudiantes') {
-            categoryClass = 'category-estudiantes';
-        } else if (event.Categoria === 'Profesores') {
-            categoryClass = 'category-profesores';
-        } else if (event.Categoria === 'Universidad') {
-            categoryClass = 'category-comunidad';
-        }
+                let categoryClass = '';
+                if (event.Categoria === 'Estudiantes') {
+                    categoryClass = 'category-estudiantes';
+                } else if (event.Categoria === 'Profesores') {
+                    categoryClass = 'category-profesores';
+                } else if (event.Categoria === 'Universidad') {
+                    categoryClass = 'category-comunidad';
+                }
 
-        listItem.className = categoryClass;
-        listItem.innerHTML = `
-            <h3>${event.Nombre}</h3>
-            <p>${event.Descripcion}</p>
-            <p><strong>Fecha:</strong> ${event.Fecha} <strong>Hora inicio:</strong> ${event.Hora_Inicio} <strong>Hora fin:</strong> ${event.Hora_Fin}</p>
-            <p><strong>Categoría:</strong> ${event.Categoria}</p>
-            <p><strong>Ubicación:</strong> ${event.Ubicacion}</p>
-            <p><strong>Organizador:</strong> ${event.Organizador}</p>
-        `;
-        eventList.appendChild(listItem);
-    });
+                listItem.className = categoryClass;
+                listItem.innerHTML = `
+                    <h3>${event.Nombre_Evento}</h3>
+                    <p>${event.Descripcion}</p>
+                    <p><strong>Fecha:</strong> ${event.Fecha} <strong>Hora inicio:</strong> ${event.Hora_Inicio} <strong>Hora fin:</strong> ${event.Hora_Fin}</p>
+                    <p><strong>Categoría:</strong> ${event.Categoria}</p>
+                    <p><strong>Ubicación:</strong> ${event.Ubicacion}</p>
+                    <p><strong>Organizador:</strong> ${event.Organizador}</p>
+                    <p><strong>Creador del Evento:</strong> ${event.Nombre_Creador}</p>
+                `;
+                eventList.appendChild(listItem);
+            });
 }
+
+
 
         function filterByDate(filter) {
     fetch(`/eventsByDate?filter=${filter}`)

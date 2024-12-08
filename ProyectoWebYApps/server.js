@@ -400,17 +400,34 @@ app.get('/pendingEvents', (req, res) => {
 
 
 // Ruta para obtener eventos aceptados y por suceder
+// Ruta para obtener eventos aceptados y por suceder con el nombre del creador
 app.get('/events', (req, res) => {
     const { category } = req.query;
 
     let query = `
-        SELECT Nombre, Descripcion, Fecha, Hora_Inicio, Hora_Fin, Categoria, Ubicacion, Organizador
-        FROM Eventos
-        WHERE Estado = 'Aceptado' AND Estado_Temporal = 'Por Suceder'
+        SELECT 
+            Eventos.Nombre AS Nombre_Evento, 
+            Eventos.Descripcion, 
+            Eventos.Fecha, 
+            Eventos.Hora_Inicio, 
+            Eventos.Hora_Fin, 
+            Eventos.Categoria, 
+            Eventos.Ubicacion, 
+            Eventos.Organizador, 
+            Usuarios.nombre AS Nombre_Creador
+        FROM 
+            Eventos
+        JOIN 
+            Usuarios 
+        ON 
+            Eventos.ID_USUARIO_CREADOR_EVENTO = Usuarios.id
+        WHERE 
+            Eventos.Estado = 'Aceptado' 
+            AND Eventos.Estado_Temporal = 'Por Suceder'
     `;
 
     if (category) {
-        query += ` AND Categoria = ${mysql.escape(category)}`;
+        query += ` AND Eventos.Categoria = ${mysql.escape(category)}`;
     }
 
     con.query(query, (err, results) => {
@@ -421,6 +438,7 @@ app.get('/events', (req, res) => {
         res.json(results);
     });
 });
+
 
 
 //Ruta para obtener los eventos creados por usuarios
