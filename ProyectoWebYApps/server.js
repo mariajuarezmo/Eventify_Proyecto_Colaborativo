@@ -548,6 +548,81 @@ app.delete('/deleteEvent', (req, res) => {
     });
 });
 
+//Ruta para eliminar un evento de la tabla eventos
+
+app.delete('/deleteUser', (req, res) => {
+    const id = req.query.id; // Leer el ID del usuario de los parámetros de consulta
+    console.log('ID recibido en el servidor:', id); 
+
+    if (!id) {
+        return res.status(400).json({ error: 'El ID del usuario es obligatorio.' });
+    }
+
+    const deleteEventQuery = `
+        DELETE FROM Usuarios
+        WHERE id = ?
+    `;
+
+    con.query(deleteEventQuery, [id], (err, result) => {
+        if (err) {
+            console.error('Error al eliminar el usuario:', err);
+            return res.status(500).json({ error: 'Error interno al eliminar el usuario.' });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'El usuario no fue encontrado.' });
+        }
+
+        res.json({ success: true, message: 'Usuario eliminado con éxito.' });
+    });
+});
+
+// Ruta para obtener todos los usuarios excepto el que tiene el nombre 'adminjefe'
+app.get('/getAllUsers', (req, res) => {
+    const getAllUsersQuery = "SELECT * FROM Usuarios WHERE nombre != 'adminjefe'";
+
+    con.query(getAllUsersQuery, (err, results) => {
+        if (err) {
+            console.error('Error al obtener los usuarios:', err);
+            return res.status(500).send('Error al obtener los usuarios.');
+        }
+
+        res.json(results);
+    });
+});
+
+
+// Ruta para actualizar la información de un usuario
+app.post('/updateUser', (req, res) => {
+    const { id_usuario, nombre, contraseña, email, rol } = req.body;
+
+    // Validar que los campos obligatorios estén presentes
+    if (!id_usuario || !nombre || !contraseña || !email || !rol) {
+        return res.send("<script>alert('Todos los campos son obligatorios.'); window.history.back();</script>");
+    }
+
+    // Query para actualizar los datos del usuario
+    const updateUserQuery = `
+        UPDATE Usuarios
+        SET nombre = ?, contraseña = ?, correo = ?, rol = ?
+        WHERE id = ?
+    `;
+
+    // Ejecutar la consulta
+    con.query(updateUserQuery, [nombre, contraseña, email, rol, id_usuario], (err, result) => {
+        if (err) {
+            console.error('Error al actualizar el usuario:', err);
+            return res.send("<script>alert('Error interno al actualizar el usuario.'); window.history.back();</script>");
+        }
+
+        if (result.affectedRows === 0) {
+            return res.send("<script>alert('Usuario no encontrado o no se pudo actualizar.'); window.history.back();</script>");
+        }
+
+        res.send("<script>alert('Usuario actualizado con éxito.'); window.history.back();</script>");
+    });
+});
+
 // Ruta para obtener eventos filtrados por día, semana o mes
 app.get('/eventsByDate', (req, res) => {
     const { filter } = req.query;

@@ -16,7 +16,7 @@ h1 {
 }
 
 /* Contenedor general */
-#adminActions, #eventFormContainer, #approvalList {
+#adminEventActions, #eventFormContainer, #approvalList {
     margin: 20px auto;
     padding: 20px;
     width: 90%;

@@ -10,14 +10,15 @@
     <!-- Título del Panel -->
     <h1>Panel del Administrador</h1>
 
-    <!-- Botones principales del administrador -->
-    <div id="adminActions">
+    <!-- Botones principales del administrador para manejo de eventos -->
+    <div id="adminEventActions">
         <h2>Acciones</h2>
         <button id="createEventButton" onclick="showCreateEventForm()">Crear Evento</button>
         <button id="approveEventButton" onclick="showPendingEvents()">Aprobar/Denegrar Eventos</button>
         <button id="editEventsButton" onclick="showEditEvents()">Editar Eventos</button>
         <button id="deleteEventsButton" onclick="deleteEvents()">Eliminar Eventos</button>
     </div>
+    <br>
 
     <!-- Formulario para crear un evento -->
     <div id="eventFormContainer" class="hidden">
@@ -91,6 +92,7 @@
             document.getElementById('eventFormContainer').classList.remove('hidden');
             document.getElementById('editEventsContainer').classList.add('hidden');
             document.getElementById('pendingEventsContainer').classList.add('hidden'); 
+            document.getElementById('deleteEventsContainer').classList.add('hidden');
         }
 
         function showPendingEvents() {
@@ -98,6 +100,7 @@
             pendingEventsContainer.classList.remove('hidden');
             document.getElementById('eventFormContainer').classList.add('hidden');
             document.getElementById('editEventsContainer').classList.add('hidden');
+            document.getElementById('deleteEventsContainer').classList.add('hidden');
 
             fetch('/pendingEvents')
                 .then(response => response.json())
@@ -128,6 +131,7 @@
             document.getElementById('editEventsContainer').classList.remove('hidden');
             document.getElementById('eventFormContainer').classList.add('hidden');
             document.getElementById('pendingEventsContainer').classList.add('hidden');
+            document.getElementById('deleteEventsContainer').classList.add('hidden');
 
             fetch('/getAllEvents')
                 .then(response => response.json())
@@ -154,6 +158,9 @@
         function editEvent(id, title, description, date, startTime, endTime, location, organizer, category) {
             document.getElementById('editEventsContainer').classList.add('hidden');
             document.getElementById('editEventFormContainer').classList.remove('hidden');
+            document.getElementById('deleteEventsContainer').classList.add('hidden');
+            document.getElementById('eventFormContainer').classList.add('hidden');
+            document.getElementById('pendingEventsContainer').classList.add('hidden');
 
             const formattedDate = new Date(date).toISOString().split('T')[0];
 
@@ -196,6 +203,8 @@
             document.getElementById('eventFormContainer').classList.add('hidden');
             document.getElementById('pendingEventsContainer').classList.add('hidden');
             document.getElementById('editEventsContainer').classList.add('hidden');
+            document.getElementById('editEventFormContainer').classList.add('hidden');
+            
 
             fetch('/getAllEvents')
                 .then(response => response.json())

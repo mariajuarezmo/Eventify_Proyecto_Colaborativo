@@ -9,16 +9,66 @@
 <body>
     <h1>Panel del Administrador Jefe</h1>
 
-    <div id="pendingRegistrations">
+    <!-- Botones principales del administrador para manejo de usuarios -->
+    <div id="adminUserActions">
+        <button id="RegisterUsersButton" onclick="loadPendingRegistrations()">Solicitudes Registro</button>
+        <button id="editUsersButton" onclick="showEditUsers()">Editar Usuarios</button>
+        <button id="deleteUsersButton" onclick="deleteUsers()">Eliminar Usuarios</button>
+    </div>
+
+    <div id="pendingRegistrations" class="hidden">
         <h2>Solicitudes de Registro</h2>
         <ul id="registrationRequestsList">
             <!-- Las solicitudes de registro se cargarán aquí dinámicamente -->
         </ul>
     </div>
 
+    <!-- Lista de usuarios para eliminar -->
+    <div id="deleteUserContainer" class="hidden">
+        <h2>Eliminar Usuarios</h2>
+        <ul id="deleteUserList">
+            <!-- Los usuarios se cargarán aquí dinámicamente -->
+        </ul>
+    </div>
+
+    <!-- Lista de usuarios para editar -->
+    <div id="editUsersContainer" class="hidden">
+        <h2>Editar Usuarios</h2>
+        <ul id="userList">
+            <!-- Los eventos se cargarán aquí dinámicamente -->
+        </ul>
+    </div>
+
+
+    <!-- Formulario para editar usuario -->
+    <div id="editUserFormContainer" class="hidden">
+        <h2>Editar Usuario</h2>
+        <form id="editUserForm" action="/updateUser" method="POST">
+            <input type="hidden" name="id_usuario" id="editUserId">
+            <input type="text" id="username" name="nombre" placeholder="Nombre de usuario" required>
+            <input type="password" id="password" name="contraseña" placeholder="Contraseña" required>
+            <input type="email" id="email" name="email" placeholder="Correo" required>
+            <select id="role" name="rol" required>
+                <option value="" disabled selected>Elige tu rol*</option>
+                <option value="Estudiante">Estudiante</option>
+                <option value="Profesor">Profesor</option>
+                <option value="Coordinador">Coordinador</option>
+                <option value="Dirección">Dirección</option>
+                <option value="Admin">Admin</option>
+            </select>
+            <button type="submit">Guardar Cambios</button>
+        </form>
+    </div>
+
+
+    <br>
+    <button onclick="window.history.back()">Volver</button>
+
     <script>
         // Cargar solicitudes pendientes
         function loadPendingRegistrations() {
+            document.getElementById('pendingRegistrations').classList.remove('hidden');
+            document.getElementById('deleteUserContainer').classList.add('hidden');
             fetch('/pendingRegistrations')
                 .then(response => response.json())
                 .then(requests => {
@@ -70,6 +120,104 @@
                     alert('Hubo un error al procesar la solicitud. Inténtalo nuevamente.');
                 });
         }
+
+
+        function deleteUsers() {
+            document.getElementById('deleteUserContainer').classList.remove('hidden');
+            document.getElementById('pendingRegistrations').classList.add('hidden');
+            document.getElementById('editUsersContainer').classList.add('hidden');
+            
+            fetch('/getAllUsers')
+                .then(response => response.json())
+                .then(users => {
+                    const userList = document.getElementById('deleteUserList');
+                    userList.innerHTML = '';
+                    if (users.length === 0) {
+                        userList.innerHTML = '<li>No hay usuarios registrados.</li>';
+                        return;
+                    }
+
+                    users.forEach(user => {
+                        const listItem = document.createElement('li');
+                        listItem.id = `user-${user.id}`;
+                        listItem.innerHTML = `
+                            <strong>NOMBRE: ${user.nombre}</strong> - <strong> ROL: ${user.rol}</strong> - <strong> CORREO: ${user.correo}</strong>
+                            <button onclick="deleteUser(${user.id})">Eliminar</button>
+                        `;
+                        userList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Error al cargar los usuarios:', error));
+        }
+
+        function deleteUser(userId) {
+    // Confirmar antes de eliminar al usuario
+    if (!confirm('¿Estás seguro de que deseas eliminar este usuario?')) return;
+
+    // Hacer la petición para eliminar al usuario
+    fetch(`/deleteUser?id=${userId}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert(result.message);
+                const userListItem = document.querySelector(`#user-${userId}`);
+                if (userListItem) {
+                    userListItem.remove(); // Eliminar el elemento de la lista
+                }
+            } else {
+                alert('Error al eliminar el usuario.');
+            }
+        })
+        .catch(error => alert('Error al intentar eliminar el usuario.'));
+}
+
+        function showEditUsers() {
+            document.getElementById('editUsersContainer').classList.remove('hidden');
+            document.getElementById('deleteUserContainer').classList.add('hidden');
+            document.getElementById('pendingRegistrations').classList.add('hidden');
+            
+            fetch('/getAllUsers')
+                .then(response => response.json())
+                .then(users => {
+                    const userList = document.getElementById('userList');
+                    userList.innerHTML = '';
+                    if (users.length === 0) {
+                        userList.innerHTML = '<li>No hay usuarios registrados.</li>';
+                        return;
+                    }
+
+                    users.forEach(user => {
+                        const listItem = document.createElement('li');
+                        listItem.id = `user-${user.id}`;
+                        listItem.innerHTML = `
+                            <strong>NOMBRE: ${user.nombre}</strong> - 
+                            <strong>ROL: ${user.rol}</strong> - 
+                            <strong>CORREO: ${user.correo}</strong>
+                            <button onclick="editUser(${user.id}, '${user.nombre}', '${user.contraseña}', '${user.correo}', '${user.rol}')">Editar</button>
+                        `;
+                        userList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Error al cargar los usuarios:', error));
+        }
+
+
+        function editUser(id, nombre, contraseña, email, rol) {
+            document.getElementById('editUserFormContainer').classList.remove('hidden');
+            document.getElementById('editUsersContainer').classList.add('hidden');
+            document.getElementById('deleteUserContainer').classList.add('hidden');
+            document.getElementById('pendingRegistrations').classList.add('hidden');
+            
+            // Pasar los valores seleccionados al formulario
+            document.getElementById('editUserId').value = id;
+            document.getElementById('username').value = nombre;
+            document.getElementById('password').value = contraseña;
+            document.getElementById('email').value = email;
+            document.getElementById('role').value = rol;
+
+
+        }
+
 
         // Cargar las solicitudes al cargar la página
         window.onload = loadPendingRegistrations;
