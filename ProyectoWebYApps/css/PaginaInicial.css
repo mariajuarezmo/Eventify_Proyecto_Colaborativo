@@ -137,3 +137,44 @@ button {
     margin-top: 10px;
     font-size: 16px;
 }
+
+
+/* ----------------------------------- */
+.footer {
+    background-color: #333333;
+    color: #ffffff;
+    padding: 20px 10px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.footer a {
+    color: #00bcd4;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.social-icons img {
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.social-icons img:hover {
+    transform: scale(1.1);
+}

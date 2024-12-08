@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ejemplo</title>
+    <link rel="stylesheet" href="../css/resetpass.css">
+</head>
+<body>
+
+     <!----------------------------------------------------->
+     <header class="header">
+        <span class="logo">
+            <img src="../img/logo 2.1.png" alt="Logo" width="170" height="50">
+        </span>
+        <nav class="nav">
+            <a href="#">Contacto</a>
+            <button id="login">Login</button>
+            <button id="registro">Registrarse</button>
+        </nav>
+    </header>
+
+     <!----------------------------------------------------->
+
+
+    <form id="forgotPasswordForm">
+        <label for="email">Introduce tu corre registrado:</label>
+        <input type="email" id="email" name="email" required>
+        <button type="submit">Envío de enlace</button>
+      </form>
+      <div id="message"></div>
+
+      <script src="../js/resetpass.js"></script>
+</body>
+</html>
