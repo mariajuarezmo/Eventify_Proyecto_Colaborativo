@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New pass fromulario</title>
+    <link rel="stylesheet" href="../css/newpass.css">
+</head>
+
+<body>  
+
+    <header class="header">
+        <span class="logo">
+            <img src="../img/logo 2.1.png" alt="Logo" width="170" height="50">
+        </span>
+        <nav class="nav">
+            <a href="#">Ejemplo 1</a>
+            <a href="#">Ejemplo 2</a>
+            <button id="login">Login</button>
+            <button id="registro">Registrarse</button>
+        </nav>
+    </header>
+    
+
+    <div class="card">
+        <p>Introduce tu nueva contraseña</p>
+        <input class="input-email" type="text" title="Nueva contraseña">
+        <P>Repite la contraseña</P>
+        <input class="input-email" type="text" title="Repite Contraseña">
+        <button id="confirm">Guardar nueva contraseña</button>
+        <a href="PaginaInicial.html">Volver a la página de inicio</a>
+    </div>
+
+
+
+    <script src="../js/newpass.js">
+        
+    document.addEventListener("DOMContentLoaded", () => {
+        const loginBtn = document.getElementById("login");
+        loginBtn.addEventListener("click", () => {
+            window.location.href = "login.html";
+        });
+    });
+
+    </script>
+
+</body>
+</html>
