@@ -167,6 +167,9 @@ con.connect(function (err) {
 });
 
 // Ruta para registrar un usuario
+const bcrypt = require('bcrypt');
+
+// Ruta para registrar un usuario
 app.post('/register', (req, res) => {
     const { nombre, contraseña, rol, email } = req.body;
 
@@ -180,18 +183,23 @@ app.post('/register', (req, res) => {
         if (err) throw err;
 
         if (results.length > 0) {
-            // Si el nombre de usuario o correo ya existen, denegar la solicitud
             return res.send("<script>alert('El nombre de usuario y/o correo ya están registrados.'); window.history.back();</script>");
         }
 
-        // Guardar en la tabla temporal si no hay conflicto
-        const insertRequestQuery = "INSERT INTO SolicitudesRegistro (nombre, contraseña, rol, correo) VALUES (?, ?, ?, ?)";
-        con.query(insertRequestQuery, [nombre, contraseña, rol, email], (err) => {
+        // Hashear la contraseña
+        bcrypt.hash(contraseña, 10, (err, hashedPassword) => {
             if (err) throw err;
-            res.send("<script>alert('Solicitud de registro enviada. Pendiente de aprobación.'); window.location.href='/index.html';</script>");
+
+            // Guardar en la tabla temporal
+            const insertRequestQuery = "INSERT INTO SolicitudesRegistro (nombre, contraseña, rol, correo) VALUES (?, ?, ?, ?)";
+            con.query(insertRequestQuery, [nombre, hashedPassword, rol, email], (err) => {
+                if (err) throw err;
+                res.send("<script>alert('Solicitud de registro enviada. Pendiente de aprobación.'); window.location.href='/index.html';</script>");
+            });
         });
     });
 });
+
 
 
 
@@ -228,14 +236,13 @@ app.post('/processRegistration', (req, res) => {
                 if (err) throw err;
 
                 if (results.length > 0) {
-                    // Si el nombre de usuario o correo ya existen, denegar automáticamente la solicitud
                     const deleteRequestQuery = "DELETE FROM SolicitudesRegistro WHERE id = ?";
                     con.query(deleteRequestQuery, [id], (err) => {
                         if (err) throw err;
                         return res.send('Solicitud rechazada automáticamente: el nombre de usuario y/o correo ya están registrados.');
                     });
                 } else {
-                    // Insertar el usuario en la tabla Usuarios si no hay conflicto
+                    // Insertar el usuario en la tabla Usuarios directamente con la contraseña hasheada
                     const insertUserQuery = "INSERT INTO Usuarios (nombre, contraseña, rol, correo) VALUES (?, ?, ?, ?)";
                     con.query(insertUserQuery, [nombre, contraseña, rol, correo], (err) => {
                         if (err) throw err;
@@ -262,9 +269,6 @@ app.post('/processRegistration', (req, res) => {
 
 
 // Ruta para iniciar sesión
-
-let loggedInUserId = null;
-
 app.post('/login', (req, res) => {
     const { nombre, contraseña } = req.body;
 
@@ -272,30 +276,39 @@ app.post('/login', (req, res) => {
         return res.send("<script>alert('Todos los campos son obligatorios.'); window.history.back();</script>");
     }
 
-    const loginQuery = "SELECT * FROM Usuarios WHERE nombre = ? AND contraseña = ?";
-    con.query(loginQuery, [nombre, contraseña], (err, results) => {
+    const loginQuery = "SELECT * FROM Usuarios WHERE nombre = ?";
+    con.query(loginQuery, [nombre], (err, results) => {
         if (err) throw err;
 
         if (results.length === 0) {
             return res.send("<script>alert('Usuario no registrado o contraseña incorrecta.'); window.history.back();</script>");
         }
 
-        // Guardar el ID del usuario logueado
         const user = results[0];
-        loggedInUserId = user.id;
+        bcrypt.compare(contraseña, user.contraseña, (err, match) => {
+            if (err) throw err;
 
-        const validRoles = ['Estudiante', 'Profesor', 'Coordinador', 'Dirección'];
-        if (validRoles.includes(user.rol)) {
-            return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/panelUsuario.html';</script>");
-        } else if (user.rol === 'Admin') {
-            return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/panelAdministrador.html';</script>");
-        } else if (user.rol === 'AdminJefe') {
-            return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/panelAdministradorJefe.html';</script>"); 
-        }else {
-            return res.send("<script>alert('Rol desconocido.'); window.history.back();</script>");
-        }
+            if (!match) {
+                return res.send("<script>alert('Usuario no registrado o contraseña incorrecta.'); window.history.back();</script>");
+            }
+
+            // Guardar el ID del usuario logueado
+            loggedInUserId = user.id;
+
+            const validRoles = ['Estudiante', 'Profesor', 'Coordinador', 'Dirección'];
+            if (validRoles.includes(user.rol)) {
+                return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/panelUsuario.html';</script>");
+            } else if (user.rol === 'Admin') {
+                return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/panelAdministrador.html';</script>");
+            } else if (user.rol === 'AdminJefe') {
+                return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/panelAdministradorJefe.html';</script>");
+            } else {
+                return res.send("<script>alert('Rol desconocido.'); window.history.back();</script>");
+            }
+        });
     });
 });
+
 
 // Ruta para registrar un evento
 app.post('/eventRegister', (req, res) => {
