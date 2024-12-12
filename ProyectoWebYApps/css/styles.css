@@ -120,3 +120,24 @@ h2 {
     border-bottom: 2px solid #007bff;
     padding-bottom: 5px;
 }
+
+.alert {
+    padding: 20px;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgb(247, 5, 5);
+    transition: transform 0.3s, opacity 0.3s;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Animación al ocultar la alerta */
+.alert.hide {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+  }

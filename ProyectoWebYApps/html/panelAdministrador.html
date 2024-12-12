@@ -21,15 +21,18 @@
     <br>
 
     <!-- Formulario para crear un evento -->
+
     <div id="eventFormContainer" class="hidden">
         <h2>Crear Evento</h2>
-        <form id="eventForm" action="/eventRegister" method="POST">
+        <form id="eventForm" action="/eventRegister" method="POST" enctype="multipart/form-data">
             <input type="text" id="eventTitle" name="titulo" placeholder="Título del evento" required>
             <input type="date" id="eventDate" name="fecha" required>
-            <input type="time" id="eventStartTime" name="hora_inicio" required>
-            <input type="time" id="eventEndTime" name="hora_fin" required>
-            <input type="text" id="eventLocation" name="ubicacion" placeholder="Ubicación" required>
+            <input type="time" id="eventStartTime" name="hora_inicio" placeholder="Hora Inicio" required>
+            <input type="time" id="eventEndTime" name="hora_fin" placeholder="Hora Fin" required>
+            <input type="text" id="eventLocation" name="ubicacion" placeholder="Ubicación o Enlace" required>
             <input type="text" id="eventOrganizer" name="organizador" placeholder="Organizador" required>
+            <input type="file" id="imagen_url" name="imagen_url" accept="image/*" onchange="previewImage(event)">
+            <img id="imagePreview" style="max-width: 300px; display: none;">
             <textarea id="eventDescription" name="descripcion" placeholder="Descripción" required></textarea>
             <select id="eventCategory" name="categoria">
                 <option value="Estudiantes">Evento para Estudiantes</option>
@@ -67,6 +70,9 @@
             <input type="time" name="hora_fin" id="editEventEndTime" required>
             <input type="text" name="ubicacion" id="editEventLocation" required>
             <input type="text" name="organizador" id="editEventOrganizer" required>
+            <input type="file" id="editEventImagen_url" name="imagen_url" accept="image/*" onchange="previewImage(event)">
+            <img id="imagePreview" style="max-width: 300px; display: none;">
+            <input type="hidden" name="current_imagen_url" id="currentImagenUrl">
             <textarea name="descripcion" id="editEventDescription" required></textarea>
             <select name="categoria" id="editEventCategory">
                 <option value="Estudiantes">Evento para Estudiantes</option>
@@ -85,7 +91,7 @@
         </ul>
     </div>
     <br>
-    <button onclick="window.history.back()">Volver</button>
+    <button onclick="window.location.href='/logout'">Volver</button>
 
     <script>
         function showCreateEventForm() {
@@ -145,9 +151,32 @@
 
                     events.forEach(event => {
                         const listItem = document.createElement('li');
+
+                        // Asegúrate de que cada campo tiene un valor y escapa caracteres especiales
+                        const nombre = event.Nombre || '';
+                        const descripcion = event.Descripcion || '';
+                        const fecha = event.Fecha || '';
+                        const horaInicio = event.Hora_Inicio || '';
+                        const horaFin = event.Hora_Fin || '';
+                        const ubicacion = event.Ubicacion || '';
+                        const organizador = event.Organizador || '';
+                        const categoria = event.Categoria || '';
+                        const imagenUrl = event.imagen_url || '';
+
                         listItem.innerHTML = `
-                            <strong>${event.Nombre}</strong> - ${event.Fecha} ${event.Hora_Inicio} a ${event.Hora_Fin} - ${event.Categoria}
-                            <button onclick="editEvent(${event.ID_EVENTO}, '${event.Nombre}', '${event.Descripcion}', '${event.Fecha}', '${event.Hora_Inicio}', '${event.Hora_Fin}', '${event.Ubicacion}', '${event.Organizador}', '${event.Categoria}')">Editar</button>
+                            <strong>${nombre}</strong> - ${fecha} ${horaInicio} a ${horaFin} - ${categoria}
+                            <button onclick="editEvent(
+                                ${event.ID_EVENTO}, 
+                                \`${nombre}\`, 
+                                \`${descripcion}\`, 
+                                \`${fecha}\`, 
+                                \`${horaInicio}\`, 
+                                \`${horaFin}\`, 
+                                \`${ubicacion}\`, 
+                                \`${organizador}\`, 
+                                \`${categoria}\`, 
+                                \`${imagenUrl}\`
+                            )">Editar</button>
                         `;
                         eventList.appendChild(listItem);
                     });
@@ -155,7 +184,10 @@
                 .catch(error => console.error('Error al cargar los eventos:', error));
         }
 
-        function editEvent(id, title, description, date, startTime, endTime, location, organizer, category) {
+
+
+
+        function editEvent(id, title, description, date, startTime, endTime, location, organizer, category, imagen_url) {
             document.getElementById('editEventsContainer').classList.add('hidden');
             document.getElementById('editEventFormContainer').classList.remove('hidden');
             document.getElementById('deleteEventsContainer').classList.add('hidden');
@@ -173,7 +205,20 @@
             document.getElementById('editEventOrganizer').value = organizer;
             document.getElementById('editEventDescription').value = description;
             document.getElementById('editEventCategory').value = category;
+
+            // Mostrar la imagen actual en la vista previa
+            const imagePreview = document.getElementById('imagePreview');
+            if (imagen_url) {
+                imagePreview.src = imagen_url; // Asignar la URL de la imagen
+                imagePreview.style.display = 'block'; // Asegurarse de que la imagen sea visible
+            } else {
+                imagePreview.style.display = 'none'; // Ocultar si no hay imagen
+            }
+
+            // Guardar la URL de la imagen actual en un campo oculto
+            document.getElementById('currentImagenUrl').value = imagen_url;
         }
+
 
         function updateEventStatus(eventId, newStatus) {
             const data = { id_evento: eventId, nuevo_estado: newStatus };
@@ -183,19 +228,32 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al actualizar el estado del evento.');
+                    }
+                    return response.json();
+                })
                 .then(result => {
                     if (result.success) {
                         alert(`Evento ${newStatus.toLowerCase()} con éxito.`);
+
+                        // Eliminar el evento del contenedor
                         const eventListItem = document.querySelector(`#event-${result.id_evento}`);
                         if (eventListItem) {
                             eventListItem.remove();
                         }
+
+                        // Verificar si no quedan más eventos pendientes
+                        const pendingEventsList = document.getElementById('pendingEventsList');
+                        if (pendingEventsList.children.length === 0) {
+                            pendingEventsList.innerHTML = '<p>No hay eventos pendientes.</p>';
+                        }
                     } else {
-                        alert('No se pudo actualizar el evento.');
+                        alert(result.error || 'No se pudo actualizar el evento.');
                     }
                 })
-                .catch(error => alert('Error al intentar actualizar el evento.'));
+                .catch(error => alert('Error al intentar actualizar el evento: ' + error.message));
         }
 
         function deleteEvents() {
@@ -246,6 +304,19 @@
                     }
                 })
                 .catch(error => alert('Error al intentar eliminar el evento.'));
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('imagePreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+            }
         }
     </script>
 </body>

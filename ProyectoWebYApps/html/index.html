@@ -8,24 +8,6 @@
 </head>
 <body>
     <div class="container">
-        <h2>Registro</h2>
-        <form id="registerForm" action="/register" method="POST">
-            <input type="text" id="username" name="nombre" placeholder="Nombre de usuario" required>
-            <input type="password" id="password" name="contraseña" placeholder="Contraseña" required>
-            <input type="email" id="email" name="email" placeholder="Correo" required>
-            <select id="role" name="rol" required>
-                <option value="" disabled selected>Elige tu rol*</option>
-                <option value="Estudiante">Estudiante</option>
-                <option value="Profesor">Profesor</option>
-                <option value="Coordinador">Coordinador</option>
-                <option value="Dirección">Dirección</option>
-                <option value="Admin">Admin</option>
-            </select>
-            <button type="submit">Registrarse</button>
-        </form>
-    </div>
-
-    <div class="container">
         <h2>Inicio de Sesión</h2>
         <form id="loginForm" action="/login" method="POST">
             <input type="text" id="loginUsername" name="nombre" placeholder="Nombre de usuario" required>
@@ -34,6 +16,9 @@
             <p>¿No sabes tu contraseña?</p>
             <a href="resetpass.html">Restablece tu contraseña aquí</a>
         </form>
+        <button type="button" onclick="location.href='/registro.html'">Realizar registro</button>
+        <br>
+        <br>
         <button type="button" onclick="location.href='/eventos.html'">Ver Eventos</button>
     </div>
 </body>

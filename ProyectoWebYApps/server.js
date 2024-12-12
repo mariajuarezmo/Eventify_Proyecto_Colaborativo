@@ -8,6 +8,7 @@ const port = 5501;
 
 require('dotenv').config();
 
+//MANEJO DE IMAGENES QUE ADJUNTA UN USUARIO CUANDO CREA UN EVENTO
 const multer = require('multer');
 
 // Configuración de almacenamiento
@@ -23,6 +24,64 @@ const storage = multer.diskStorage({
 
 // Inicializar multer
 const upload = multer({ storage: storage });
+
+
+//MANEJO DE SESIONES Y MANEJO DE VULNERACIONES PARA EVITAR ACCEDER A PANELES NO AUTORIZADOS SEGUN EL ROL
+const session = require('express-session');
+
+const PORT = 5501;
+// Configuración de sesión
+app.use(session({
+    secret: 'clave-secreta',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+}));
+
+
+// Middleware para bloquear acceso directo a rutas HTML según el rol del usuario activo
+app.use((req, res, next) => {
+    let rutasBloqueadasConSesion = [];
+
+    if (req.session && req.session.user) {
+        const rolUsuario = req.session.user.rol;
+
+        // Definir rutas bloqueadas según el rol del usuario
+        if (['Estudiante', 'Profesor', 'Coordinador', 'Dirección'].includes(rolUsuario)) {
+            rutasBloqueadasConSesion = ['/panelAdministrador.html', '/panelAdministradorJefe.html'];
+        } else if (rolUsuario === 'Admin') {
+            rutasBloqueadasConSesion = ['/panelUsuario.html', '/panelAdministradorJefe.html'];
+        } else if (rolUsuario === 'AdminJefe') {
+            rutasBloqueadasConSesion = ['/panelUsuario.html', '/panelAdministrador.html'];
+        }
+
+        // Verificar si la ruta actual está bloqueada
+        const esRutaBloqueada = rutasBloqueadasConSesion.some(ruta => req.path.startsWith(ruta));
+
+        if (esRutaBloqueada) {
+            console.log(`Acceso denegado a ${req.path}: sesión activa para el usuario ${req.session.user.nombre} con rol ${rolUsuario}.`);
+            return res.send("<script>alert('No tienes permiso para acceder a esta página.'); window.history.back();</script>");
+        }
+    }
+
+    next(); // Continúa con la solicitud si no es una ruta bloqueada
+});
+
+// Middleware para bloquear rutas si no hay sesión activa
+app.use((req, res, next) => {
+    const rutasBloqueadasSinSesion = ['/panelUsuario.html', '/panelAdministrador.html', '/panelAdministradorJefe.html']; // Rutas bloqueadas sin sesión
+    const esRutaBloqueada = rutasBloqueadasSinSesion.some(ruta => req.path.startsWith(ruta));
+
+    if (!req.session || !req.session.user) {
+        if (esRutaBloqueada) {
+            console.log(`Acceso denegado a ${req.path}: no hay sesión activa.`);
+            return res.send("<script>alert('No tienes permiso para acceder a esta página.'); window.history.back();</script>");
+            
+        }
+    }
+
+    next(); // Continúa con la solicitud si no es una ruta bloqueada
+});
 
 
 // Middleware para analizar JSON
@@ -190,8 +249,15 @@ app.post('/login', (req, res) => {
                 return res.send("<script>alert('Usuario no registrado o contraseña incorrecta.'); window.history.back();</script>");
             }
 
-            // Guardar el ID del usuario logueado
-            loggedInUserId = user.id;
+            // Guardar datos del usuario en la sesión
+            req.session.user = {
+                id: user.id,
+                nombre: user.nombre,
+                rol: user.rol
+            };
+
+            // Imprimir el contenido de la sesión en la consola
+            console.log('Sesión iniciada:', req.session.user);
 
             const validRoles = ['Estudiante', 'Profesor', 'Coordinador', 'Dirección'];
             if (validRoles.includes(user.rol)) {
@@ -207,10 +273,94 @@ app.post('/login', (req, res) => {
     });
 });
 
+// Proteger las rutas de los paneles para que solo se pueda acceder con una sesión activa
+
+// Middleware para verificar la sesión y los roles
+// Middleware para verificar la sesión y los roles
+/*
+const authMiddleware = (requiredRoles) => {
+    return (req, res, next) => {
+        if (!req.session || !req.session.user) {
+            console.log('Acceso denegado: no hay sesión activa.');
+            return res.redirect('/index.html'); // Redirige al inicio si no hay sesión activa
+        }
+
+        // Verifica si el rol del usuario está en los roles permitidos
+        if (!requiredRoles.includes(req.session.user.rol)) {
+            console.log(`Acceso denegado para el usuario ${req.session.user.nombre} con rol ${req.session.user.rol}.`);
+            return res.send("<script>alert('No tienes permiso para acceder a esta página.'); window.history.back();</script>");
+        }
+
+        next(); // El usuario tiene el rol adecuado, pasa al siguiente middleware
+    };
+};
+
+// Rutas protegidas
+// Panel para Administradores (solo Admin)
+app.get('/panelAdministrador.html', authMiddleware(['Admin']), (req, res) => {
+    res.send('Contenido del panel de Administradores');
+});
+
+// Panel para Administradores Jefe (solo AdminJefe)
+app.get('/panelAdministradorJefe.html', authMiddleware(['AdminJefe']), (req, res) => {
+    res.send('Contenido del panel de Administradores Jefe');
+});
+
+// Panel para Usuarios Generales (Estudiante, Profesor, Coordinador, Dirección)
+app.get('/panelUsuario.html', authMiddleware(['Estudiante', 'Profesor', 'Coordinador', 'Dirección']), (req, res) => {
+    res.send('Contenido del panel de Usuario');
+});
+*/
+
+
+// Rutas protegidas según el rol
+app.get('/panelUsuario.html', (req, res) => {
+    res.send('Contenido del panel de Usuario');
+});
+
+app.get('/panelAdministrador.html', (req, res) => {
+    res.send('Contenido del panel de Administradores');
+});
+
+app.get('/panelAdministradorJefe.html', (req, res) => {
+    res.send('Contenido del panel de Administradores Jefe');
+});
+
+
+//Ruta para cerrar sesión
+app.get('/logout', (req, res) => {
+    if (req.session.user) {
+        // Imprimir los valores actuales antes de destruir la sesión
+        console.log('Cerrando sesión para:', req.session.user);
+    } else {
+        console.log('No hay sesión activa para cerrar.');
+    }
+
+    // Destruir la sesión
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Error al destruir la sesión:', err);
+            return res.send("<script>alert('Error al cerrar sesión. Por favor, inténtelo de nuevo.'); window.history.back();</script>");
+        }
+
+        // Confirmar el cierre de sesión en la consola
+        console.log('Sesión cerrada con éxito.');
+
+        // Redirigir al archivo index.html
+        res.redirect('/index.html');
+    });
+});
+
+
 
 // Ruta para registrar un evento
 app.post('/eventRegister', upload.single('imagen_url'), (req, res) => {
     const { titulo, fecha, hora_inicio, hora_fin, ubicacion, organizador, descripcion, categoria } = req.body;
+
+    // Verificar que el usuario ha iniciado sesión
+    if (!req.session || !req.session.user) {
+        return res.send("<script>alert('Debes iniciar sesión para crear un evento.'); window.location.href='/index.html';</script>");
+    }
 
     // Validar que los campos obligatorios estén presentes
     if (!titulo || !fecha || !hora_inicio || !hora_fin || !ubicacion || !organizador || !descripcion || !categoria) {
@@ -225,35 +375,51 @@ app.post('/eventRegister', upload.single('imagen_url'), (req, res) => {
     // Ruta de la imagen subida
     const imagenPath = `/uploads/${req.file.filename}`;
 
+    // Obtener los datos del usuario desde la sesión
+    const userId = req.session.user.id;
+    const userRole = req.session.user.rol;
+
+    // Determinar el estado inicial del evento según el rol del usuario
+    const estado = userRole === 'Admin' ? 'Aceptado' : 'Pendiente';
+
     // Insertar el evento en la base de datos
     const insertEventQuery = `
         INSERT INTO Eventos (Nombre, Descripcion, Estado, Fecha, Hora_Inicio, Hora_Fin, Categoria, Ubicacion, Organizador, ID_USUARIO_CREADOR_EVENTO, Estado_Temporal, imagen_url)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const estadoTemporal = 'Por Suceder'; // Estado predeterminado
+    const estadoTemporal = 'Por Suceder'; // Estado temporal predeterminado
 
     con.query(
         insertEventQuery,
-        [titulo, descripcion, 'Pendiente', fecha, hora_inicio, hora_fin, categoria, ubicacion, organizador, loggedInUserId, estadoTemporal, imagenPath],
+        [titulo, descripcion, estado, fecha, hora_inicio, hora_fin, categoria, ubicacion, organizador, userId, estadoTemporal, imagenPath],
         (err) => {
             if (err) {
                 console.error('Error al registrar el evento:', err);
                 return res.status(500).send('Error interno al registrar el evento.');
             }
-            res.send("<script>alert('Evento creado con éxito.'); window.location.href='/panelUsuario.html';</script>");
+
+            // Mensaje diferente según el estado del evento
+            if (estado === 'Aceptado') {
+                res.send("<script>alert('Evento creado y aprobado automáticamente.'); window.location.href='/panelAdministrador.html';</script>");
+            } else {
+                res.send("<script>alert('Evento creado con éxito. Espera que el ADMIN lo apruebe para verlo en el tablón'); window.location.href='/panelUsuario.html';</script>");
+            }
         }
     );
 });
 
 
+
 app.post('/updateEventStatus', (req, res) => {
     const { id_evento, nuevo_estado } = req.body;
 
-    // Verificar si el ID del administrador está disponible
-    if (!loggedInUserId) {
+    // Verificar si el usuario tiene sesión activa
+    if (!req.session || !req.session.user) {
         return res.status(401).json({ error: 'No estás autorizado para realizar esta acción.' });
     }
+
+    const adminId = req.session.user.id; // Obtener el ID del administrador desde la sesión
 
     // Verificar los datos recibidos
     if (!id_evento || !nuevo_estado) {
@@ -267,8 +433,7 @@ app.post('/updateEventStatus', (req, res) => {
         WHERE ID_EVENTO = ?
     `;
 
-    // Ejecutar la consulta
-    con.query(updateEventQuery, [nuevo_estado, loggedInUserId, id_evento], (err, result) => {
+    con.query(updateEventQuery, [nuevo_estado, adminId, id_evento], (err, result) => {
         if (err) {
             console.error('Error al actualizar el evento:', err);
             return res.status(500).json({ error: 'Error interno al actualizar el evento.' });
@@ -280,7 +445,7 @@ app.post('/updateEventStatus', (req, res) => {
         }
 
         // Responder con éxito si la actualización fue realizada
-        res.json({ success: true, id_evento, nuevo_estado, admin_id: loggedInUserId });
+        res.json({ success: true, id_evento, nuevo_estado, admin_id: adminId });
     });
 });
 
@@ -299,7 +464,6 @@ app.get('/pendingEvents', (req, res) => {
 });
 
 
-// Ruta para obtener eventos aceptados y por suceder
 // Ruta para obtener eventos aceptados y por suceder con el nombre del creador
 app.get('/events', (req, res) => {
     const { category } = req.query;
@@ -341,12 +505,14 @@ app.get('/events', (req, res) => {
 });
 
 
-
-//Ruta para obtener los eventos creados por usuarios
+// Ruta para obtener los eventos creados por el usuario
 app.get('/userEvents', (req, res) => {
-    if (!loggedInUserId) {
+    // Verificar si el usuario ha iniciado sesión
+    if (!req.session || !req.session.user) {
         return res.send("<script>alert('Debes iniciar sesión para ver tus eventos.'); window.location.href='/index.html';</script>");
     }
+
+    const userId = req.session.user.id; // Obtener el ID del usuario desde la sesión
 
     const userEventsQuery = `
         SELECT ID_EVENTO, Nombre, Descripcion, Fecha, Hora_Inicio, Hora_Fin, Categoria, Ubicacion, Organizador, imagen_url
@@ -354,30 +520,35 @@ app.get('/userEvents', (req, res) => {
         WHERE ID_USUARIO_CREADOR_EVENTO = ?
     `;
 
-    con.query(userEventsQuery, [loggedInUserId], (err, results) => {
+    con.query(userEventsQuery, [userId], (err, results) => {
         if (err) {
             console.error('Error al obtener los eventos del usuario:', err);
             return res.status(500).send("Error al cargar los eventos.");
         }
+
+        // Enviar los eventos como respuesta en formato JSON
         res.json(results);
     });
 });
 
-
-//Ruta para modificar eventos
 app.post('/updateEvent', (req, res) => {
     const { id_evento, titulo, descripcion, fecha, hora_inicio, hora_fin, ubicacion, organizador, categoria, imagen_url } = req.body;
 
+    // Verificar si todos los campos obligatorios están presentes
     if (!id_evento || !titulo || !descripcion || !fecha || !hora_inicio || !hora_fin || !ubicacion || !organizador || !categoria || !imagen_url) {
         return res.send("<script>alert('Todos los campos son obligatorios.'); window.history.back();</script>");
     }
 
-    if (!loggedInUserId) {
+    // Verificar si el usuario ha iniciado sesión
+    if (!req.session || !req.session.user) {
         return res.send("<script>alert('Debes iniciar sesión para editar eventos.'); window.location.href='/index.html';</script>");
     }
 
+    const userId = req.session.user.id; // Obtener el ID del usuario desde la sesión
+
+    // Consulta para obtener el rol del usuario
     const getUserRoleQuery = "SELECT rol FROM Usuarios WHERE id = ?";
-    con.query(getUserRoleQuery, [loggedInUserId], (err, results) => {
+    con.query(getUserRoleQuery, [userId], (err, results) => {
         if (err) {
             console.error('Error al obtener el rol del usuario:', err);
             return res.send("<script>alert('Error interno.'); window.history.back();</script>");
@@ -392,20 +563,22 @@ app.post('/updateEvent', (req, res) => {
         let updateEventQuery;
         let queryParams;
 
+        // Si el usuario es un administrador
         if (userRole === 'Admin') {
             updateEventQuery = `
                 UPDATE Eventos
-                SET Nombre = ?, Descripcion = ?, Fecha = ?, Hora_Inicio = ?, Hora_Fin = ?, Categoria = ?, Ubicacion = ?, Organizador = ?, imagen_url=?
+                SET Nombre = ?, Descripcion = ?, Fecha = ?, Hora_Inicio = ?, Hora_Fin = ?, Categoria = ?, Ubicacion = ?, Organizador = ?, imagen_url = ?
                 WHERE ID_EVENTO = ?
             `;
-            queryParams = [titulo, descripcion, fecha, hora_inicio, hora_fin, categoria, ubicacion, organizador, id_evento, imagen_url];
+            queryParams = [titulo, descripcion, fecha, hora_inicio, hora_fin, categoria, ubicacion, organizador, imagen_url, id_evento];
         } else {
+            // Para otros usuarios, verificar que sean los creadores del evento
             updateEventQuery = `
                 UPDATE Eventos
-                SET Nombre = ?, Descripcion = ?, Fecha = ?, Hora_Inicio = ?, Hora_Fin = ?, Categoria = ?, Ubicacion = ?, Organizador = ?, imagen_url=?
+                SET Nombre = ?, Descripcion = ?, Fecha = ?, Hora_Inicio = ?, Hora_Fin = ?, Categoria = ?, Ubicacion = ?, Organizador = ?, imagen_url = ?
                 WHERE ID_EVENTO = ? AND ID_USUARIO_CREADOR_EVENTO = ?
             `;
-            queryParams = [titulo, descripcion, fecha, hora_inicio, hora_fin, categoria, ubicacion, organizador, id_evento, loggedInUserId];
+            queryParams = [titulo, descripcion, fecha, hora_inicio, hora_fin, categoria, ubicacion, organizador, imagen_url, id_evento, userId];
         }
 
         con.query(updateEventQuery, queryParams, (err, result) => {
