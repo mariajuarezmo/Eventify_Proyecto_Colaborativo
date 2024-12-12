@@ -426,29 +426,54 @@ app.post('/updateEventStatus', (req, res) => {
         return res.status(400).json({ error: 'El ID del evento y el nuevo estado son obligatorios.' });
     }
 
-    // Consulta SQL para actualizar el estado del evento e incluir el ID del administrador aprobador
-    const updateEventQuery = `
-        UPDATE Eventos
-        SET Estado = ?, ID_ADMIN_APROBADOR = ?
-        WHERE ID_EVENTO = ?
-    `;
+    if (nuevo_estado === 'Denegado') {
+        // Si el estado es "Denegado", eliminar el evento de la tabla
+        const deleteEventQuery = `
+            DELETE FROM Eventos
+            WHERE ID_EVENTO = ?
+        `;
 
-    con.query(updateEventQuery, [nuevo_estado, adminId, id_evento], (err, result) => {
-        if (err) {
-            console.error('Error al actualizar el evento:', err);
-            return res.status(500).json({ error: 'Error interno al actualizar el evento.' });
-        }
+        con.query(deleteEventQuery, [id_evento], (err, result) => {
+            if (err) {
+                console.error('Error al eliminar el evento:', err);
+                return res.status(500).json({ error: 'Error interno al eliminar el evento.' });
+            }
 
-        // Verificar si el evento fue encontrado y actualizado
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'El evento no fue encontrado.' });
-        }
+            // Verificar si el evento fue eliminado
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'El evento no fue encontrado.' });
+            }
 
-        // Responder con éxito si la actualización fue realizada
-        res.json({ success: true, id_evento, nuevo_estado, admin_id: adminId });
-    });
+            // Responder con éxito si la eliminación fue realizada
+            res.json({ success: true, id_evento, message: 'El evento fue denegado y eliminado correctamente.' });
+        });
+    } else if (nuevo_estado === 'Aceptado') {
+        // Si el estado es "Aceptado", actualizar el estado del evento
+        const updateEventQuery = `
+            UPDATE Eventos
+            SET Estado = ?, ID_ADMIN_APROBADOR = ?
+            WHERE ID_EVENTO = ?
+        `;
+
+        con.query(updateEventQuery, [nuevo_estado, adminId, id_evento], (err, result) => {
+            if (err) {
+                console.error('Error al actualizar el evento:', err);
+                return res.status(500).json({ error: 'Error interno al actualizar el evento.' });
+            }
+
+            // Verificar si el evento fue encontrado y actualizado
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: 'El evento no fue encontrado.' });
+            }
+
+            // Responder con éxito si la actualización fue realizada
+            res.json({ success: true, id_evento, nuevo_estado, admin_id: adminId });
+        });
+    } else {
+        // Manejar estados no reconocidos
+        return res.status(400).json({ error: 'El estado especificado no es válido.' });
+    }
 });
-
 
 //Ruta para obtener todos los eventos con estado pendiente
 
