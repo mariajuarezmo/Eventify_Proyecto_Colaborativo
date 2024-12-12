@@ -12,13 +12,15 @@
     <!-- Crear Evento -->
     <h2>Crear Evento</h2>
     <div id="eventFormContainer">
-        <form id="eventForm" action="/eventRegister" method="POST">
+        <form id="eventForm" action="/eventRegister" method="POST" enctype="multipart/form-data">
             <input type="text" id="eventTitle" name="titulo" placeholder="Título del evento" required>
             <input type="date" id="eventDate" name="fecha" required>
             <input type="time" id="eventStartTime" name="hora_inicio" placeholder="Hora Inicio" required>
             <input type="time" id="eventEndTime" name="hora_fin" placeholder="Hora Fin" required>
             <input type="text" id="eventLocation" name="ubicacion" placeholder="Ubicación o Enlace" required>
             <input type="text" id="eventOrganizer" name="organizador" placeholder="Organizador" required>
+            <input type="file" id="imagen_url" name="imagen_url" accept="image/*" onchange="previewImage(event)">
+            <img id="imagePreview" style="max-width: 300px; display: none;">
             <textarea id="eventDescription" name="descripcion" placeholder="Descripción" required></textarea>
             <select id="eventCategory" name="categoria">
                 <option value="Estudiantes">Evento para Estudiantes</option>
@@ -28,6 +30,7 @@
             <button type="submit">Crear Evento</button>
         </form>
     </div>
+    
 
     <!-- Editar Eventos -->
     <h2>Mis Eventos</h2>
@@ -73,7 +76,7 @@
         });
 
         // Función para mostrar el formulario de edición
-        function editEvent(id, title, description, date, startTime, endTime, location, organizer, category) {
+        function editEvent(id, title, description, date, startTime, endTime, location, organizer, category, imagen_url) {
             const eventForm = document.getElementById('eventForm');
             eventForm.action = '/updateEvent';
             eventForm.method = 'POST';
@@ -89,6 +92,7 @@
                 <input type="time" name="hora_fin" value="${endTime}" required>
                 <input type="text" name="ubicacion" value="${location}" required>
                 <input type="text" name="organizador" value="${organizer}" required>
+                <input type="file" name="imagen_url" value="${imagen_url}" requiered>
                 <textarea name="descripcion" required>${description}</textarea>
                 <select name="categoria">
                     <option value="Estudiantes" ${category === 'Estudiantes' ? 'selected' : ''}>Estudiantes</option>
@@ -97,6 +101,20 @@
                 </select>
                 <button type="submit">Guardar Cambios</button>
             `;
+        }
+
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('imagePreview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+            }
         }
     </script>
 </body>

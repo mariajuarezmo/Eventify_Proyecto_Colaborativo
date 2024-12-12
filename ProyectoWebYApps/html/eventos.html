@@ -65,7 +65,6 @@
 }
 
 
-
         function filterEvents(category) {
             fetchEvents(category);
         }
@@ -87,6 +86,13 @@
 
             events.forEach(event => {
                 const listItem = document.createElement('li');
+                const imageItem = document.createElement('img');
+
+                imageItem.src = event.imagen_url; // La URL de la imagen almacenada en la base de datos
+                imageItem.alt = `Imagen del evento ${event.Nombre_Evento}`;
+
+                imageItem.style.width = '150px'; // Ajusta el tamaño si es necesario
+                imageItem.style.height = 'auto';
 
                 let categoryClass = '';
                 if (event.Categoria === 'Estudiantes') {
@@ -107,9 +113,14 @@
                     <p><strong>Organizador:</strong> ${event.Organizador}</p>
                     <p><strong>Creador del Evento:</strong> ${event.Nombre_Creador}</p>
                 `;
+
+
+                // Agrega la imagen al inicio del elemento de la lista
+                listItem.insertBefore(imageItem, listItem.firstChild);
                 eventList.appendChild(listItem);
             });
-}
+        }
+
 
 
 
@@ -129,9 +140,6 @@
             alert('No se pudieron cargar los eventos filtrados.');
         });
 }
-
-
-
 
 
         // Llama a la función para cargar los eventos al cargar la página
