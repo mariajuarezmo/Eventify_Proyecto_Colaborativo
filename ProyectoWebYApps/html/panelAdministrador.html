@@ -15,38 +15,40 @@
         <h2>Acciones</h2>
         <button id="createEventButton" onclick="showCreateEventForm()">Crear Evento</button>
         <button id="approveEventButton" onclick="showPendingEvents()">Aprobar/Denegrar Eventos</button>
-        <button id="editEventsButton" onclick="showEditEvents()">Editar Eventos</button>
+        <button id="editEventsButton">Ver y Editar Eventos</button>
         <button id="deleteEventsButton" onclick="deleteEvents()">Eliminar Eventos</button>
     </div>
     <br>
 
     <!-- Formulario para crear un evento -->
-
+    
     <div id="eventFormContainer" class="hidden">
         <h2>Crear Evento</h2>
         <form id="eventForm" action="/eventRegister" method="POST" enctype="multipart/form-data">
-            <input type="text" id="eventTitle" name="titulo" placeholder="Título del evento" required>
-            <input type="date" id="eventDate" name="fecha" required>
-            <input type="time" id="eventStartTime" name="hora_inicio" placeholder="Hora Inicio" required>
-            <input type="time" id="eventEndTime" name="hora_fin" placeholder="Hora Fin" required>
-            <input type="text" id="eventLocation" name="ubicacion" placeholder="Ubicación o Enlace" required>
-            <input type="text" id="eventOrganizer" name="organizador" placeholder="Organizador" required>
-            <input type="file" id="imagen_url" name="imagen_url" accept="image/*" onchange="previewImage(event)">
+            <input type="hidden" name="id_evento" value="">
+            <input type="hidden" name="imagen_actual" value="">
+            <input type="text" name="titulo" placeholder="Título del evento" required>
+            <input type="date" name="fecha" required>
+            <input type="time" name="hora_inicio" required>
+            <input type="time" name="hora_fin" required>
+            <input type="text" name="ubicacion" placeholder="Ubicación o Enlace" required>
+            <input type="text" name="organizador" placeholder="Organizador" required>
+            <input type="file" name="imagen_url" accept="image/*" onchange="previewImage(event)">
             <img id="imagePreview" style="max-width: 300px; display: none;">
-            <textarea id="eventDescription" name="descripcion" placeholder="Descripción" required></textarea>
-            <select id="eventCategory" name="categoria">
+            <textarea name="descripcion" placeholder="Descripción" required></textarea>
+            <select name="categoria">
                 <option value="Estudiantes">Evento para Estudiantes</option>
                 <option value="Profesores">Evento para Profesores</option>
                 <option value="Universidad">Evento para Comunidad Universitaria</option>
             </select>
-            <button type="submit">Crear Evento</button>
+            <button id="formSubmitButton" type="submit">Crear Evento</button>
         </form>
     </div>
 
-    <!-- Lista de eventos para editar -->
-    <div id="editEventsContainer" class="hidden">
+    <!-- Editar Eventos -->
+    <div id="adminEventsContainer" class="hidden">
         <h2>Editar Eventos</h2>
-        <ul id="eventList">
+        <ul id="adminEventsList">
             <!-- Los eventos se cargarán aquí dinámicamente -->
         </ul>
     </div>
@@ -57,30 +59,6 @@
         <ul id="deleteEventList">
             <!-- Los eventos se cargarán aquí dinámicamente -->
         </ul>
-    </div>
-
-    <!-- Formulario para editar evento -->
-    <div id="editEventFormContainer" class="hidden">
-        <h2>Editar Evento</h2>
-        <form id="editEventForm" action="/updateEvent" method="POST">
-            <input type="hidden" name="id_evento" id="editEventId">
-            <input type="text" name="titulo" id="editEventTitle" required>
-            <input type="date" name="fecha" id="editEventDate" required>
-            <input type="time" name="hora_inicio" id="editEventStartTime" required>
-            <input type="time" name="hora_fin" id="editEventEndTime" required>
-            <input type="text" name="ubicacion" id="editEventLocation" required>
-            <input type="text" name="organizador" id="editEventOrganizer" required>
-            <input type="file" id="editEventImagen_url" name="imagen_url" accept="image/*" onchange="previewImage(event)">
-            <img id="imagePreview" style="max-width: 300px; display: none;">
-            <input type="hidden" name="current_imagen_url" id="currentImagenUrl">
-            <textarea name="descripcion" id="editEventDescription" required></textarea>
-            <select name="categoria" id="editEventCategory">
-                <option value="Estudiantes">Evento para Estudiantes</option>
-                <option value="Profesores">Evento para Profesores</option>
-                <option value="Universidad">Evento para Comunidad Universitaria</option>
-            </select>
-            <button type="submit">Guardar Cambios</button>
-        </form>
     </div>
 
     <!-- Contenedor de eventos pendientes -->
@@ -96,16 +74,17 @@
     <script>
         function showCreateEventForm() {
             document.getElementById('eventFormContainer').classList.remove('hidden');
-            document.getElementById('editEventsContainer').classList.add('hidden');
+            document.getElementById('adminEventsContainer').classList.add('hidden');
             document.getElementById('pendingEventsContainer').classList.add('hidden'); 
             document.getElementById('deleteEventsContainer').classList.add('hidden');
+            
         }
 
         function showPendingEvents() {
             const pendingEventsContainer = document.getElementById('pendingEventsContainer');
             pendingEventsContainer.classList.remove('hidden');
             document.getElementById('eventFormContainer').classList.add('hidden');
-            document.getElementById('editEventsContainer').classList.add('hidden');
+            document.getElementById('adminEventsContainer').classList.add('hidden');
             document.getElementById('deleteEventsContainer').classList.add('hidden');
 
             fetch('/pendingEvents')
@@ -133,91 +112,88 @@
                 .catch(error => console.error('Error al cargar los eventos pendientes:', error));
         }
 
-        function showEditEvents() {
-            document.getElementById('editEventsContainer').classList.remove('hidden');
-            document.getElementById('eventFormContainer').classList.add('hidden');
-            document.getElementById('pendingEventsContainer').classList.add('hidden');
-            document.getElementById('deleteEventsContainer').classList.add('hidden');
+        const editEventsButton = document.getElementById('editEventsButton');
+const adminEventsContainer = document.getElementById('adminEventsContainer');
+const adminEventsList = document.getElementById('adminEventsList');
 
-            fetch('/getAllEvents')
-                .then(response => response.json())
-                .then(events => {
-                    const eventList = document.getElementById('eventList');
-                    eventList.innerHTML = '';
-                    if (events.length === 0) {
-                        eventList.innerHTML = '<li>No hay eventos registrados.</li>';
-                        return;
-                    }
+// Mostrar todos los eventos
+editEventsButton.addEventListener('click', () => {
+    document.getElementById('eventFormContainer').classList.add('hidden');
+    document.getElementById('pendingEventsContainer').classList.add('hidden');
+    document.getElementById('deleteEventsContainer').classList.add('hidden');
 
-                    events.forEach(event => {
-                        const listItem = document.createElement('li');
+    fetch('/getAllEvents')
+        .then(response => response.json())
+        .then(events => {
+            adminEventsContainer.classList.remove('hidden');
+            adminEventsList.innerHTML = '';
 
-                        // Asegúrate de que cada campo tiene un valor y escapa caracteres especiales
-                        const nombre = event.Nombre || '';
-                        const descripcion = event.Descripcion || '';
-                        const fecha = event.Fecha || '';
-                        const horaInicio = event.Hora_Inicio || '';
-                        const horaFin = event.Hora_Fin || '';
-                        const ubicacion = event.Ubicacion || '';
-                        const organizador = event.Organizador || '';
-                        const categoria = event.Categoria || '';
-                        const imagenUrl = event.imagen_url || '';
-
-                        listItem.innerHTML = `
-                            <strong>${nombre}</strong> - ${fecha} ${horaInicio} a ${horaFin} - ${categoria}
-                            <button onclick="editEvent(
-                                ${event.ID_EVENTO}, 
-                                \`${nombre}\`, 
-                                \`${descripcion}\`, 
-                                \`${fecha}\`, 
-                                \`${horaInicio}\`, 
-                                \`${horaFin}\`, 
-                                \`${ubicacion}\`, 
-                                \`${organizador}\`, 
-                                \`${categoria}\`, 
-                                \`${imagenUrl}\`
-                            )">Editar</button>
-                        `;
-                        eventList.appendChild(listItem);
-                    });
-                })
-                .catch(error => console.error('Error al cargar los eventos:', error));
-        }
-
-
-
-
-        function editEvent(id, title, description, date, startTime, endTime, location, organizer, category, imagen_url) {
-            document.getElementById('editEventsContainer').classList.add('hidden');
-            document.getElementById('editEventFormContainer').classList.remove('hidden');
-            document.getElementById('deleteEventsContainer').classList.add('hidden');
-            document.getElementById('eventFormContainer').classList.add('hidden');
-            document.getElementById('pendingEventsContainer').classList.add('hidden');
-
-            const formattedDate = new Date(date).toISOString().split('T')[0];
-
-            document.getElementById('editEventId').value = id;
-            document.getElementById('editEventTitle').value = title;
-            document.getElementById('editEventDate').value = formattedDate;
-            document.getElementById('editEventStartTime').value = startTime;
-            document.getElementById('editEventEndTime').value = endTime;
-            document.getElementById('editEventLocation').value = location;
-            document.getElementById('editEventOrganizer').value = organizer;
-            document.getElementById('editEventDescription').value = description;
-            document.getElementById('editEventCategory').value = category;
-
-            // Mostrar la imagen actual en la vista previa
-            const imagePreview = document.getElementById('imagePreview');
-            if (imagen_url) {
-                imagePreview.src = imagen_url; // Asignar la URL de la imagen
-                imagePreview.style.display = 'block'; // Asegurarse de que la imagen sea visible
-            } else {
-                imagePreview.style.display = 'none'; // Ocultar si no hay imagen
+            if (events.length === 0) {
+                adminEventsList.innerHTML = '<li>No hay eventos registrados.</li>';
+                return;
             }
 
-            // Guardar la URL de la imagen actual en un campo oculto
-            document.getElementById('currentImagenUrl').value = imagen_url;
-        }
+            events.forEach(event => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <strong>${event.Nombre}</strong> - ${event.Fecha} ${event.Hora_Inicio} a ${event.Hora_Fin} - ${event.Categoria}
+                    <button onclick="editEvent(${event.ID_EVENTO}, '${event.Nombre}', '${event.Descripcion}', '${event.Fecha}', '${event.Hora_Inicio}', '${event.Hora_Fin}', '${event.Ubicacion}', '${event.Organizador}', '${event.Categoria}', '${encodeURIComponent(event.imagen_url)}')">Editar</button>
+                `;
+                adminEventsList.appendChild(listItem);
+            });
+        })
+        .catch(error => console.error('Error al cargar los eventos:', error));
+});
+
+// Función para mostrar el formulario de edición
+function editEvent(id, title, description, date, startTime, endTime, location, organizer, category, imagen_url) {
+    const eventForm = document.getElementById('eventForm');
+    eventForm.action = '/updateEvent';
+    eventForm.method = 'POST';
+
+    // Actualizar los valores de los campos existentes
+    document.querySelector('input[name="id_evento"]').value = id;
+    document.querySelector('input[name="imagen_actual"]').value = decodeURIComponent(imagen_url);
+    document.querySelector('input[name="titulo"]').value = title;
+    document.querySelector('input[name="fecha"]').value = new Date(date).toISOString().split('T')[0];
+    document.querySelector('input[name="hora_inicio"]').value = startTime;
+    document.querySelector('input[name="hora_fin"]').value = endTime;
+    document.querySelector('input[name="ubicacion"]').value = location;
+    document.querySelector('input[name="organizador"]').value = organizer;
+    document.querySelector('textarea[name="descripcion"]').value = description;
+
+    // Actualizar la categoría seleccionada
+    document.querySelector(`select[name="categoria"] option[value="${category}"]`).selected = true;
+
+    // Actualizar la imagen previa
+    const preview = document.getElementById('imagePreview');
+    preview.src = decodeURIComponent(imagen_url);
+    preview.style.display = 'block';
+
+    // Cambiar el texto del botón a "Guardar Cambios"
+    const submitButton = document.getElementById('formSubmitButton');
+    submitButton.textContent = 'Guardar Cambios';
+
+    // Mostrar el contenedor del formulario y ocultar los demás contenedores
+    document.getElementById('eventFormContainer').classList.remove('hidden');
+    document.getElementById('adminEventsContainer').classList.add('hidden');
+    document.getElementById('pendingEventsContainer').classList.add('hidden');
+    document.getElementById('deleteEventsContainer').classList.add('hidden');
+}
+
+// Función para previsualizar la imagen seleccionada
+function previewImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const preview = document.getElementById('imagePreview');
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
 
 
         function updateEventStatus(eventId, newStatus) {
@@ -260,8 +236,7 @@
             document.getElementById('deleteEventsContainer').classList.remove('hidden');
             document.getElementById('eventFormContainer').classList.add('hidden');
             document.getElementById('pendingEventsContainer').classList.add('hidden');
-            document.getElementById('editEventsContainer').classList.add('hidden');
-            document.getElementById('editEventFormContainer').classList.add('hidden');
+            document.getElementById('adminEventsContainer').classList.add('hidden');
             
 
             fetch('/getAllEvents')
@@ -306,18 +281,6 @@
                 .catch(error => alert('Error al intentar eliminar el evento.'));
         }
 
-        function previewImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById('imagePreview');
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-            }
-        }
     </script>
 </body>
 </html>

@@ -556,11 +556,16 @@ app.get('/userEvents', (req, res) => {
     });
 });
 
-app.post('/updateEvent', (req, res) => {
-    const { id_evento, titulo, descripcion, fecha, hora_inicio, hora_fin, ubicacion, organizador, categoria, imagen_url } = req.body;
 
-    // Verificar si todos los campos obligatorios están presentes
+app.post('/updateEvent', upload.single('imagen_url'), (req, res) => {
+    console.log('Datos recibidos:', req.body);
+    console.log('Archivo recibido:', req.file);
+
+    const { id_evento, titulo, descripcion, fecha, hora_inicio, hora_fin, ubicacion, organizador, categoria } = req.body;
+    const imagen_url = req.file ? req.file.path : req.body.imagen_actual;
+
     if (!id_evento || !titulo || !descripcion || !fecha || !hora_inicio || !hora_fin || !ubicacion || !organizador || !categoria || !imagen_url) {
+        console.error('Campos faltantes:', { id_evento, titulo, descripcion, fecha, hora_inicio, hora_fin, ubicacion, organizador, categoria, imagen_url });
         return res.send("<script>alert('Todos los campos son obligatorios.'); window.history.back();</script>");
     }
 
@@ -755,10 +760,29 @@ app.get('/eventsByDate', (req, res) => {
         return res.status(400).json({ error: 'Filtro no válido' });
     }
 
-    const query = `
-        SELECT Nombre, Descripcion, Fecha, Hora_Inicio, Hora_Fin, Categoria, Ubicacion, Organizador
-        FROM Eventos
-        WHERE Estado = 'Aceptado' AND Estado_Temporal = 'Por Suceder' AND ${dateCondition}
+
+    let query = `
+        SELECT 
+            Eventos.Nombre AS Nombre_Evento, 
+            Eventos.Descripcion, 
+            Eventos.Fecha, 
+            Eventos.Hora_Inicio, 
+            Eventos.Hora_Fin, 
+            Eventos.Categoria, 
+            Eventos.Ubicacion, 
+            Eventos.Organizador, 
+            Eventos.imagen_url,
+            Usuarios.nombre AS Nombre_Creador
+        FROM 
+            Eventos
+        JOIN 
+            Usuarios 
+        ON 
+            Eventos.ID_USUARIO_CREADOR_EVENTO = Usuarios.id
+        WHERE 
+            Eventos.Estado = 'Aceptado' 
+            AND Eventos.Estado_Temporal = 'Por Suceder'
+            AND ${dateCondition}
     `;
 
     con.query(query, (err, results) => {
