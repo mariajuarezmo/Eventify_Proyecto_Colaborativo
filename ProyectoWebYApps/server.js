@@ -43,7 +43,7 @@ const options = {
 const sessionStore = new MySQLStore(options);
 
 app.use(session({
-    secret: 'your_secret_key', // Cambia esto por una clave segura
+    secret: 'sesion_secreta', 
     store: sessionStore,
     resave: false,
     saveUninitialized: true,
