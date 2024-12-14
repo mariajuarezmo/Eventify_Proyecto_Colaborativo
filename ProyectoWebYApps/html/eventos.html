@@ -90,9 +90,15 @@
 
                 imageItem.src = event.imagen_url; // La URL de la imagen almacenada en la base de datos
                 imageItem.alt = `Imagen del evento ${event.Nombre_Evento}`;
-
                 imageItem.style.width = '150px';
                 imageItem.style.height = 'auto';
+
+                const qrImage = document.createElement('img'); // Crear elemento para el QR
+                qrImage.src = event.QR; // La URL del QR almacenada en la base de datos
+                qrImage.alt = `QR del evento ${event.Nombre_Evento}`;
+                qrImage.style.width = '150px';
+                qrImage.style.height = '150px';
+                qrImage.style.marginTop = '10px';
 
                 let categoryClass = '';
                 if (event.Categoria === 'Estudiantes') {
@@ -112,14 +118,18 @@
                     <p><strong>Ubicación:</strong> ${event.Ubicacion}</p>
                     <p><strong>Organizador:</strong> ${event.Organizador}</p>
                     <p><strong>Creador del Evento:</strong> ${event.Nombre_Creador}</p>
+                    <p><strong>Número de asistentes del evento:</strong> ${event.num_asistentes}</p>
                 `;
 
-                // Agrega la imagen después de la información del evento
+                // Agrega la imagen y el QR después de la información del evento
                 listItem.appendChild(imageItem);
+                listItem.appendChild(qrImage);
+
                 // Agregar el elemento <li> al <ul>
                 eventList.appendChild(listItem);
             });
         }
+
 
 
 

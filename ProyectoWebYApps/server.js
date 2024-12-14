@@ -2,14 +2,18 @@
 const express = require('express');
 const mysql = require('mysql2');
 const path = require('path');
-
-const app = express();
-const port = 5501;
-
-require('dotenv').config();
-
+//CREACIÓN DE QRs
+const axios = require('axios');
+//MANEJO DE SESIONES Y MANEJO DE VULNERACIONES PARA EVITAR ACCEDER A PANELES NO AUTORIZADOS SEGUN EL ROL
+const session = require('express-session');
 //MANEJO DE IMAGENES QUE ADJUNTA UN USUARIO CUANDO CREA UN EVENTO
 const multer = require('multer');
+const app = express();
+const port = 5501;
+require('dotenv').config();
+
+
+
 
 // Configuración de almacenamiento
 const storage = multer.diskStorage({
@@ -26,10 +30,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
-//MANEJO DE SESIONES Y MANEJO DE VULNERACIONES PARA EVITAR ACCEDER A PANELES NO AUTORIZADOS SEGUN EL ROL
-const session = require('express-session');
-
-const PORT = 5501;
 // Configuración de sesión
 app.use(session({
     secret: 'clave-secreta',
@@ -158,8 +158,6 @@ app.post('/register', (req, res) => {
 });
 
 
-
-
 app.get('/pendingRegistrations', (req, res) => {
     const query = "SELECT * FROM SolicitudesRegistro";
     con.query(query, (err, results) => {
@@ -273,44 +271,6 @@ app.post('/login', (req, res) => {
     });
 });
 
-// Proteger las rutas de los paneles para que solo se pueda acceder con una sesión activa
-
-// Middleware para verificar la sesión y los roles
-// Middleware para verificar la sesión y los roles
-/*
-const authMiddleware = (requiredRoles) => {
-    return (req, res, next) => {
-        if (!req.session || !req.session.user) {
-            console.log('Acceso denegado: no hay sesión activa.');
-            return res.redirect('/index.html'); // Redirige al inicio si no hay sesión activa
-        }
-
-        // Verifica si el rol del usuario está en los roles permitidos
-        if (!requiredRoles.includes(req.session.user.rol)) {
-            console.log(`Acceso denegado para el usuario ${req.session.user.nombre} con rol ${req.session.user.rol}.`);
-            return res.send("<script>alert('No tienes permiso para acceder a esta página.'); window.history.back();</script>");
-        }
-
-        next(); // El usuario tiene el rol adecuado, pasa al siguiente middleware
-    };
-};
-
-// Rutas protegidas
-// Panel para Administradores (solo Admin)
-app.get('/panelAdministrador.html', authMiddleware(['Admin']), (req, res) => {
-    res.send('Contenido del panel de Administradores');
-});
-
-// Panel para Administradores Jefe (solo AdminJefe)
-app.get('/panelAdministradorJefe.html', authMiddleware(['AdminJefe']), (req, res) => {
-    res.send('Contenido del panel de Administradores Jefe');
-});
-
-// Panel para Usuarios Generales (Estudiante, Profesor, Coordinador, Dirección)
-app.get('/panelUsuario.html', authMiddleware(['Estudiante', 'Profesor', 'Coordinador', 'Dirección']), (req, res) => {
-    res.send('Contenido del panel de Usuario');
-});
-*/
 
 
 // Rutas protegidas según el rol
@@ -354,59 +314,118 @@ app.get('/logout', (req, res) => {
 
 
 // Ruta para registrar un evento
-app.post('/eventRegister', upload.single('imagen_url'), (req, res) => {
+
+app.post('/eventRegister', upload.single('imagen_url'), async (req, res) => {
     const { titulo, fecha, hora_inicio, hora_fin, ubicacion, organizador, descripcion, categoria } = req.body;
 
-    // Verificar que el usuario ha iniciado sesión
     if (!req.session || !req.session.user) {
         return res.send("<script>alert('Debes iniciar sesión para crear un evento.'); window.location.href='/index.html';</script>");
     }
 
-    // Validar que los campos obligatorios estén presentes
     if (!titulo || !fecha || !hora_inicio || !hora_fin || !ubicacion || !organizador || !descripcion || !categoria) {
         return res.send("<script>alert('Todos los campos son obligatorios.'); window.history.back();</script>");
     }
 
-    // Validar que se haya subido una imagen
     if (!req.file) {
         return res.send("<script>alert('Debes subir una imagen para el evento.'); window.history.back();</script>");
     }
 
-    // Ruta de la imagen subida
     const imagenPath = `/uploads/${req.file.filename}`;
-
-    // Obtener los datos del usuario desde la sesión
     const userId = req.session.user.id;
     const userRole = req.session.user.rol;
-
-    // Determinar el estado inicial del evento según el rol del usuario
     const estado = userRole === 'Admin' ? 'Aceptado' : 'Pendiente';
+    const estadoTemporal = 'Por Suceder';
 
-    // Insertar el evento en la base de datos
     const insertEventQuery = `
-        INSERT INTO Eventos (Nombre, Descripcion, Estado, Fecha, Hora_Inicio, Hora_Fin, Categoria, Ubicacion, Organizador, ID_USUARIO_CREADOR_EVENTO, Estado_Temporal, imagen_url)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO Eventos (Nombre, Descripcion, Estado, Fecha, Hora_Inicio, Hora_Fin, Categoria, Ubicacion, Organizador, ID_USUARIO_CREADOR_EVENTO, Estado_Temporal, imagen_url, num_asistentes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
     `;
-
-    const estadoTemporal = 'Por Suceder'; // Estado temporal predeterminado
 
     con.query(
         insertEventQuery,
         [titulo, descripcion, estado, fecha, hora_inicio, hora_fin, categoria, ubicacion, organizador, userId, estadoTemporal, imagenPath],
-        (err) => {
+        async (err, result) => {
             if (err) {
                 console.error('Error al registrar el evento:', err);
                 return res.status(500).send('Error interno al registrar el evento.');
             }
 
-            // Mensaje diferente según el estado del evento
-            if (estado === 'Aceptado') {
-                res.send("<script>alert('Evento creado y aprobado automáticamente.'); window.location.href='/panelAdministrador.html';</script>");
-            } else {
-                res.send("<script>alert('Evento creado con éxito. Espera que el ADMIN lo apruebe para verlo en el tablón'); window.location.href='/panelUsuario.html';</script>");
-            }
+            const eventId = result.insertId; // Obtener el ID del evento recién creado
+
+            // Generar QR con QuickChart.io
+            const qrData = `https://registroEventoEventify.com/event/${eventId}`; // URL para mostrar información del evento
+            const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(qrData)}&size=200`;
+
+            // Actualizar la base de datos con la URL del QR
+            const updateQuery = `UPDATE Eventos SET QR = ? WHERE ID_EVENTO = ?`;
+            con.query(updateQuery, [qrUrl, eventId], (updateErr) => {
+                if (updateErr) {
+                    console.error('Error al guardar el QR:', updateErr);
+                    return res.status(500).send('Error al guardar el QR.');
+                }
+
+                if (estado === 'Aceptado') {
+                    res.send("<script>alert('Evento creado y aprobado automáticamente.'); window.location.href='/panelAdministrador.html';</script>");
+                } else {
+                    res.send("<script>alert('Evento creado con éxito. Espera que el ADMIN lo apruebe para verlo en el tablón'); window.location.href='/panelUsuario.html';</script>");
+                }
+            });
         }
     );
+});
+
+app.get('/event/:id', (req, res) => {
+    const eventId = req.params.id;
+
+    const query = `SELECT * FROM Eventos WHERE id = ?`;
+    con.query(query, [eventId], (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(404).send('Evento no encontrado.');
+        }
+
+        const evento = results[0];
+
+        res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>${evento.Nombre}</title>
+            </head>
+            <body>
+                <h1>${evento.Nombre}</h1>
+                <p>${evento.Descripcion}</p>
+                <p><strong>Fecha:</strong> ${evento.Fecha}</p>
+                <p><strong>Hora:</strong> ${evento.Hora_Inicio} - ${evento.Hora_Fin}</p>
+                <p><strong>Ubicación:</strong> ${evento.Ubicacion}</p>
+                <p><strong>Organizador:</strong> ${evento.Organizador}</p>
+                <p><strong>Asistentes:</strong> ${evento.num_asistentes}</p>
+
+                <h2>Confirmar Asistencia</h2>
+                <form action="/event/${evento.id}/register" method="POST">
+                    <input type="text" name="nombre" placeholder="Tu nombre" required>
+                    <input type="text" name="apellidos" placeholder="Tus apellidos" required>
+                    <button type="submit">Confirmar</button>
+                </form>
+            </body>
+            </html>
+        `);
+    });
+});
+
+app.post('/event/:id/register', (req, res) => {
+    const eventId = req.params.id;
+
+    const query = `UPDATE Eventos SET num_asistentes = num_asistentes + 1 WHERE id = ?`;
+    con.query(query, [eventId], (err) => {
+        if (err) {
+            console.error('Error al actualizar asistentes:', err);
+            return res.status(500).send('Error interno.');
+        }
+
+        res.send("<script>alert('Gracias por confirmar tu asistencia.'); window.location.href='/';</script>");
+    });
 });
 
 
@@ -504,6 +523,8 @@ app.get('/events', (req, res) => {
             Eventos.Ubicacion, 
             Eventos.Organizador, 
             Eventos.imagen_url,
+            Eventos.QR,
+            Eventos.num_asistentes,
             Usuarios.nombre AS Nombre_Creador
         FROM 
             Eventos
@@ -528,6 +549,7 @@ app.get('/events', (req, res) => {
         res.json(results);
     });
 });
+
 
 
 // Ruta para obtener los eventos creados por el usuario
@@ -772,6 +794,8 @@ app.get('/eventsByDate', (req, res) => {
             Eventos.Ubicacion, 
             Eventos.Organizador, 
             Eventos.imagen_url,
+            Eventos.QR,
+            Eventos.num_asistentes,
             Usuarios.nombre AS Nombre_Creador
         FROM 
             Eventos
