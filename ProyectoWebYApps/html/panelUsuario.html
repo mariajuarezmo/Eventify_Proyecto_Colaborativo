@@ -9,9 +9,17 @@
 <body>
     <h1>Panel del Usuario</h1>
 
-    <!-- Crear Evento -->
-    <h2>Crear Evento</h2>
-    <div id="eventFormContainer">
+    <!-- Botones principales del usuario -->
+    <div id="userActions">
+        <h2>Acciones</h2>
+        <button id="createEventButton" onclick="showCreateEventForm()">Crear Evento</button>
+        <button id="showEventsButton" onclick="showUserEvents()">Ver y Editar Mis Eventos</button>
+    </div>
+    <br>
+
+    <!-- Formulario para crear y editar eventos -->
+    <div id="eventFormContainer" class="hidden">
+        <h2 id="formTitle">Crear Evento</h2>
         <form id="eventForm" action="/eventRegister" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="id_evento" value="">
             <input type="hidden" name="imagen_actual" value="">
@@ -30,100 +38,134 @@
                 <option value="Universidad">Evento para Comunidad Universitaria</option>
             </select>
             <button id="formSubmitButton" type="submit">Crear Evento</button>
-            
+            <button id="discardCreationButton" type="button" class="hidden" onclick="cancelCreation()">Cancelar Creación</button>
+            <button id="discardChangesButton" type="button" class="hidden" onclick="discardChanges()">Descartar Cambios</button>
         </form>
-        
     </div>
-    
 
-    <!-- Editar Eventos -->
-    <h2>Mis Eventos</h2>
-    <button id="showEventsButton">Mostrar Mis Eventos</button>
+    <!-- Contenedor para mostrar eventos del usuario -->
     <div id="userEventsContainer" class="hidden">
+        <h2>Mis Eventos</h2>
         <ul id="userEventsList">
             <!-- Los eventos se cargarán aquí dinámicamente -->
         </ul>
     </div>
+
     <br>
     <button onclick="window.location.href='/logout'">Volver</button>
 
-
     <!-- Script -->
     <script>
-        const showEventsButton = document.getElementById('showEventsButton');
-        const userEventsContainer = document.getElementById('userEventsContainer');
-        const userEventsList = document.getElementById('userEventsList');
+        // Mostrar el formulario para crear un evento
+        function showCreateEventForm() {
+            resetForm(); // Limpia el formulario
+            document.getElementById('formTitle').textContent = 'Crear Evento';
+            document.getElementById('eventForm').action = '/eventRegister';
+            document.getElementById('formSubmitButton').textContent = 'Crear Evento';
 
-        // Mostrar los eventos del usuario
-        showEventsButton.addEventListener('click', () => {
+            document.getElementById('eventFormContainer').classList.remove('hidden');
+            document.getElementById('userEventsContainer').classList.add('hidden');
+            document.getElementById('discardCreationButton').classList.remove('hidden');
+            document.getElementById('discardChangesButton').classList.add('hidden');
+        }
+
+        // Mostrar la lista de eventos del usuario
+        function showUserEvents() {
+            document.getElementById('userEventsContainer').classList.remove('hidden');
+            document.getElementById('eventFormContainer').classList.add('hidden');
+
             fetch('/userEvents')
-            .then(response => response.json())
-            .then(events => {
-                userEventsContainer.classList.remove('hidden');
-                userEventsList.innerHTML = '';
+                .then(response => response.json())
+                .then(events => {
+                    const userEventsList = document.getElementById('userEventsList');
+                    userEventsList.innerHTML = '';
 
-                if (events.length === 0) {
-                    userEventsList.innerHTML = '<li>No tienes eventos creados.</li>';
-                    return;
-                }
+                    if (events.length === 0) {
+                        userEventsList.innerHTML = '<li>No tienes eventos creados.</li>';
+                        return;
+                    }
 
-                events.forEach(event => {
-                    const listItem = document.createElement('li');
-                    listItem.innerHTML = `
-                        <strong>${event.Nombre}</strong> - ${event.Fecha} ${event.Hora_Inicio} a ${event.Hora_Fin} - ${event.Categoria}
-                        <button onclick="editEvent(${event.ID_EVENTO}, '${event.Nombre}', '${event.Descripcion}', '${event.Fecha}', '${event.Hora_Inicio}', '${event.Hora_Fin}', '${event.Ubicacion}', '${event.Organizador}', '${event.Categoria}', '${encodeURIComponent(event.imagen_url)}')">Editar</button>
-                    `;
-                    userEventsList.appendChild(listItem);
-                });
-            })
-            .catch(error => console.error('Error al cargar los eventos:', error));
+                    events.forEach(event => {
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `
+                            <strong>${event.Nombre}</strong> - ${event.Fecha} ${event.Hora_Inicio} a ${event.Hora_Fin} - ${event.Categoria}
+                            <button onclick="editEvent(${event.ID_EVENTO}, '${event.Nombre}', '${event.Descripcion}', '${event.Fecha}', '${event.Hora_Inicio}', '${event.Hora_Fin}', '${event.Ubicacion}', '${event.Organizador}', '${event.Categoria}', '${encodeURIComponent(event.imagen_url)}')">Editar</button>
+                        `;
+                        userEventsList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Error al cargar los eventos:', error));
+        }
 
-        });
-
-        
-        // Función para mostrar el formulario de edición
+        // Editar un evento
         function editEvent(id, title, description, date, startTime, endTime, location, organizer, category, imagen_url) {
-    const eventForm = document.getElementById('eventForm');
-    eventForm.action = '/updateEvent';
-    eventForm.method = 'POST';
+            resetForm();
 
-    // Actualizar los valores de los campos existentes
-    document.querySelector('input[name="id_evento"]').value = id;
-    document.querySelector('input[name="imagen_actual"]').value = decodeURIComponent(imagen_url);
-    document.querySelector('input[name="titulo"]').value = title;
-    document.querySelector('input[name="fecha"]').value = new Date(date).toISOString().split('T')[0];
-    document.querySelector('input[name="hora_inicio"]').value = startTime;
-    document.querySelector('input[name="hora_fin"]').value = endTime;
-    document.querySelector('input[name="ubicacion"]').value = location;
-    document.querySelector('input[name="organizador"]').value = organizer;
-    document.querySelector('textarea[name="descripcion"]').value = description;
+            const eventForm = document.getElementById('eventForm');
+            eventForm.action = '/updateEvent';
 
-    // Actualizar la categoría seleccionada
-    document.querySelector(`select[name="categoria"] option[value="${category}"]`).selected = true;
+            // Actualizar valores del formulario
+            document.querySelector('input[name="id_evento"]').value = id;
+            document.querySelector('input[name="imagen_actual"]').value = decodeURIComponent(imagen_url);
+            document.querySelector('input[name="titulo"]').value = title;
+            document.querySelector('input[name="fecha"]').value = new Date(date).toISOString().split('T')[0];
+            document.querySelector('input[name="hora_inicio"]').value = startTime;
+            document.querySelector('input[name="hora_fin"]').value = endTime;
+            document.querySelector('input[name="ubicacion"]').value = location;
+            document.querySelector('input[name="organizador"]').value = organizer;
+            document.querySelector('textarea[name="descripcion"]').value = description;
+            document.querySelector(`select[name="categoria"] option[value="${category}"]`).selected = true;
 
-    // Actualizar la imagen previa
-    const preview = document.getElementById('imagePreview');
-    preview.src = decodeURIComponent(imagen_url);
-    preview.style.display = 'block';
+            const preview = document.getElementById('imagePreview');
+            preview.src = decodeURIComponent(imagen_url);
+            preview.style.display = 'block';
 
-     // Cambiar el texto del botón a "Guardar Cambios"
-     const submitButton = document.getElementById('formSubmitButton');
-    submitButton.textContent = 'Guardar Cambios';
-}
+            // Cambiar texto de formulario y mostrar botones
+            document.getElementById('formTitle').textContent = 'Actualizar Evento';
+            document.getElementById('formSubmitButton').textContent = 'Guardar Cambios';
+            document.getElementById('discardCreationButton').classList.add('hidden');
+            document.getElementById('discardChangesButton').classList.remove('hidden');
 
+            document.getElementById('eventFormContainer').classList.remove('hidden');
+            document.getElementById('userEventsContainer').classList.add('hidden');
+        }
 
+        // Cancelar creación de evento
+        function cancelCreation() {
+            document.getElementById('eventFormContainer').classList.add('hidden');
+        }
 
+        // Descartar cambios al editar
+        function discardChanges() {
+            document.getElementById('eventFormContainer').classList.add('hidden');
+            document.getElementById('userEventsContainer').classList.remove('hidden');
+        }
 
+        // Resetear el formulario
+        function resetForm() {
+            const eventForm = document.getElementById('eventForm');
+            eventForm.reset();
+
+            document.querySelector('input[name="id_evento"]').value = '';
+            document.querySelector('input[name="imagen_actual"]').value = '';
+            document.getElementById('imagePreview').src = '';
+            document.getElementById('imagePreview').style.display = 'none';
+
+            document.getElementById('discardChangesButton').classList.add('hidden');
+            document.getElementById('discardCreationButton').classList.add('hidden');
+        }
+
+        // Previsualizar imagen
         function previewImage(event) {
             const file = event.target.files[0];
             if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById('imagePreview');
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
             }
         }
     </script>

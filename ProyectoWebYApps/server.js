@@ -353,7 +353,7 @@ app.post('/eventRegister', upload.single('imagen_url'), async (req, res) => {
             const eventId = result.insertId; // Obtener el ID del evento recién creado
 
             // Generar QR con QuickChart.io
-            const qrData = `https://eventify-pkjh.onrender.com/formulario/${eventId}`;// URL para mostrar información del evento
+            const qrData = `https://registroEventoEventify.com/event/${eventId}`;// URL para mostrar información del evento
             const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(qrData)}&size=200`;
 
             // Actualizar la base de datos con la URL del QR
