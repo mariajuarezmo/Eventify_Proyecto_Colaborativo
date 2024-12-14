@@ -6,18 +6,14 @@ const path = require('path');
 const axios = require('axios');
 //MANEJO DE SESIONES Y MANEJO DE VULNERACIONES PARA EVITAR ACCEDER A PANELES NO AUTORIZADOS SEGUN EL ROL
 const session = require('express-session');
-const MySQLStore = require('express-mysql-session')(session);
 //MANEJO DE IMAGENES QUE ADJUNTA UN USUARIO CUANDO CREA UN EVENTO
 const multer = require('multer');
 const app = express();
-
+const port = 5501;
 require('dotenv').config();
 
 
-const PORT = process.env.PORT || 5501; // Usar PORT asignado por Render
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+
 
 // Configuración de almacenamiento
 const storage = multer.diskStorage({
@@ -32,25 +28,16 @@ const storage = multer.diskStorage({
 
 // Inicializar multer
 const upload = multer({ storage: storage });
-const options = {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-};
 
-const sessionStore = new MySQLStore(options);
 
+// Configuración de sesión
 app.use(session({
-    secret: 'sesion_secreta', 
-    store: sessionStore,
+    secret: 'clave-secreta',
     resave: false,
     saveUninitialized: true,
-    cookie: {
-        maxAge: 1000 * 60 * 60 * 24 // 1 día
-    }
+    cookie: { secure: false }
 }));
+
 
 // Middleware para bloquear acceso directo a rutas HTML según el rol del usuario activo
 app.use((req, res, next) => {
@@ -137,7 +124,7 @@ con.connect(function (err) {
 });
 
 // Ruta para registrar un usuario
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 
 // Ruta para registrar un usuario
 app.post('/register', (req, res) => {
@@ -387,7 +374,6 @@ app.post('/eventRegister', upload.single('imagen_url'), async (req, res) => {
     );
 });
 
-/*
 app.get('/event/:id', (req, res) => {
     const eventId = req.params.id;
 
@@ -442,41 +428,6 @@ app.post('/event/:id/register', (req, res) => {
     });
 });
 
-*/
-
-app.get('/formulario/:id', (req, res) => {
-    const eventId = req.params.id;
-
-    // Verificar si el evento existe
-    const query = `SELECT * FROM Eventos WHERE ID_EVENTO = ?`;
-    con.query(query, [eventId], (err, results) => {
-        if (err || results.length === 0) {
-            return res.status(404).send('Evento no encontrado.');
-        }
-
-        // Renderizar el formulario HTML, pasando el ID del evento
-        res.sendFile(__dirname + '/formularioRegistroAsistenciaEvento.html'); // Asegúrate de que el archivo esté en la raíz del proyecto
-    });
-});
-
-app.post('/formulario/register', (req, res) => {
-    const { eventId, nombre, apellidos } = req.body;
-
-    if (!eventId || !nombre || !apellidos) {
-        return res.send("<script>alert('Todos los campos son obligatorios.'); window.history.back();</script>");
-    }
-
-    // Incrementar el número de asistentes en la base de datos
-    const query = `UPDATE Eventos SET num_asistentes = num_asistentes + 1 WHERE ID_EVENTO = ?`;
-    con.query(query, [eventId], (err) => {
-        if (err) {
-            console.error('Error al actualizar asistentes:', err);
-            return res.status(500).send('Error interno al registrar asistencia.');
-        }
-
-        res.send("<script>alert('Gracias por confirmar tu asistencia.'); window.location.href='/';</script>");
-    });
-});
 
 
 app.post('/updateEventStatus', (req, res) => {

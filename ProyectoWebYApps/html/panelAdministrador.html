@@ -23,7 +23,7 @@
     <!-- Formulario para crear un evento -->
     
     <div id="eventFormContainer" class="hidden">
-        <h2>Crear Evento</h2>
+        <h2 id ="formTitle">Crear Evento</h2>
         <form id="eventForm" action="/eventRegister" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="id_evento" value="">
             <input type="hidden" name="imagen_actual" value="">
@@ -42,6 +42,9 @@
                 <option value="Universidad">Evento para Comunidad Universitaria</option>
             </select>
             <button id="formSubmitButton" type="submit">Crear Evento</button>
+            <button id="discardCreationButton" type="button" class="hidden" onclick="window.location.href='/panelAdministrador.html'">Cancelar Creación</button>
+            <button id="discardChangesButton" type="button" class="hidden" onclick="discardChanges()">Descartar Cambios</button>
+
         </form>
     </div>
 
@@ -72,13 +75,82 @@
     <button onclick="window.location.href='/logout'">Volver</button>
 
     <script>
+
+function resetForm() {
+    const eventForm = document.getElementById('eventForm');
+
+    // Restablecer todos los valores de los campos del formulario
+    eventForm.reset();
+
+    // Restablecer los valores de campos ocultos
+    document.querySelector('input[name="id_evento"]').value = '';
+    document.querySelector('input[name="imagen_actual"]').value = '';
+
+    // Ocultar la previsualización de la imagen
+    const preview = document.getElementById('imagePreview');
+    preview.src = '';
+    preview.style.display = 'none';
+
+    // Cambiar el texto del título del formulario y el botón
+    const formTitle = document.getElementById('formTitle');
+    formTitle.textContent = 'Crear Evento';
+    const submitButton = document.getElementById('formSubmitButton');
+    submitButton.textContent = 'Crear Evento';
+
+    // Limpieza adicional por seguridad (por ejemplo, en campos dinámicos)
+    const inputs = eventForm.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+        if (input.type !== 'hidden') {
+            input.value = '';
+        }
+        if (input.tagName === 'SELECT') {
+            input.selectedIndex = 0;
+        }
+    });
+}
+
+
+
+
+
         function showCreateEventForm() {
+            
+            resetForm(); // Limpia el formulario antes de mostrarlo
+            // Mostrar el botón "Cancelar Creación"
             document.getElementById('eventFormContainer').classList.remove('hidden');
+            document.getElementById('discardCreationButton').classList.remove('hidden');
             document.getElementById('adminEventsContainer').classList.add('hidden');
             document.getElementById('pendingEventsContainer').classList.add('hidden'); 
             document.getElementById('deleteEventsContainer').classList.add('hidden');
             
         }
+
+        function resetForm() {
+    const eventForm = document.getElementById('eventForm');
+
+    // Restablecer todos los valores de los campos del formulario
+    eventForm.reset();
+
+    // Restablecer los valores de campos ocultos
+    document.querySelector('input[name="id_evento"]').value = '';
+    document.querySelector('input[name="imagen_actual"]').value = '';
+
+    // Ocultar la previsualización de la imagen
+    const preview = document.getElementById('imagePreview');
+    preview.src = '';
+    preview.style.display = 'none';
+
+    // Cambiar el texto del título del formulario y el botón
+    const formTitle = document.getElementById('formTitle');
+    formTitle.textContent = 'Crear Evento';
+    const submitButton = document.getElementById('formSubmitButton');
+    submitButton.textContent = 'Crear Evento';
+
+    // Ocultar el botón "Descartar Cambios"
+    const discardButton = document.getElementById('discardChangesButton');
+    discardButton.classList.add('hidden');
+}
+
 
         function showPendingEvents() {
             const pendingEventsContainer = document.getElementById('pendingEventsContainer');
@@ -147,10 +219,14 @@ editEventsButton.addEventListener('click', () => {
 
 // Función para mostrar el formulario de edición
 function editEvent(id, title, description, date, startTime, endTime, location, organizer, category, imagen_url) {
+    resetForm(); // Limpia el formulario antes de mostrarlo
     const eventForm = document.getElementById('eventForm');
     eventForm.action = '/updateEvent';
     eventForm.method = 'POST';
 
+    // Cambiar el texto del botón a "Guardar Cambios"
+    const formTitle = document.getElementById('formTitle');
+    formTitle.textContent = 'Actualizar Evento';
     // Actualizar los valores de los campos existentes
     document.querySelector('input[name="id_evento"]').value = id;
     document.querySelector('input[name="imagen_actual"]').value = decodeURIComponent(imagen_url);
@@ -174,6 +250,14 @@ function editEvent(id, title, description, date, startTime, endTime, location, o
     const submitButton = document.getElementById('formSubmitButton');
     submitButton.textContent = 'Guardar Cambios';
 
+     // Mostrar el botón "Descartar Cambios"
+     const discardButton = document.getElementById('discardChangesButton');
+    discardButton.classList.remove('hidden');
+
+     // Ocultar el botón "Cancelar Creación"
+     const cancelCreationButton = document.getElementById('discardCreationButton');
+    cancelCreationButton.classList.add('hidden');
+
     // Mostrar el contenedor del formulario y ocultar los demás contenedores
     document.getElementById('eventFormContainer').classList.remove('hidden');
     document.getElementById('adminEventsContainer').classList.add('hidden');
@@ -194,6 +278,13 @@ function previewImage(event) {
         reader.readAsDataURL(file);
     }
 }
+function discardChanges() {
+    // Ocultar el formulario de edición
+    document.getElementById('eventFormContainer').classList.add('hidden');
+    // Mostrar la lista de eventos para editar
+    document.getElementById('adminEventsContainer').classList.remove('hidden');
+}
+
 
 
         function updateEventStatus(eventId, newStatus) {
