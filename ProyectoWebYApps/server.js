@@ -127,7 +127,7 @@ con.connect(function (err) {
 });
 
 // Ruta para registrar un usuario
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 // Ruta para registrar un usuario
 app.post('/register', (req, res) => {
