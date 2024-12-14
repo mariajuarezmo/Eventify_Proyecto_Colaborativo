@@ -6,6 +6,7 @@ const mysql = require('mysql2'); // Or your chosen database library
 const app = express();
 const cors = require('cors');
 require('dotenv').config({ path: '../.env' });
+const path = require('path');
 
 
 
@@ -14,10 +15,10 @@ app.use(express.json());
 
 
 const db = mysql.createConnection({
-  host: process.env.HOST, // Servidor de MySQL
-  user: 'root',      // 
-  password: process.env.BBDD_PASS,      // Contraseña 
-  database: 'Eventify', // Nombre de la base de datos
+  host: process.env.HOST, 
+  user: 'root',     
+  password: process.env.BBDD_PASS,     
+  database: 'Eventify',
   port: 3369,
 }).promise();
 
@@ -25,21 +26,18 @@ db.query('SELECT 1')
   .then(() => console.log('Connected to database.'))
   .catch((err) => {
     console.error('Database connection failed:', err.stack);
-    process.exit(1); // Salir si no se puede conectar
+    process.exit(1); 
   });
 
 module.exports = db;
 
 app.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
-  console.log('Correo introducido:', email); // Log the incoming email
+  console.log('Correo introducido:', email); 
 
   try {
-    // Check if email exists in the database
-    console.log('mirando si existe en la bbdd...');
-    const [user] = await db.query(
-      'SELECT * FROM Usuarios WHERE correo = ? AND (reset_token IS NULL OR token_used = FALSE)',
-      [email]
+    console.log('mirando si el correo existe en la bbdd...');
+    const [user] = await db.query('SELECT * FROM Usuarios WHERE correo = ? AND (reset_token IS NULL OR token_used = FALSE)', [email]       
     );
     console.log('resultado:', user);
     
@@ -62,7 +60,9 @@ app.post('/forgot-password', async (req, res) => {
 
     // Send email with reset link
     console.log('Creating reset link...');
-    const resetLink = `http://eventify.info/reset-password?token=${token}`;
+    //const resetLink = `http://eventify.info/reset-password?token=${token}`;
+    const resetLink = `http://localhost:3000/reset-password?token=${token}`; //para probar que funciona en el local
+
     console.log('Reset link:', resetLink);
 
     console.log('Setting up transporter...');
@@ -81,9 +81,9 @@ app.post('/forgot-password', async (req, res) => {
       from: '"Eventify Support" <contact@eventify.info>',
       to: email,
       subject: 'Restablecer la contraseña',
-      text: `You requested to reset your password. Click the link to reset it: ${resetLink}`,
-      html: `<p>You requested to reset your password. Click the link below to reset it:</p>
-             <a href="${resetLink}">Reset Password</a>`,
+      text: `enlace para restablecer la contraseña: ${resetLink}`,
+      html: `<p>Se ha solicitado restablecer la contraseña. Pulsa aqui para cambiar tu contraseña::</p>
+             <a href="${resetLink}">Nueva contraseña</a>`,
     });
     console.log('Correo enviado!', mailResult);
 
@@ -93,6 +93,36 @@ app.post('/forgot-password', async (req, res) => {
     res.status(500).json({ message: 'No se ha podido enviar un correo.' });
   }
 });
+
+//HACEMOS UN GET PARA VERIFICAR QUE EL TOKEN ES VALIDO Y NO SE HA USADO ANTERIORMENTE
+//para redirigir el enlace de reset a la pagina de resetpass.html
+app.get('/reset-password', async (req, res) => {
+  const { token } = req.query;
+
+  try {
+    const [rows] = await db.query(
+      'SELECT * FROM Usuarios WHERE reset_token = ? AND reset_expire > ? AND token_used = FALSE',
+      [token, Date.now()]
+    );
+      //si no es valido:
+    if (!rows.length) {
+      return res.status(400).json({ message: 'El enlace no es válido o ha expirado.' });
+    }
+    
+    //si es valido:
+    const filePath = path.join(__dirname, '../html/newpass.html');
+
+    app.use('/css', express.static(path.join(__dirname, '../css')));
+    app.use('/js', express.static(path.join(__dirname, '../js')));
+    app.use('/img', express.static(path.join(__dirname, '../img')));
+    res.sendFile(filePath);
+    
+  } catch (error) {
+    console.error('Error al verificar el token:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+});
+
 
 app.listen(3000, () => {
   console.log('Server is running on port 3000...');
