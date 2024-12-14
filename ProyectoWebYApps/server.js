@@ -6,6 +6,7 @@ const path = require('path');
 const axios = require('axios');
 //MANEJO DE SESIONES Y MANEJO DE VULNERACIONES PARA EVITAR ACCEDER A PANELES NO AUTORIZADOS SEGUN EL ROL
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 //MANEJO DE IMAGENES QUE ADJUNTA UN USUARIO CUANDO CREA UN EVENTO
 const multer = require('multer');
 const app = express();
@@ -31,16 +32,25 @@ const storage = multer.diskStorage({
 
 // Inicializar multer
 const upload = multer({ storage: storage });
+const options = {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
+};
 
+const sessionStore = new MySQLStore(options);
 
-// Configuración de sesión
 app.use(session({
-    secret: 'clave-secreta',
+    secret: 'your_secret_key', // Cambia esto por una clave segura
+    store: sessionStore,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 // 1 día
+    }
 }));
-
 
 // Middleware para bloquear acceso directo a rutas HTML según el rol del usuario activo
 app.use((req, res, next) => {
