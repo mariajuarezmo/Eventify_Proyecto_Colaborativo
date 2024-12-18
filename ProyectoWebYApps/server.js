@@ -137,21 +137,30 @@ app.post('/register', (req, res) => {
     // Verificar si el nombre de usuario o el correo ya existen en la tabla Usuarios
     const checkUserQuery = "SELECT * FROM Usuarios WHERE nombre = ? OR correo = ?";
     con.query(checkUserQuery, [nombre, email], (err, results) => {
-        if (err) throw err;
+        if (err) {
+            console.error("Error al verificar usuario:", err);
+            return res.status(500).send("Ocurrió un error al procesar tu solicitud.");
+        }
 
         if (results.length > 0) {
-            return res.send("<script>alert('El nombre de usuario y/o correo ya están registrados.'); window.history.back();</script>");
+            return res.status(400).send("<script>alert('El nombre de usuario y/o correo ya están registrados.'); window.history.back();</script>");
         }
 
         // Hashear la contraseña
         bcrypt.hash(contraseña, 10, (err, hashedPassword) => {
-            if (err) throw err;
+            if (err) {
+                console.error("Error al hashear la contraseña:", err);
+                return res.status(500).send("Ocurrió un error al procesar tu solicitud.");
+            }
 
             // Guardar en la tabla temporal
             const insertRequestQuery = "INSERT INTO SolicitudesRegistro (nombre, contraseña, rol, correo) VALUES (?, ?, ?, ?)";
             con.query(insertRequestQuery, [nombre, hashedPassword, rol, email], (err) => {
-                if (err) throw err;
-                res.send("<script>alert('Solicitud de registro enviada. Pendiente de aprobación.'); window.location.href='/index.html';</script>");
+                if (err) {
+                    console.error("Error al insertar la solicitud de registro:", err);
+                    return res.status(500).send("Ocurrió un error al procesar tu solicitud.");
+                }
+                res.status(201).send("<script>alert('Solicitud de registro enviada. Pendiente de aprobación.'); window.location.href='/index.html';</script>");
             });
         });
     });
@@ -162,22 +171,39 @@ app.post('/register', (req, res) => {
 app.get('/pendingRegistrations', (req, res) => {
     const query = "SELECT * FROM SolicitudesRegistro";
     con.query(query, (err, results) => {
-        if (err) throw err;
-        res.json(results);
+        if (err) {
+            console.error("Error al obtener registros pendientes:", err);
+            return res.status(500).send("Error al obtener registros pendientes.");
+        }
+        res.status(200).json(results);
     });
 });
+
 
 
 app.post('/processRegistration', (req, res) => {
     const { id, action } = req.body;
 
+    // Validar los datos recibidos
     if (!id || !action) {
         return res.status(400).send('ID y acción son obligatorios.');
     }
 
+    if (!Number.isInteger(Number(id))) {
+        return res.status(400).send('ID debe ser un número válido.');
+    }
+
+    const validActions = ['aceptar', 'denegar'];
+    if (!validActions.includes(action)) {
+        return res.status(400).send('Acción no válida.');
+    }
+
     const getRequestQuery = "SELECT * FROM SolicitudesRegistro WHERE id = ?";
     con.query(getRequestQuery, [id], (err, results) => {
-        if (err) throw err;
+        if (err) {
+            console.error("Error al obtener la solicitud:", err);
+            return res.status(500).send("Error interno del servidor.");
+        }
 
         if (results.length === 0) {
             return res.status(404).send('Solicitud no encontrada.');
@@ -186,39 +212,55 @@ app.post('/processRegistration', (req, res) => {
         const { nombre, contraseña, rol, correo } = results[0];
 
         if (action === 'aceptar') {
-            // Verificar si el nombre de usuario o correo ya existen en la tabla Usuarios
+            // Verificar si el nombre de usuario o correo ya existen
             const checkUserQuery = "SELECT * FROM Usuarios WHERE nombre = ? OR correo = ?";
             con.query(checkUserQuery, [nombre, correo], (err, results) => {
-                if (err) throw err;
+                if (err) {
+                    console.error("Error al verificar usuario:", err);
+                    return res.status(500).send("Error interno del servidor.");
+                }
 
                 if (results.length > 0) {
+                    // Eliminar la solicitud si ya existe el usuario
                     const deleteRequestQuery = "DELETE FROM SolicitudesRegistro WHERE id = ?";
                     con.query(deleteRequestQuery, [id], (err) => {
-                        if (err) throw err;
-                        return res.send('Solicitud rechazada automáticamente: el nombre de usuario y/o correo ya están registrados.');
+                        if (err) {
+                            console.error("Error al eliminar la solicitud:", err);
+                            return res.status(500).send("Error interno del servidor.");
+                        }
+                        return res.status(200).send('Solicitud rechazada automáticamente: el nombre de usuario y/o correo ya están registrados.');
                     });
                 } else {
-                    // Insertar el usuario en la tabla Usuarios directamente con la contraseña hasheada
+                    // Insertar el usuario en la tabla Usuarios
                     const insertUserQuery = "INSERT INTO Usuarios (nombre, contraseña, rol, correo) VALUES (?, ?, ?, ?)";
                     con.query(insertUserQuery, [nombre, contraseña, rol, correo], (err) => {
-                        if (err) throw err;
+                        if (err) {
+                            console.error("Error al registrar el usuario:", err);
+                            return res.status(500).send("Error interno del servidor.");
+                        }
 
+                        // Eliminar la solicitud una vez aprobado
                         const deleteRequestQuery = "DELETE FROM SolicitudesRegistro WHERE id = ?";
                         con.query(deleteRequestQuery, [id], (err) => {
-                            if (err) throw err;
-                            res.send('Usuario aceptado y registrado con éxito.');
+                            if (err) {
+                                console.error("Error al eliminar la solicitud:", err);
+                                return res.status(500).send("Error interno del servidor.");
+                            }
+                            res.status(201).send('Usuario aceptado y registrado con éxito.');
                         });
                     });
                 }
             });
         } else if (action === 'denegar') {
+            // Eliminar la solicitud
             const deleteRequestQuery = "DELETE FROM SolicitudesRegistro WHERE id = ?";
             con.query(deleteRequestQuery, [id], (err) => {
-                if (err) throw err;
-                res.send('Solicitud rechazada.');
+                if (err) {
+                    console.error("Error al eliminar la solicitud:", err);
+                    return res.status(500).send("Error interno del servidor.");
+                }
+                res.status(200).send('Solicitud rechazada.');
             });
-        } else {
-            res.status(400).send('Acción no válida.');
         }
     });
 });
@@ -374,6 +416,8 @@ app.post('/eventRegister', upload.single('imagen_url'), async (req, res) => {
         }
     );
 });
+
+//Ruta para crear formulario para registrar asistencia de un evento
 
 app.get('/event/:id', (req, res) => {
     const eventId = req.params.id;
@@ -538,19 +582,21 @@ app.get('/events', (req, res) => {
             AND Eventos.Estado_Temporal = 'Por Suceder'
     `;
 
+    const queryParams = [];
+
     if (category) {
-        query += ` AND Eventos.Categoria = ${mysql.escape(category)}`;
+        query += ` AND Eventos.Categoria = ?`;
+        queryParams.push(category);
     }
 
-    con.query(query, (err, results) => {
+    con.query(query, queryParams, (err, results) => {
         if (err) {
             console.error('Error al obtener eventos:', err);
             return res.status(500).json({ error: "Error al cargar los eventos." });
         }
-        res.json(results);
+        res.status(200).json(results);
     });
 });
-
 
 
 // Ruta para obtener los eventos creados por el usuario
