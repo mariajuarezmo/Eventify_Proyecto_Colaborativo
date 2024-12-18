@@ -158,6 +158,7 @@ app.post('/register', (req, res) => {
 });
 
 
+
 app.get('/pendingRegistrations', (req, res) => {
     const query = "SELECT * FROM SolicitudesRegistro";
     con.query(query, (err, results) => {
