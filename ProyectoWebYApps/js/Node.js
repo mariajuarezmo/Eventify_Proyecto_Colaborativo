@@ -19,7 +19,7 @@ const db = mysql.createConnection({
   user: 'root',     
   password: process.env.BBDD_PASS,     
   database: 'Eventify',
-  port: 3369,
+  port: 3636,
 }).promise();
 
 db.query('SELECT 1')
