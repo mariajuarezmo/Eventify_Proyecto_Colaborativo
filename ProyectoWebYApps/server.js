@@ -355,7 +355,6 @@ app.get('/logout', (req, res) => {
 });
 
 
-
 // Ruta para registrar un evento
 
 app.post('/eventRegister', upload.single('imagen_url'), async (req, res) => {
@@ -474,7 +473,7 @@ app.post('/event/:id/register', (req, res) => {
 });
 
 
-
+//Ruta para modificar el estado del proceso del evento 
 app.post('/updateEventStatus', (req, res) => {
     const { id_evento, nuevo_estado } = req.body;
 
@@ -626,6 +625,7 @@ app.get('/userEvents', (req, res) => {
 });
 
 
+//Ruta para actualizar un evento
 app.post('/updateEvent', upload.single('imagen_url'), (req, res) => {
     console.log('Datos recibidos:', req.body);
     console.log('Archivo recibido:', req.file);
@@ -782,7 +782,6 @@ app.get('/getAllUsers', (req, res) => {
     });
 });
 
-
 // Ruta para actualizar la información de un usuario
 app.post('/updateUser', (req, res) => {
     const { id_usuario, nombre, contraseña, email, rol } = req.body;
@@ -864,9 +863,6 @@ app.get('/eventsByDate', (req, res) => {
         res.json(results);
     });
 });
-
-
-
 
 // Iniciar el servidor
 app.listen(port, () => {
