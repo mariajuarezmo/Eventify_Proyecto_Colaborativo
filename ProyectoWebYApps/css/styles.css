@@ -30,9 +30,10 @@ h1 {
 button {
     display: inline-block;
     padding: 10px 15px;
+    margin-top: 15px;
     font-size: 16px;
     color: white;
-    background-color: #007bff;
+    background-color: #538aaa;
     border: none;
     border-radius: 5px;
     cursor: pointer;

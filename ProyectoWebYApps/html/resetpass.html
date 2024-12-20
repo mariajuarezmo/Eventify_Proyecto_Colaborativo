@@ -4,22 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ejemplo</title>
-    <link rel="stylesheet" href="../css/resetpass.css">
+    <link rel="stylesheet" href="../css/header-footer.css">
 </head>
 <body>
 
      <!----------------------------------------------------->
-     <header class="header">
-        <span class="logo">
-            <img src="../img/logo 2.1.png" alt="Logo" width="170" height="50">
-        </span>
-        <nav class="nav">
-            <a href="#">Contacto</a>
-            <button id="login">Login</button>
-            <button id="registro">Registrarse</button>
-        </nav>
-    </header>
-
+     <header class="shared-header">
+      <span class="logo">
+          <img src="../img/logo 2.1.png" alt="Logo" width="170" height="50">
+      </span>
+      <nav class="nav">
+          <a href="#">Contacto</a>
+          <button id="login-btn">Login</button>
+          <button id="register-btn">Registrarse</button>
+      </nav>
+  </header>
      <!----------------------------------------------------->
 
 
@@ -31,6 +30,117 @@
       <div id="message"></div>
       <p id="message"></p> <!-- Aquí se mostrarán mensajes de éxito o error -->
     
+      <!------------------------------------------------------------------>
+    <footer class="shared-footer">
+      <div class="footer-content">
+          <p>¿Tienes preguntas? Contáctanos</p>
+          <a href="mailto:contact@eventify.info">contact@eventify.info</a>
+          <p>© 2024 Eventify. Todos los derechos reservados.</p>
+          <div class="social-icons">
+              <a href="https://facebook.com" target="_blank">
+                  <img src="../img/facebook-icon.png" alt="Facebook" width="24" height="24">
+              </a>
+              <a href="https://twitter.com" target="_blank">
+                  <img src="../img/twitter-icon.png" alt="Twitter" width="35" height="35">
+              </a>
+              <a href="https://instagram.com" target="_blank">
+                  <img src="../img/instagram-icon.png" alt="Instagram" width="24" height="24">
+              </a>
+          </div>
+      </div>
+    </footer>
+    <!------------------------------------------------------------------>
+
+
+    <style>
+      body {
+    margin: 0;
+    align-items: center;
+    text-align: left;
+    font-family: Arial, sans-serif;
+
+    color: #333;
+}
+
+
+
+/*-----------------------------------------*/
+#forgotPasswordForm {
+    background-color: #ffffff;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Form Heading */
+#forgotPasswordForm h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    text-align: center;
+    color: #333333;
+}
+
+/* Label Styling */
+#forgotPasswordForm label {
+    font-size: 14px;
+    color: #555555;
+}
+
+/* Input Field */
+#forgotPasswordForm input[type="email"] {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+#forgotPasswordForm input[type="email"]:focus {
+    border-color: #007bff;
+}
+
+/* Submit Button */
+#forgotPasswordForm button {
+    padding: 10px 15px;
+    font-size: 16px;
+    color: #ffffff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#forgotPasswordForm button:hover {
+    background-color: #0056b3;
+}
+
+/* Message Div */
+#message {
+    margin-top: 15px;
+    font-size: 14px;
+    text-align: center;
+    color: #ff0000; /* Default color for error messages */
+}
+
+    </style>
+      
+
+
+
+
+
+
+
+
       <script>
         document.getElementById('forgotPasswordForm').addEventListener('submit', async (e) => {
   e.preventDefault();

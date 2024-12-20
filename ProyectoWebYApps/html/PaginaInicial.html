@@ -4,22 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pagina Inicial</title>
-    <link rel="stylesheet" href="../css/PaginaInicial.css">
+    <link rel="stylesheet" href="../css/comun.css">
 </head>
 <body>
 
     <!----------------------------------------------------->
-    <header class="header">
+    <header class="shared-header">
         <span class="logo">
             <img src="../img/logo 2.1.png" alt="Logo" width="170" height="50">
         </span>
         <nav class="nav">
-            <a href="#">Contacto     </a>
-            <button id="login">Login</button>
-            <button id="registro">Registrarse</button>
+            <a href="#">Contacto</a>
+            <button id="login-btn">Login</button>
+            <button id="register-btn">Registrarse</button>
         </nav>
     </header>
-
      <!----------------------------------------------------->
     <section class="contenedor">
         <div class="contenedor-contenido">
@@ -68,7 +67,7 @@
     </script>
 
 <!------------------------------------------------------------------>
-<footer class="footer">
+<footer class="shared-footer">
     <div class="footer-content">
         <p>¿Tienes preguntas? Contáctanos</p>
         <a href="mailto:contact@eventify.info">contact@eventify.info</a>
@@ -87,6 +86,111 @@
     </div>
 </footer>
 <!------------------------------------------------------------------>
+
+<style>
+
+    body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+
+.contenedor {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 50px 20px;
+    background-color: #bb95b941;
+    color: white;
+}
+
+.contenedor-contenido{
+    max-width: 50%;
+}
+
+.contenedor h1 {
+    font-size: 36px;
+    color: black;
+}
+
+.contenedor p {
+    margin: 20px 0;
+    color: black;
+}
+
+.cont-buttons button {
+    margin: 10px 10px 0 0;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.crea-evento {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.ver-evento {
+    background-color: #005BB5;
+    color: white;
+}
+
+.cont-img img {
+    max-width: 100%;
+}
+
+/* ----------------------------------- */
+.tareas {
+    text-align: center;
+    padding: 50px 20px;
+    background-color: #f4f4f4;
+}
+
+.tareas-flex{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 50px;
+}
+
+.tareas-card {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 10px;
+    width: 200px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.tareas-card img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit:scale-down;
+    border: 2px solid black;
+    overflow: hidden;
+}
+
+.tareas-card h3 {
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+
+/* ----------------------------------- */
+</style>
 
 
 

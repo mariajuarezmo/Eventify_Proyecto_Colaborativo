@@ -1,0 +1,77 @@
+/* -------------------------------- HEADER -------------------------------- */
+.shared-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.shared-header p {
+    display: inline-block;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+}
+
+.shared-header .nav a {
+    margin: 0 10px;
+    font-size: 14px;
+    color: #333;
+}
+
+.shared-header #register-btn {
+    background-color: #beb66b;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+}
+
+.shared-header #login-btn {
+    background-color: #d37232;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+}
+
+/* -------------------------------- FOOTER -------------------------------- */
+.shared-footer {
+    background-color: #333333;
+    color: #ffffff;
+    padding: 20px 10px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.shared-footer a {
+    color: #00bcd4;
+    text-decoration: none;
+}
+
+.shared-footer a:hover {
+    text-decoration: underline;
+}
+
+.shared-footer .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.shared-footer .social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.shared-footer .social-icons img {
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.shared-footer .social-icons img:hover {
+    transform: scale(1.1);
+}
