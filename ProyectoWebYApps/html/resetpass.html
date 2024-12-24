@@ -4,17 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ejemplo</title>
-    <link rel="stylesheet" href="../css/header-footer.css">
+    <link rel="stylesheet" href="../css/comun.css">
 </head>
 <body>
 
      <!----------------------------------------------------->
      <header class="shared-header">
       <span class="logo">
+        <a href="PaginaInicial.html">
           <img src="../img/logo 2.1.png" alt="Logo" width="170" height="50">
+      </a>
       </span>
       <nav class="nav">
-          <a href="#">Contacto</a>
           <button id="login-btn">Login</button>
           <button id="register-btn">Registrarse</button>
       </nav>
@@ -22,14 +23,17 @@
      <!----------------------------------------------------->
 
 
-    <form id="forgotPasswordForm">
-        <label for="email">Introduce tu corre registrado:</label>
-        <input type="email" id="email" name="email" required>
-        <button type="submit">Envío de enlace</button>
-      </form>
-      <div id="message"></div>
-      <p id="message"></p> <!-- Aquí se mostrarán mensajes de éxito o error -->
-    
+    <div class="container">
+      <div class="card">
+          <h2>Recuperar Contraseña</h2>
+          <form id="forgotPasswordForm">
+              <label for="email">Introduce tu correo registrado</label>
+              <input type="email" id="email" name="email" required>
+              <button type="submit">Envío de enlace</button>
+          </form>
+          <div id="message"></div> <!--por si da error-->
+      </div>
+    </div>
       <!------------------------------------------------------------------>
     <footer class="shared-footer">
       <div class="footer-content">
@@ -54,129 +58,144 @@
 
     <style>
       body {
-    margin: 0;
-    align-items: center;
-    text-align: left;
-    font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
 
-    color: #333;
-}
-
-
-
-/*-----------------------------------------*/
-#forgotPasswordForm {
-    background-color: #ffffff;
-    padding: 20px 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-/* Form Heading */
-#forgotPasswordForm h2 {
-    font-size: 24px;
-    margin-bottom: 10px;
-    text-align: center;
-    color: #333333;
-}
-
-/* Label Styling */
-#forgotPasswordForm label {
-    font-size: 14px;
-    color: #555555;
-}
-
-/* Input Field */
-#forgotPasswordForm input[type="email"] {
-    padding: 10px;
-    font-size: 14px;
-    border: 1px solid #cccccc;
-    border-radius: 4px;
-    width: 100%;
-    box-sizing: border-box;
-    outline: none;
-    transition: border-color 0.3s;
-}
-
-#forgotPasswordForm input[type="email"]:focus {
-    border-color: #007bff;
-}
-
-/* Submit Button */
-#forgotPasswordForm button {
-    padding: 10px 15px;
-    font-size: 16px;
-    color: #ffffff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-#forgotPasswordForm button:hover {
-    background-color: #0056b3;
-}
-
-/* Message Div */
-#message {
-    margin-top: 15px;
-    font-size: 14px;
-    text-align: center;
-    color: #ff0000; /* Default color for error messages */
-}
-
-    </style>
-      
-
-
-
-
-
-
-
-
-      <script>
-        document.getElementById('forgotPasswordForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  // Get the email input value
-  const email = document.getElementById('email').value;
-
-  try {
-    // Send a POST request to the Node.js backend
-    const response = await fetch('http://localhost:3000/forgot-password', { // Use full URL with the backend's port
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email }) // Send the email in the request body
-    });
-
-    // Parse the JSON response
-    if (!response.ok) {
-      throw new Error(`Error: ${response.statusText}`);
+    /* Contenedor Principal */
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: calc(80vh - 80px); /* Resta espacio del header y footer */
+        padding: 20px;
+        background-image: url('../img/lock.webp');
+        background-size: contain; /* Ajusta la imagen al contenedor */
+        background-repeat: no-repeat; /* Evita que la imagen se repita */
+        background-position: center; /* Centra la imagen en el contenedor */
     }
 
-    const result = await response.json();
+   
+    .card {
+        background: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        text-align: center; 
+        max-width: 350px;
+        width: 100%;
+        padding: 120px 20px;
+        position: relative;
+        overflow: hidden;
+    }
 
-    // Display the message in the UI
-    document.getElementById('message').textContent = result.message;
-    document.getElementById('message').style.color = 'green'; // Set success message color
-  } catch (error) {
-    console.error('Error:', error);
+    .login-card h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: #333;
+        font-weight: bold;
+    }
 
-    // Display the error in the UI
-    document.getElementById('message').textContent = 'Se ha enviado el enlace correctamente!';
-    document.getElementById('message').style.color = 'green'; // Set error message color
-  }
-});
 
-      </script>
+    #forgotPasswordForm {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+        align-items: center;
+    }
+
+    #forgotPasswordForm label {
+        margin-top: 15px;
+        margin-bottom: -3%;
+        font-size: 14px;
+        color: #555;
+        text-align: left;
+        width: 80%;
+    }
+
+    #forgotPasswordForm input[type="email"] {
+        width: 80%;
+        padding: 10px;
+        font-size: 14px;
+        border: none;
+        border-bottom: 2px solid #ddd;
+        background-color: transparent;
+        outline: none;
+        transition: border-color 0.3s ease;
+    }
+
+    #forgotPasswordForm input[type="email"]:focus {
+        border-bottom: 2px solid #3168b5;
+    }
+
+    /* Botón */
+    #forgotPasswordForm button {
+        width: 80%;
+        padding: 12px;
+        margin-top: 30px;
+        background-color: #3168b5;
+        color: #fff;
+        border: none;
+        border-radius: 25px;
+        font-size: 15px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-weight: bold;
+    }
+
+    #forgotPasswordForm button:hover {
+        background-color: #47a9f9;
+    }
+
+    /* Mensaje */
+    #message {
+        margin-top: 15px;
+        font-size: 14px;
+        text-align: center;
+        color: red;
+    }
+
+                      
+    </style>
+      
+    <script>
+        document.getElementById('forgotPasswordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Get the email input value
+        const email = document.getElementById('email').value;
+
+        try {
+          // Send a POST request to the Node.js backend
+          const response = await fetch('http://localhost:3000/forgot-password', { // Use full URL with the backend's port
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email }) // Send the email in the request body
+          });
+
+          // Parse the JSON response
+          if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+          }
+
+          const result = await response.json();
+
+          // Display the message in the UI
+          document.getElementById('message').textContent = result.message;
+          document.getElementById('message').style.color = 'green'; // Set success message color
+        } catch (error) {
+          console.error('Error:', error);
+
+          // Display the error in the UI
+          document.getElementById('message').textContent = 'Se ha enviado el enlace correctamente!';
+          document.getElementById('message').style.color = 'green'; // Set error message color
+        }
+      });
+
+    </script>
 </body>
 </html>

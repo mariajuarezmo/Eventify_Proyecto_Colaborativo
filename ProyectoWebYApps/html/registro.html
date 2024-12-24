@@ -4,27 +4,171 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Eventos STEAM</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/comun.css">
 </head>
 <body>
-    <div class="container">
-        <h2>Registro</h2>
-        <form id="registerForm" action="/register" method="POST">
-            <input type="text" id="username" name="nombre" placeholder="Nombre de usuario" required>
-            <input type="password" id="password" name="contraseña" placeholder="Contraseña" required>
-            <input type="email" id="email" name="email" placeholder="Correo" required>
-            <select id="role" name="rol" required>
-                <option value="" disabled selected>Elige tu rol*</option>
-                <option value="Estudiante">Estudiante</option>
-                <option value="Profesor">Profesor</option>
-                <option value="Coordinador">Coordinador</option>
-                <option value="Dirección">Dirección</option>
-                <option value="Admin">Admin</option>
-            </select>
-            <button type="submit">Registrarse</button>
-        </form>
-        <br>
-        <button onclick="window.history.back()">Volver</button>
+    <!----------------------------------------------------->
+    <header class="shared-header">
+        <span class="logo">
+            <a href="PaginaInicial.html">
+                <img src="../img/logo 2.1.png" alt="Logo" width="170" height="50">
+            </a>
+        </span>
+        <nav class="nav">
+            <button id="login-btn">Login</button>
+            <button id="register-btn">Registrarse</button>
+        </nav>
+    </header>
+     <!----------------------------------------------------->
+
+   <div class="register-container">
+        <div class="register-card">
+            <h2>Registro</h2>
+            <form id="registerForm" action="/register" method="POST">
+                <input type="text" id="username" name="nombre" placeholder="Nombre de usuario" required>
+                <input type="password" id="password" name="contraseña" placeholder="Contraseña" required>
+                <input type="email" id="email" name="email" placeholder="Correo" required>
+                <select id="role" name="rol" required>
+                    <option value="" disabled selected>Elige tu rol*</option>
+                    <option value="Estudiante">Estudiante</option>
+                    <option value="Profesor">Profesor</option>
+                    <option value="Coordinador">Coordinador</option>
+                    <option value="Dirección">Dirección</option>
+                    <option value="Admin">Admin</option>
+                </select>
+                <button type="submit">Registrarse</button>
+            </form>
+            <br>
+            <p>¿Ya tienes una cuenta? <a href="login.html">Inicia sesión.</a></p>
+        </div>
+   </div> 
+
+   <!------------------------------------------------------------------>
+   <footer class="shared-footer">
+    <div class="footer-content">
+        <p>¿Tienes preguntas? Contáctanos</p>
+        <a href="mailto:contact@eventify.info">contact@eventify.info</a>
+        <p>© 2024 Eventify. Todos los derechos reservados.</p>
+        <div class="social-icons">
+            <a href="https://facebook.com" target="_blank">
+                <img src="../img/facebook-icon.png" alt="Facebook" width="24" height="24">
+            </a>
+            <a href="https://twitter.com" target="_blank">
+                <img src="../img/twitter-icon.png" alt="Twitter" width="35" height="35">
+            </a>
+            <a href="https://instagram.com" target="_blank">
+                <img src="../img/instagram-icon.png" alt="Instagram" width="24" height="24">
+            </a>
+        </div>
     </div>
+</footer>
+<!------------------------------------------------------------------>
+    
 </body>
+
+<style>
+    body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Fondo degradado */
+.register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(90vh - 80px); /* Resta el espacio del header y footer */
+    padding: 20px;
+    background: linear-gradient(135deg, #ffc8f8, #87e368c2);
+}
+
+
+.register-card {
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 350px;
+    width: 100%;
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.register-card h2 {
+    font-size: 24px;
+    margin-bottom: 35px;
+    color: #333;
+    font-weight: bold;
+}
+
+/* Inputs del formulario */
+#registerForm input, #registerForm select {
+    width: 80%;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    border: none;
+    border-bottom: 2px solid #ddd;
+    background-color: transparent;
+    outline: none;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+
+#registerForm select {
+    color: #555;
+    background-color: #ffffff;
+    width: 90%;
+    margin-bottom: 45px;
+
+}
+
+#registerForm input:focus, #registerForm select:focus {
+    border-bottom: 2px solid #3168b5;
+}
+
+
+#registerForm button {
+    width: 80%;
+    padding: 12px;
+    background-color: #50946c;
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: bold;
+}
+
+#registerForm button:hover {
+    background-color: #7ae4ab;
+}
+
+
+.register-card p {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #555;
+}
+
+.register-card p a {
+    color: #3168b5;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.register-card p a:hover {
+    text-decoration: underline;
+}
+</style>
+
+<script>
+
+</script>
+
 </html>

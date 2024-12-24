@@ -8,28 +8,53 @@
 </head>
 
 <body>  
-
-    <header class="header">
-        <span class="logo">
+<!--------------------------------------------------->
+<header class="shared-header">
+    <span class="logo">
+        <a href="PaginaInicial.html">
             <img src="../img/logo 2.1.png" alt="Logo" width="170" height="50">
-        </span>
-        <nav class="nav">
-            <a href="#">Ejemplo 1</a>
-            <a href="#">Ejemplo 2</a>
-            <button id="login">Login</button>
-            <button id="registro">Registrarse</button>
-        </nav>
-    </header>
-    
+        </a>
+    </span>
+    <nav class="nav">
+        <button id="login-btn">Login</button>
+        <button id="register-btn">Registrarse</button>
+    </nav>
+</header>
+<!--------------------------------------------------->
 
+<div class="container">
     <div class="card">
-        <p>Introduce tu nueva contraseña</p>
-        <input class="input-email" type="text" title="Nueva contraseña">
-        <P>Repite la contraseña</P>
-        <input class="input-email" type="text" title="Repite Contraseña">
-        <button id="confirm">Guardar nueva contraseña</button>
-        <a href="PaginaInicial.html">Volver a la página de inicio</a>
+        <h2>Cambia tu contraseña</h2>
+        <form id="newPasswordForm">
+            <input class="input-field" type="password" placeholder="Nueva contraseña" required>
+            <input class="input-field" type="password" placeholder="Repite la nueva contraseña" required>
+            <button class="btn-primary">Guardar nueva contraseña</button>
+        </form>
+        <p><a href="PaginaInicial.html">Volver a la página inicial</a></p>
     </div>
+</div>
+
+
+    <!------------------------------------------------------------------>
+<footer class="shared-footer">
+    <div class="footer-content">
+        <p>¿Tienes preguntas? Contáctanos</p>
+        <a href="mailto:contact@eventify.info">contact@eventify.info</a>
+        <p>© 2024 Eventify. Todos los derechos reservados.</p>
+        <div class="social-icons">
+            <a href="https://facebook.com" target="_blank">
+                <img src="../img/facebook-icon.png" alt="Facebook" width="24" height="24">
+            </a>
+            <a href="https://twitter.com" target="_blank">
+                <img src="../img/twitter-icon.png" alt="Twitter" width="35" height="35">
+            </a>
+            <a href="https://instagram.com" target="_blank">
+                <img src="../img/instagram-icon.png" alt="Instagram" width="24" height="24">
+            </a>
+        </div>
+    </div>
+</footer>
+<!------------------------------------------------------------------>
 
 
 
@@ -43,6 +68,104 @@
     });
 
     </script>
+
+    
+    <style>
+        /* Contenedor Principal */
+            body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            
+        }
+
+        /* Contenedor Principal */
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 80px); /* Resta el espacio del header y footer */
+            padding: 20px;
+            background:url('../img/backgroundd.jpg');
+        }
+
+        /* Tarjeta */
+        .card {
+            background-color:rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 350px;
+            width: 100%;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        /* Títulos */
+        .card h2 {
+            font-size: 24px;
+            margin-bottom: 35px;
+            color: #333;
+            font-weight: bold;
+        }
+
+    
+
+        /* Inputs */
+        .input-field {
+            width: 80%;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border: none;
+            border-bottom: 2px solid #ddd;
+            background-color: transparent;
+            outline: none;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-bottom: 2px solid #b531a6; /* Color al enfocar */
+        }
+
+        /* Botón Principal */
+        .btn-primary {
+            width: 80%;
+            padding: 12px;
+            background-color: #b84991;
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: bold;
+            margin-top: 17px;
+        }
+
+        .btn-primary:hover {
+            background-color: #d891dd;
+        }
+
+        /* Enlace */
+        .card p {
+            margin-top: 30px;
+            font-size: 14px;
+        }
+
+        .card p a {
+            color: #3168b5;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .card p a:hover {
+            text-decoration: underline;
+        }
+    </style>
 
 </body>
 </html>

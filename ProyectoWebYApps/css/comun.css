@@ -2,10 +2,12 @@
 .shared-header {
     display: flex;
     justify-content: space-between;
+    z-index: 10; /* Eleva el header por encima del contenedor */
     align-items: center;
     padding: 10px 20px;
     background-color: #ffffff;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
 }
 
 .shared-header p {
@@ -21,19 +23,19 @@
 }
 
 .shared-header #register-btn {
-    background-color: #beb66b;
+    background-color: #50946c;
     color: white;
-    padding: 10px 20px;
+    padding: 10px 22px;
     border: none;
-    border-radius: 4px;
+    border-radius: 19px;
 }
 
 .shared-header #login-btn {
-    background-color: #d37232;
+    background-color: #3168b5;
     color: white;
     padding: 10px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: 19px;
 }
 
 /* -------------------------------- FOOTER -------------------------------- */
