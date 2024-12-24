@@ -4,8 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Asistencia</title>
+    <link rel="stylesheet" href="../css/comun.css">
+
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+    
+        
+    </style>
+
 </head>
 <body>
+
+
+ <!----------------------------------------------------->
+ <header class="shared-header">
+    <span class="logo">
+        <a href="PaginaInicial.html">
+            <img src="../img/logo_eventify.png" alt="Logo" width="170" height="50">
+        </a>
+    </span>
+    <nav class="nav">
+        <button id="login-btn">Login</button>
+        <button id="register-btn">Registrarse</button>
+    </nav>
+</header>
+ <!----------------------------------------------------->
+
+
     <h1>Confirma tu Asistencia al Evento</h1>
     <form action="/formulario/register" method="POST">
         <!-- Campo oculto para pasar el ID del evento -->
@@ -20,5 +49,44 @@
         
         <button type="submit">Registrar Asistencia</button>
     </form>
+
+
+     <!------------------------------------------------------------------>
+     <footer class="shared-footer">
+        <div class="footer-content">
+            <p>¿Tienes preguntas? Contáctanos</p>
+            <a href="mailto:contact@eventify.info">contact@eventify.info</a>
+            <p>© 2024 Eventify. Todos los derechos reservados.</p>
+            <div class="social-icons">
+                <a href="https://facebook.com" target="_blank">
+                    <img src="../img/facebook_icon.png" alt="Facebook" width="24" height="24">
+                </a>
+                <a href="https://twitter.com" target="_blank">
+                    <img src="../img/twitter_icon.png" alt="Twitter" width="35" height="35">
+                </a>
+                <a href="https://instagram.com" target="_blank">
+                    <img src="../img/instagram_icon.png" alt="Instagram" width="24" height="24">
+                </a>
+            </div>
+        </div>
+    </footer>
+<!------------------------------------------------------------------>
+
+
+
+<script>
+    //BOTONES DEL HEADER-------------------------------------------
+    const login=document.getElementById("login-btn");
+    const registro= document.getElementById("register-btn");
+
+    login.addEventListener('click', () => {
+        window.location.href="login.html"
+    });
+
+    registro.addEventListener('click', () => {
+        window.location.href="registro.html"
+    });
+    //-------------------------------------------
+</script>
 </body>
 </html>

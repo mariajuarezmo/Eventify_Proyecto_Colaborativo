@@ -4,25 +4,87 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/> 
     <title>Calendario</title>
-    <link rel="stylesheet" href="../css/calendario.css">
+    <link rel="stylesheet" href="../css/comun.css">
+     <style>
+
+/* General */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Garantiza que el footer esté al fondo */
+}
+
+h1 {
+    margin: 20px 0;
+    font-size: 2rem;
+    text-align: center;
+}
+
+
+/* Calendario */
+.calendar-container {
+    margin: 40px auto;
+    max-width: 1600px; /* Ancho máximo para el calendario */
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-top: 20px;
+}
+
+#calendar .header {
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 15px;
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#calendar div {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#calendar .hoy {
+    background-color: rgba(158, 33, 141, 0.486); /* Resaltar el día actual */
+    font-weight: bold;
+    border: 2px solid #f90;
+    color: white;
+}
+    </style>
 </head>
 <body>
 
-<!----------------------------------------------------->
-     <header class="header">
-        <span class="logo">
-            <a href="PaginaInicial.html">
-                <img src="../img/logo_eventify.png" alt="Logo" width="170" height="50">
-            </a>
-        </span>
-        <nav class="nav">
-            <a href="#">Contacto     </a>
-            <button id="login">Login</button>
-            <button id="registro">Registrarse</button>
-        </nav>
-    </header>
-
-<!----------------------------------------------------->
+ <!----------------------------------------------------->
+ <header class="shared-header">
+    <span class="logo">
+        <a href="PaginaInicial.html">
+            <img src="../img/logo_eventify.png" alt="Logo" width="170" height="50">
+        </a>
+    </span>
+    <nav class="nav">
+        <button id="login-btn">Login</button>
+        <button id="register-btn">Registrarse</button>
+    </nav>
+</header>
+ <!----------------------------------------------------->
 
 <main>
     <h1>Calendario</h1>
@@ -36,7 +98,7 @@
 
 
 <!------------------------------------------------------------------>
-<footer class="footer">
+<footer class="shared-footer">
     <div class="footer-content">
         <p>¿Tienes preguntas? Contáctanos</p>
         <a href="mailto:contact@eventify.info">contact@eventify.info</a>
@@ -49,7 +111,7 @@
                 <img src="../img/twitter_icon.png" alt="Twitter" width="35" height="35">
             </a>
             <a href="https://instagram.com" target="_blank">
-                <img src="../img/instagram_icon.png" alt="Instagram" width="24" height="24">
+                <img src="../img/Instagram_icon.png" alt="Instagram" width="24" height="24">
             </a>
         </div>
     </div>
@@ -57,6 +119,9 @@
 <!------------------------------------------------------------------>
 
 
-    <script src="../js/APIcalendario.js"></script>
+    <script src="../js/APIcalendario.js">
+    
+   
+    </script>
 </body>
 </html>

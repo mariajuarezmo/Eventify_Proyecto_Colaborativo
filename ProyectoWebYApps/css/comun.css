@@ -28,6 +28,8 @@
     padding: 10px 22px;
     border: none;
     border-radius: 19px;
+    cursor: pointer;
+    transition: background-color 0.3 ease;
 }
 
 .shared-header #login-btn {
@@ -36,7 +38,20 @@
     padding: 10px 20px;
     border: none;
     border-radius: 19px;
+    cursor: pointer;
+    transition: background-color 0.3 ease;
 }
+
+.shared-header #register-btn:hover{
+    background-color: #4fda82;
+}
+
+.shared-header #login-btn:hover {
+    background-color: #49b9ed;
+}
+
+
+
 
 /* -------------------------------- FOOTER -------------------------------- */
 .shared-footer {
