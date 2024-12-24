@@ -93,16 +93,21 @@ app.use(express.urlencoded({ extended: true }));
 // Middleware para servir archivos estáticos desde la carpeta "css"
 app.use('/css', express.static(path.join(__dirname, 'css')));
 
-// Middleware para servir archivos HTML directamente desde "html"
-app.use(express.static(path.join(__dirname, 'html')));
+// Middleware para servir archivos HTML  desde "html"
+app.use('/html', express.static(path.join(__dirname, 'html')));
+
+app.use('/js', express.static(path.join(__dirname, 'js'))); // Archivos JS
+
 
 //Funcionalidad para que se carguen las imagenes al servidor
 app.use('/uploads', express.static('uploads'));
+app.use('/img', express.static(path.join(__dirname, 'img')));
+
 
 
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'html', 'index.html'));
+    res.sendFile(path.join(__dirname, 'html', 'PaginaInicial.html'));
 });
 
 // Configuración de conexión a la base de datos
