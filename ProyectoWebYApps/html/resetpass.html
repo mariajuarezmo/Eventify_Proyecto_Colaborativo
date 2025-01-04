@@ -183,7 +183,7 @@
 
         try {
           // Send a POST request to the Node.js backend
-          const response = await fetch('http://localhost:3000/forgot-password', { // Use full URL with the backend's port
+          const response = await fetch('http://localhost:5501/forgot-password', { // Use full URL with the backend's port
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -205,7 +205,7 @@
           console.error('Error:', error);
 
           // Display the error in the UI
-          document.getElementById('message').textContent = 'Se ha enviado el enlace correctamente!';
+          document.getElementById('message').textContent = 'Enlace enviado correctamente! En caso de no recibir el enlace, revisa tu correo introducido y vuelve a intentar.';
           document.getElementById('message').style.color = 'green'; // Set error message color
         }
       });

@@ -4,7 +4,129 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel del Administrador Jefe</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/comun.css">
+
+    <style>
+                body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            box-sizing: border-box;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin: 20px 0;
+        }
+
+        #adminUserActions {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #adminUserActions button {
+            background-color: #8178e7;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        #adminUserActions button:hover {
+            background-color: #0056b3;
+        }
+
+        .card {
+            background: #f9f9f9;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 6        00px;
+            margin: 20px auto;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        form input, form textarea, form select, form button {
+            width: 95%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        ul li {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        ul li button {
+            background-color: #25bd48;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 12px;
+            margin: 7px;
+            cursor: pointer;
+            
+        }
+
+        ul li button:hover {
+            background-color: #08552c;
+        }
+
+        #editUserFormContainer button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #editUserFormContainer button:hover {
+            background-color: #218838;
+        }
+
+        .volver-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px;
+            font-size: 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f8693e;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            z-index: 1000;
+        }
+
+        .volver-btn:hover {
+            background-color: #fbb53d;
+        }
+    </style>
 </head>
 <body>
 
@@ -21,59 +143,58 @@
      <!----------------------------------------------------->
 
 
-    <h1>Panel del Administrador Jefe</h1>
+     <h1>Panel del Administrador Jefe</h1>
 
-    <!-- Botones principales del administrador para manejo de usuarios -->
-    <div id="adminUserActions">
-        <button id="RegisterUsersButton" onclick="loadPendingRegistrations()">Solicitudes Registro</button>
-        <button id="editUsersButton" onclick="showEditUsers()">Ver y Editar Usuarios</button>
-        <button id="deleteUsersButton" onclick="deleteUsers()">Eliminar Usuarios</button>
-    </div>
-
-    <div id="pendingRegistrations" class="hidden">
-        <h2>Solicitudes de Registro</h2>
-        <ul id="registrationRequestsList">
-            <!-- Las solicitudes de registro se cargarán aquí dinámicamente -->
-        </ul>
-    </div>
-
-    <!-- Lista de usuarios para eliminar -->
-    <div id="deleteUserContainer" class="hidden">
-        <h2>Eliminar Usuarios</h2>
-        <ul id="deleteUserList">
-            <!-- Los usuarios se cargarán aquí dinámicamente -->
-        </ul>
-    </div>
-
-    <!-- Lista de usuarios para editar -->
-    <div id="editUsersContainer" class="hidden">
-        <h2>Editar Usuarios</h2>
-        <ul id="userList">
-            <!-- Los eventos se cargarán aquí dinámicamente -->
-        </ul>
-    </div>
-
-
-    <!-- Formulario para editar usuario -->
-    <div id="editUserFormContainer" class="hidden">
-        <h2>Editar Usuario</h2>
-        <form id="editUserForm" action="/updateUser" method="POST">
-            <input type="hidden" name="id_usuario" id="editUserId">
-            <input type="text" id="username" name="nombre" placeholder="Nombre de usuario" required>
-            <input type="password" id="password" name="contraseña" placeholder="Contraseña" required>
-            <input type="email" id="email" name="email" placeholder="Correo" required>
-            <select id="role" name="rol" required>
-                <option value="" disabled selected>Elige tu rol*</option>
-                <option value="Estudiante">Estudiante</option>
-                <option value="Profesor">Profesor</option>
-                <option value="Coordinador">Coordinador</option>
-                <option value="Dirección">Dirección</option>
-                <option value="Admin">Admin</option>
-            </select>
-            <button type="submit">Guardar Cambios</button>
-        </form>
-    </div>
-
+     <!-- Botones principales del administrador jefe -->
+     <div id="adminUserActions">
+         <button id="RegisterUsersButton" onclick="loadPendingRegistrations()">Solicitudes Registro</button>
+         <button id="editUsersButton" onclick="showEditUsers()">Ver y Editar Usuarios</button>
+         <button id="deleteUsersButton" onclick="deleteUsers()">Eliminar Usuarios</button>
+     </div>
+ 
+     <!-- Contenedores para cada acción -->
+     <div id="pendingRegistrations" class="card hidden">
+         <h2>Solicitudes de Registro</h2>
+         <ul id="registrationRequestsList">
+             <!-- Las solicitudes de registro se cargarán aquí dinámicamente -->
+         </ul>
+     </div>
+ 
+     <div id="editUsersContainer" class="card hidden">
+         <h2>Editar Usuarios</h2>
+         <ul id="userList">
+             <!-- Los usuarios se cargarán aquí dinámicamente -->
+         </ul>
+     </div>
+ 
+     <div id="deleteUserContainer" class="card hidden">
+         <h2>Eliminar Usuarios</h2>
+         <ul id="deleteUserList">
+             <!-- Los usuarios se cargarán aquí dinámicamente -->
+         </ul>
+     </div>
+ 
+     <div id="editUserFormContainer" class="card hidden">
+         <h2>Editar Usuario</h2>
+         <form id="editUserForm" action="/updateUser" method="POST">
+             <input type="hidden" name="id_usuario" id="editUserId">
+             <input type="text" id="username" name="nombre" placeholder="Nombre de usuario" required>
+             <input type="password" id="password" name="contraseña" placeholder="Contraseña" required>
+             <input type="email" id="email" name="email" placeholder="Correo" required>
+             <select id="role" name="rol" required>
+                 <option value="" disabled selected>Elige tu rol*</option>
+                 <option value="Estudiante">Estudiante</option>
+                 <option value="Profesor">Profesor</option>
+                 <option value="Coordinador">Coordinador</option>
+                 <option value="Dirección">Dirección</option>
+                 <option value="Admin">Admin</option>
+             </select>
+             <button type="submit">Guardar Cambios</button>
+         </form>
+     </div>
+ 
+     <button class="volver-btn" onclick="window.location.href='/logout'">Volver</button>
+ 
     <!------------------------------------------------------------------>
 <footer class="shared-footer">
     <div class="footer-content">
@@ -95,10 +216,6 @@
 </footer>
 <!------------------------------------------------------------------>s
 
-
-    <br>
-    <button onclick="window.location.href='/logout'">Volver</button>
-
     <script>
     //BOTONES DEL HEADER-------------------------------------------
     const login=document.getElementById("login-btn");
@@ -119,7 +236,10 @@
         function loadPendingRegistrations() {
             document.getElementById('pendingRegistrations').classList.remove('hidden');
             document.getElementById('deleteUserContainer').classList.add('hidden');
-            fetch('/pendingRegistrations')
+            document.getElementById('editUsersContainer').classList.add('hidden');
+
+
+            fetch('/adminJefe/pendingRegistrations')
                 .then(response => response.json())
                 .then(requests => {
                     const registrationRequestsList = document.getElementById('registrationRequestsList');
@@ -155,7 +275,7 @@
 
         // Procesar solicitud de registro
         function processRegistration(userId, action, listItem) {
-            fetch('/processRegistration', {
+            fetch('/adminJefe/processRegistration', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `id=${userId}&action=${action}`,
@@ -177,7 +297,7 @@
             document.getElementById('pendingRegistrations').classList.add('hidden');
             document.getElementById('editUsersContainer').classList.add('hidden');
             
-            fetch('/getAllUsers')
+            fetch('/adminJefe/getAllUsers')
                 .then(response => response.json())
                 .then(users => {
                     const userList = document.getElementById('deleteUserList');
@@ -191,7 +311,7 @@
                         const listItem = document.createElement('li');
                         listItem.id = `user-${user.id}`;
                         listItem.innerHTML = `
-                            <strong>NOMBRE: ${user.nombre}</strong> - <strong> ROL: ${user.rol}</strong> - <strong> CORREO: ${user.correo}</strong>
+                            <strong>Nombre: </strong>${user.nombre}, <strong> Rol:</strong> ${user.rol}, <strong> Correo:</strong> ${user.correo}
                             <button onclick="deleteUser(${user.id})">Eliminar</button>
                         `;
                         userList.appendChild(listItem);
@@ -205,7 +325,7 @@
     if (!confirm('¿Estás seguro de que deseas eliminar este usuario?')) return;
 
     // Hacer la petición para eliminar al usuario
-    fetch(`/deleteUser?id=${userId}`, { method: 'DELETE' })
+    fetch(`/adminJefe/deleteUser?id=${userId}`, { method: 'DELETE' })
         .then(response => response.json())
         .then(result => {
             if (result.success) {
@@ -226,7 +346,7 @@
             document.getElementById('deleteUserContainer').classList.add('hidden');
             document.getElementById('pendingRegistrations').classList.add('hidden');
             
-            fetch('/getAllUsers')
+            fetch('/adminJefe/getAllUsers')
                 .then(response => response.json())
                 .then(users => {
                     const userList = document.getElementById('userList');
@@ -240,9 +360,9 @@
                         const listItem = document.createElement('li');
                         listItem.id = `user-${user.id}`;
                         listItem.innerHTML = `
-                            <strong>NOMBRE: ${user.nombre}</strong> - 
-                            <strong>ROL: ${user.rol}</strong> - 
-                            <strong>CORREO: ${user.correo}</strong>
+                            <strong>Nombre: </strong> ${user.nombre} , 
+                            <strong>Rol:</strong> ${user.rol} , 
+                            <strong>Correo: </strong>${user.correo}
                             <button onclick="editUser(${user.id}, '${user.nombre}', '${user.contraseña}', '${user.correo}', '${user.rol}')">Editar</button>
                         `;
                         userList.appendChild(listItem);

@@ -22,7 +22,7 @@ registerButton.addEventListener('click', () => {
         .then(data => alert(data.message))
         .catch(error => console.error('Error:', error));
 });
-
+/*
 // Inicio de sesión
 loginButton.addEventListener('click', () => {
     const username = document.getElementById('loginUsername').value.trim();
@@ -34,7 +34,7 @@ loginButton.addEventListener('click', () => {
     }
 
     // Enviar datos al backend
-    fetch('http://localhost:3000/login', {
+    fetch('http://localhost:5501/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre: username, contraseña: password })
@@ -44,9 +44,10 @@ loginButton.addEventListener('click', () => {
         .catch(error => console.error('Error:', error));
 });
 
+*/
 
 // Obtener el formulario
-eventForm.addEventListener('submit', (e) => {
+    eventForm.addEventListener('submit', (e) => {
     e.preventDefault(); // Evitar la recarga de la página
 
     // Capturar los valores de los campos del formulario

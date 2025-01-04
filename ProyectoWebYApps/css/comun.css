@@ -60,6 +60,7 @@
     padding: 20px 10px;
     text-align: center;
     font-size: 14px;
+    position: relative;
 }
 
 .shared-footer a {

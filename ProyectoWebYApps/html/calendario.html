@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/> 
     <title>Calendario</title>
     <link rel="stylesheet" href="../css/comun.css">
-     <style>
 
+    <style>
 /* General */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* Garantiza que el footer esté al fondo */
+    min-height: 100vh;
 }
 
 h1 {
@@ -22,11 +22,10 @@ h1 {
     text-align: center;
 }
 
-
 /* Calendario */
 .calendar-container {
     margin: 40px auto;
-    max-width: 1600px; /* Ancho máximo para el calendario */
+    max-width: 1200px;
     background-color: white;
     border-radius: 10px;
     padding: 20px;
@@ -44,31 +43,56 @@ h1 {
     font-weight: bold;
     text-transform: uppercase;
     text-align: center;
-    padding: 15px;
+    padding: 10px;
     background-color: #f4f4f4;
     border: 1px solid #ddd;
     border-radius: 5px;
 }
 
 #calendar div {
-    text-align: center;
-    padding: 50px;
-    font-size: 1.1rem;
+    text-align: left;
+    padding: 15px;
+    font-size: 1rem;
     border: 1px solid #ddd;
     border-radius: 5px;
-    background-color: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: relative;
 }
 
 #calendar .hoy {
-    background-color: rgba(158, 33, 141, 0.486); /* Resaltar el día actual */
-    font-weight: bold;
-    border: 2px solid #f90;
-    color: white;
+    background-color: #7129582f;
+    border: 2px solid rgb(206, 34, 152);
 }
+
+/* Eventos por categoría */
+.event-estudiantes {
+    background-color: #7fafe1;
+    color: rgb(0, 0, 0);
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+.event-profesores {
+    background-color: #f5ff62;
+    color: black;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+.event-universidad {
+    background-color: #00f439c7; /* Verde */
+    color: rgb(0, 0, 0);
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
     </style>
+
 </head>
 <body>
 
@@ -119,8 +143,147 @@ h1 {
 <!------------------------------------------------------------------>
 
 
-    <script src="../js/APIcalendario.js">
-    
+    <script>
+
+
+    //BOTONES DEL HEADER-------------------------------------------
+    const login=document.getElementById("login-btn");
+    const registro= document.getElementById("register-btn");
+
+    login.addEventListener('click', () => {
+        window.location.href="login.html"
+    });
+
+    registro.addEventListener('click', () => {
+        window.location.href="registro.html"
+    });
+    //-------------------------------------------
+const apiUrl = 'https://api.timezonedb.com/v2.1/get-time-zone?key=IYEXT5XXYKQI&format=json&by=zone&zone=Europe/Madrid';
+let events= [];
+
+async function getCurrentDate() {
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        const data = await response.json();
+
+        // La clave "formatted" tiene la fecha y hora en formato "YYYY-MM-DD HH:mm:ss"
+        const [datePart, timePart] = data.formatted.split(' ');
+        const [year, month, day] = datePart.split('-').map(Number);
+        const [hour, minute, second] = timePart.split(':').map(Number);
+
+        // Crear un objeto Date basado en los datos devueltos
+        return new Date(year, month - 1, day, hour, minute, second);
+    } catch (error) {
+        console.error('No se pudo obtener la fecha actual:', error);
+        alert('Hubo un problema al conectarse a la API de tiempo. Revisa tu conexión.');
+        return new Date(); // Usa la fecha local como alternativa
+    }
+}
+
+
+// Obtener eventos desde el backend
+async function fetchEvents() {
+    try {
+        const response = await fetch('http://localhost:5501/api/events'); // Llama a la API del backend
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        events = await response.json(); // Parsear eventos como JSON
+       
+    } catch (error) {
+        console.error("Error al cargar eventos:", error);
+        events= []; // Devuelve un array vacío si hay un error
+    }
+}
+
+/**CODIGO JAVASCRIPT FRONT-END------------------------------------------------------------------------------ */
+
+function generateCalendar(currentDate) {
+    const calendarContainer = document.getElementById('calendar');
+    if (!calendarContainer) {
+        console.error('El contenedor del calendario no existe.');
+        return;
+    }
+    calendarContainer.innerHTML = ''; // Limpia el contenido previo
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth(); // 0 = Enero, 11 = Diciembre
+    const today = currentDate.getDate();
+
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    const totalDays = lastDayOfMonth.getDate();
+
+    let startDay = firstDayOfMonth.getDay();
+    startDay = (startDay === 0) ? 6 : startDay - 1;
+
+    const weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+    // Crear la fila de encabezados
+    for (let d of weekDays) {
+        const div = document.createElement('div');
+        div.classList.add('header');
+        div.textContent = d;
+        calendarContainer.appendChild(div);
+    }
+
+    // Espacios en blanco antes del primer día
+    for (let i = 0; i < startDay; i++) {
+        const emptyDiv = document.createElement('div');
+        calendarContainer.appendChild(emptyDiv);
+    }
+
+    // Días del mes
+    for (let day = 1; day <= totalDays; day++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.textContent = day;
+
+        if (day === today) {
+            dayDiv.classList.add('hoy');
+        }
+
+        // Mostrar eventos para este día
+        const dayDate = new Date(year, month, day).toISOString().split("T")[0];
+        const dayEvents = events.filter((event) => {
+        const eventDate = new Date(event.fecha).toISOString().split("T")[0]; 
+        // Normaliza la fecha al formato YYYY-MM-DD
+        return eventDate === dayDate;
+    });
+        dayEvents.forEach((event) => {
+            const eventDiv = document.createElement("div");
+
+            // Extraer solo la hora y los minutos
+            const horaInicio = event.horaInicio.slice(0, 5); // "HH:mm"
+            const horaFin = event.horaFin.slice(0, 5);       
+
+            eventDiv.innerHTML = `<strong>${event.titulo}</strong> (${horaInicio} - ${horaFin})`;
+
+
+            // Asignar clase según categoría
+            if (event.categoria === "Estudiantes") {
+                eventDiv.classList.add("event-estudiantes");
+            } else if (event.categoria === "Profesores") {
+                eventDiv.classList.add("event-profesores");
+            } else if (event.categoria === "Universidad") {
+                eventDiv.classList.add("event-universidad");
+            }
+
+            dayDiv.appendChild(eventDiv);
+        });
+
+        calendarContainer.appendChild(dayDiv);
+    }
+}
+
+// Cargar el calendario al cargar la página
+document.addEventListener("DOMContentLoaded", async function () {
+    const currentDate = new Date(); // Obtener la fecha actual
+    await fetchEvents(); // Cargar eventos y almacenarlos en la variable global `events`
+    generateCalendar(currentDate); // Generar el calendario usando los eventos cargados
+});
    
     </script>
 </body>

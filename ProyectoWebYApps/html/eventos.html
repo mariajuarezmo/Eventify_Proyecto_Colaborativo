@@ -7,25 +7,178 @@
     <link rel="stylesheet" href="../css/comun.css">
     <style>
 
-    body{
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-        /* Agregar estilos para las categorías */
-        .category-estudiantes {
-            color: red; /* Rojo para estudiantes */
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
         }
-        .category-profesores {
-            color: blue; /* Azul para profesores */
+
+        /* Título */
+         h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.2em;
+            color: #333;
         }
-        .category-comunidad {
-            color: green; /* Verde para comunidad universitaria */
+
+        /* Estilo para el contenedor general */
+        .filter-span {
+            display: flex;
+            gap: 20px; /* Espaciado entre los botones */
+            justify-content: center; /* Centra los botones horizontalmente */
+            align-items: center;
+            position: relative; /* Posición estática dentro del flujo de la página */
+            background-color: white; /* Fondo blanco */
+            padding: 10px 0; /* Espaciado interno */
+            border-bottom: 1px solid #ccc; /* Línea divisoria opcional */
         }
 
 
+        /* Botones con tamaño fijo */
+        .filter-span button,
+        .filter-span select {
+            padding: 10px 15px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f4f4f4;
+            cursor: pointer;
+            min-width: 150px; /* Ancho mínimo fijo */
+        }
 
+        /* Hover para botones */
+        .filter-span button:hover,
+        .filter-span select:hover {
+            background-color: #e0e0e0;
+        }
+
+        .container {
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center; /* Centrar los eventos */
+        }
+
+        .event-card {
+            border: 1px solid #dccece;
+            border-radius: 10px;
+            width: 300px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            background-color: rgb(254, 250, 250); /* Fondo blanco */
+        }
+
+        .event-card h3 {
+            margin: 13px 0;
+            font-size: 1.4em;
+            color: rgb(0, 0, 0);
+        }
+
+        .event-card img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .event-card ul {
+            list-style: none; /* Quitar los puntos de la lista */
+            padding: 0;
+            text-align: left; /* Alinear a la izquierda */
+        }
+
+        .event-card ul li {
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+
+        .event-card button {
+            margin-top: 8px;
+            margin-bottom: 8px;
+            padding: 10px;
+            width: 40%;
+            background-color: #1a4fcc;
+            color: white;
+            border: none;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 15px;
+            position: relative;
+
+        }
+
+        .event-card button:hover {
+            background-color: #0056b3;
+        }
+
+        .volver-btn {
+            position: fixed; /* Fija el botón */
+            bottom: 20px; /* Espaciado desde la parte inferior */
+            right: 20px; /* Espaciado desde la derecha */
+            padding: 12px;
+            font-size: 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f8693e;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            z-index: 1000; /* Asegura que esté sobre otros elementos */
+        }
+
+        .volver-btn:hover {
+            background-color: #fbb53d;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: rgb(141, 35, 35);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            color: wheat;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .modal-content img {
+            max-width: 150px;
+            margin: 0 auto;
+        }
+
+        .modal-content button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            align-self: center;
+        }
+
+        .modal-content button:hover {
+            background-color: #0056b3;
+        }
     </style>
+
 </head>
 <body>
 
@@ -42,31 +195,46 @@
     </nav>
 </header>
  <!----------------------------------------------------->
+ <h1>Eventos</h1>
 
+     <!-- Nuevo sistema de filtración -->
+     <span class="filter-span">
+        <button onclick="fetchEvents()">Todos</button>
 
+        <!-- Filtro para categoría -->
+        <select id="filterCategory" onchange="filterCategory()">
+            <option value="">Eventos para:</option>
+            <option value="Estudiantes">Estudiantes</option>
+            <option value="Profesores">Profesores</option>
+            <option value="Universidad">Comunidad Universitaria</option>
+        </select>
 
-    <div class="container">
-        <h1>Eventos</h1>
-        <div>
-            <button onclick="fetchEvents()">Todos</button>
-            <button onclick="filterEvents('Estudiantes')">Estudiantes</button>
-            <button onclick="filterEvents('Profesores')">Profesores</button>
-            <button onclick="filterEvents('Universidad')">Comunidad Universitaria</button>
-        </div>
-
-        <br>
-
-        <div>
-            <button onclick="filterByDate('dia')">Hoy</button>
-            <button onclick="filterByDate('semana')">Esta Semana</button>
-            <button onclick="filterByDate('mes')">Este Mes</button>
-        </div>
-        
-        <ul id="eventList">
-            <!-- Los eventos se agregarán dinámicamente aquí -->
-        </ul>
-        <button onclick="window.location.href='/logout'">Volver</button>
+        <!-- Filtro por fecha -->
+        <select id="filterDate" onchange="filterByDateOption()">
+            <option value="">Eventos de:</option>
+            <option value="dia">Hoy</option>
+            <option value="semana">Esta Semana</option>
+            <option value="mes">Este Mes</option>
+        </select>
+    </span>
+ <div class="container">
+    <div id="eventList" class="container">
+        <!-- Los eventos se agregarán dinámicamente aquí -->
     </div>
+
+    <button onclick="window.location.href='/logout'" class="volver-btn">Volver</button>
+</div>
+
+    <!-- Modal -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <h3>Atender al evento</h3>
+        <p>Para atender, escanea el código QR y rellena el formulario.</p>
+        <img id="qrImage" src="" alt="Código QR del evento">
+        <button onclick="closeModal()">OK</button>
+    </div>
+</div>
+
 
      <!------------------------------------------------------------------>
      <footer class="shared-footer">
@@ -92,132 +260,124 @@
 
 
     <script>
+        const login = document.getElementById("login-btn");
+        const registro = document.getElementById("register-btn");
 
-
-    //BOTONES DEL HEADER-------------------------------------------
-    const login=document.getElementById("login-btn");
-    const registro= document.getElementById("register-btn");
-
-    login.addEventListener('click', () => {
-        window.location.href="login.html"
-    });
-
-    registro.addEventListener('click', () => {
-        window.location.href="registro.html"
-    });
-    //-------------------------------------------
-
-        // Función para obtener los eventos desde el servidor
-        function fetchEvents(category = null) {
-    // Construir el endpoint con la categoría si es necesario
-    const endpoint = category ? `/events?category=${category}` : '/events';
-
-    fetch(endpoint)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error al obtener eventos');
-            }
-            return response.json(); // Convertir la respuesta a JSON
-        })
-        .then(events => {
-            renderEvents(events); // Llamar a la función para renderizar eventos
-        })
-        .catch(error => {
-            console.error('Error al cargar los eventos:', error);
-            alert('No se pudieron cargar los eventos.');
+        login.addEventListener('click', () => {
+            window.location.href = "login.html";
         });
-}
 
+        registro.addEventListener('click', () => {
+            window.location.href = "registro.html";
+        });
+
+        // Función para obtener eventos
+        function fetchEvents(category = null) {
+            const endpoint = category ? `/events?category=${category}` : '/events';
+            fetch(endpoint)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al obtener eventos');
+                    }
+                    return response.json();
+                })
+                .then(events => renderEvents(events))
+                .catch(error => {
+                    console.error('Error al cargar los eventos:', error);
+                    alert('No se pudieron cargar los eventos.');
+                });
+        }
+
+        function filterCategory() {
+            const category = document.getElementById('filterCategory').value;
+            if (category) {
+                fetchEvents(category);
+            }
+        }
+
+        function filterByDateOption() {
+            const dateFilter = document.getElementById('filterDate').value;
+            if (dateFilter) {
+                filterByDate(dateFilter);
+            }
+        }
 
         function filterEvents(category) {
             fetchEvents(category);
         }
 
-        // Llama a fetchEvents al cargar la página
-        fetchEvents();
-
-        // Función para mostrar los eventos en la lista
-        function renderEvents(events) {
-            const eventList = document.getElementById('eventList');
-            eventList.innerHTML = ''; // Limpia la lista antes de agregar los nuevos eventos
-
-            if (events.length === 0) {
-                const noEventsItem = document.createElement('li');
-                noEventsItem.textContent = 'No hay eventos disponibles.';
-                eventList.appendChild(noEventsItem);
-                return;
-            }
-
-            events.forEach(event => {
-                const listItem = document.createElement('li');
-                const imageItem = document.createElement('img');
-
-                imageItem.src = event.imagen_url; // La URL de la imagen almacenada en la base de datos
-                imageItem.alt = `Imagen del evento ${event.Nombre_Evento}`;
-                imageItem.style.width = '150px';
-                imageItem.style.height = 'auto';
-
-                const qrImage = document.createElement('img'); // Crear elemento para el QR
-                qrImage.src = event.QR; // La URL del QR almacenada en la base de datos
-                qrImage.alt = `QR del evento ${event.Nombre_Evento}`;
-                qrImage.style.width = '150px';
-                qrImage.style.height = '150px';
-                qrImage.style.marginTop = '10px';
-
-                let categoryClass = '';
-                if (event.Categoria === 'Estudiantes') {
-                    categoryClass = 'category-estudiantes';
-                } else if (event.Categoria === 'Profesores') {
-                    categoryClass = 'category-profesores';
-                } else if (event.Categoria === 'Universidad') {
-                    categoryClass = 'category-comunidad';
-                }
-
-                listItem.className = categoryClass;
-                listItem.innerHTML = `
-                    <h3>${event.Nombre_Evento}</h3>
-                    <p>${event.Descripcion}</p>
-                    <p><strong>Fecha:</strong> ${event.Fecha} <strong>Hora inicio:</strong> ${event.Hora_Inicio} <strong>Hora fin:</strong> ${event.Hora_Fin}</p>
-                    <p><strong>Categoría:</strong> ${event.Categoria}</p>
-                    <p><strong>Ubicación:</strong> ${event.Ubicacion}</p>
-                    <p><strong>Organizador:</strong> ${event.Organizador}</p>
-                    <p><strong>Creador del Evento:</strong> ${event.Nombre_Creador}</p>
-                    <p><strong>Número de asistentes del evento:</strong> ${event.num_asistentes}</p>
-                `;
-
-                // Agrega la imagen y el QR después de la información del evento
-                listItem.appendChild(imageItem);
-                listItem.appendChild(qrImage);
-
-                // Agregar el elemento <li> al <ul>
-                eventList.appendChild(listItem);
-            });
+        function filterByDate(filter) {
+            fetch(`/eventsByDate?filter=${filter}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al obtener eventos filtrados por fecha');
+                    }
+                    return response.json();
+                })
+                .then(events => renderEvents(events))
+                .catch(error => {
+                    console.error('Error al filtrar eventos por fecha:', error);
+                    alert('No se pudieron cargar los eventos filtrados.');
+                });
         }
 
+        function renderEvents(events) {
+        const eventList = document.getElementById('eventList');
+        eventList.innerHTML = ''; // Limpia la lista de eventos
 
+        if (events.length === 0) {
+            const noEventsItem = document.createElement('div');
+            noEventsItem.textContent = 'No hay eventos disponibles.';
+            eventList.appendChild(noEventsItem);
+            return;
+        }
 
+        events.forEach(event => {
+            // Crear contenedor para cada evento
+            const eventCard = document.createElement('div');
+            eventCard.className = 'event-card';
 
+            const horaInicio = event.Hora_Inicio.slice(0, 5); // "HH:mm"
+            const horaFin = event.Hora_Fin.slice(0, 5);      
 
-        function filterByDate(filter) {
-    fetch(`/eventsByDate?filter=${filter}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error al obtener eventos filtrados por fecha');
-            }
-            return response.json();
-        })
-        .then(events => {
-            renderEvents(events);
-        })
-        .catch(error => {
-            console.error('Error al filtrar eventos por fecha:', error);
-            alert('No se pudieron cargar los eventos filtrados.');
+            // Generar HTML para el evento
+            eventCard.innerHTML = `
+                <h3>${event.Nombre_Evento}</h3>
+                <img src="${event.imagen_url}" alt="Imagen del evento">
+                <ul>
+                    <li><strong>Fecha:</strong> ${event.Fecha.split('T')[0]}</li>
+                    <li><strong>Horario: </strong> ${horaInicio} - ${horaFin} </li>
+                    <li><strong>Categoría:</strong> ${event.Categoria}</li>
+                    <li><strong>Ubicación:</strong> ${event.Ubicacion}</li>
+                    <li><strong>Organizador:</strong> ${event.Organizador}</li>
+                    <li><strong>Creador del Evento:</strong> ${event.Nombre_Creador}</li>
+                    <li><strong>Número de asistentes del evento:</strong> ${event.num_asistentes}</li>
+                </ul>
+                <button onclick="openModal('${event.QR}')">Atender</button>
+            `;
+
+            // Añadir el contenedor al listado de eventos
+            eventList.appendChild(eventCard);
         });
-}
+    }
 
+    // Abrir el modal y mostrar el QR
+    function openModal(qrUrl) {
+        const modal = document.getElementById('modal');
+        const qrImage = document.getElementById('qrImage');
+        qrImage.src = qrUrl;
+        modal.style.display = 'flex'; // Mostrar el modal
+    }
 
-        // Llama a la función para cargar los eventos al cargar la página
-        fetchEvents();
+    // Cerrar el modal
+    function closeModal() {
+        const modal = document.getElementById('modal');
+        modal.style.display = 'none'; // Ocultar el modal
+    }
+
+    // Cargar los eventos al inicio
+    fetchEvents();
+
     </script>
 </body>
 

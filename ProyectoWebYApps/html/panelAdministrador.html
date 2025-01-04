@@ -4,14 +4,187 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel del Administrador</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/comun.css">
+
+    <style>
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        box-sizing: border-box;
+        min-height: 100vh;
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 2.5em;
+        margin: 20px 0;
+    }
+
+    #adminEventActions {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    #adminEventActions button {
+        background-color: #8178e7;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+    }
+
+    #adminEventActions button:hover {
+        background-color: #0056b3;
+    }
+
+    .card-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 20px auto;
+        max-width: 600px;
+    }
+
+    .card {
+        margin: 50px auto; /* Margen superior para separación del header */
+        max-width: 800px; /* Limitar el ancho del card */
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        align-items: center;
+        }
+
+    form input, form textarea, form select, form button {
+        width: 95%;
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1em;
+        align-items: center;
+    }
+
+    #imagePreview {
+        max-width: 100%;
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    .volver-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px;
+        font-size: 15px;
+        border: none;
+        border-radius: 5px;
+        background-color: #f8693e;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        z-index: 1000;
+    }
+
+    .volver-btn:hover {
+        background-color: #fbb53d;
+    }
+
+    /* Para contenedores de eventos */
+    #pendingEventsContainer ul,
+    #adminEventsContainer ul,
+    #deleteEventsContainer ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    #pendingEventsContainer li,
+    #adminEventsContainer li,
+    #deleteEventsContainer li {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #pendingEventsContainer button,
+    #adminEventsContainer button,
+    #deleteEventsContainer button {
+        margin-top: 10px;
+        margin-left: 10px;
+        margin-bottom: 10px;
+        padding: 10px;
+        width: 10%;
+        background-color: #1a4fcc;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    #formSubmitButton {
+    background-color: #28a745; /* Verde */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1em;
+    }
+
+    #formSubmitButton:hover {
+        background-color: #218838;
+    }
+
+    #discardCreationButton, #discardChangesButton {
+        background-color: #dc3545; /* Rojo */
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 1em;
+    }
+
+    #discardCreationButton:hover, #discardChangesButton:hover {
+        background-color: #c82333;
+    }
+
+    #pendingEventsContainer button:hover{
+        background-color: #f8693e;
+
+    }
+    #adminEventsContainer button:hover{
+        background-color: #218838;
+
+    }
+    #deleteEventsContainer button:hover {
+        background-color: #f40101;
+    }
+
+    </style>
 </head>
 <body>
 
      <!----------------------------------------------------->
      <header class="shared-header">
         <span class="logo">
-            <img src="../img/logo_eventify.png" alt="Logo" width="170" height="50">
+            <a href="PaginaInicial.html">
+                <img src="../img/logo_eventify.png" alt="Logo" width="170" height="50">
+            </a>
         </span>
         <nav class="nav">
             <button id="login-btn">Login</button>
@@ -20,73 +193,70 @@
     </header>
      <!----------------------------------------------------->
 
-    <!-- Título del Panel -->
-    <h1>Panel del Administrador</h1>
+       <!-- Título del Panel -->
+       <h1>Panel del Administrador</h1>
 
-    <!-- Botones principales del administrador para manejo de eventos -->
-    <div id="adminEventActions">
-        <h2>Acciones</h2>
-        <button id="createEventButton" onclick="showCreateEventForm()">Crear Evento</button>
-        <button id="approveEventButton" onclick="showPendingEvents()">Aprobar/Denegrar Eventos</button>
-        <button id="editEventsButton">Ver y Editar Eventos</button>
-        <button id="deleteEventsButton" onclick="deleteEvents()">Eliminar Eventos</button>
-    </div>
-    <br>
-
-    <!-- Formulario para crear un evento -->
-    
-    <div id="eventFormContainer" class="hidden">
-        <h2 id ="formTitle">Crear Evento</h2>
-        <form id="eventForm" action="/eventRegister" method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="id_evento" value="">
-            <input type="hidden" name="imagen_actual" value="">
-            <input type="text" name="titulo" placeholder="Título del evento" required>
-            <input type="date" name="fecha" required>
-            <input type="time" name="hora_inicio" required>
-            <input type="time" name="hora_fin" required>
-            <input type="text" name="ubicacion" placeholder="Ubicación o Enlace" required>
-            <input type="text" name="organizador" placeholder="Organizador" required>
-            <input type="file" name="imagen_url" accept="image/*" onchange="previewImage(event)">
-            <img id="imagePreview" style="max-width: 300px; display: none;">
-            <textarea name="descripcion" placeholder="Descripción" required></textarea>
-            <select name="categoria">
-                <option value="Estudiantes">Evento para Estudiantes</option>
-                <option value="Profesores">Evento para Profesores</option>
-                <option value="Universidad">Evento para Comunidad Universitaria</option>
-            </select>
-            <button id="formSubmitButton" type="submit">Crear Evento</button>
-            <button id="discardCreationButton" type="button" class="hidden" onclick="window.location.href='/panelAdministrador.html'">Cancelar Creación</button>
-            <button id="discardChangesButton" type="button" class="hidden" onclick="discardChanges()">Descartar Cambios</button>
-
-        </form>
-    </div>
-
-    <!-- Editar Eventos -->
-    <div id="adminEventsContainer" class="hidden">
-        <h2>Editar Eventos</h2>
-        <ul id="adminEventsList">
-            <!-- Los eventos se cargarán aquí dinámicamente -->
-        </ul>
-    </div>
-
-    <!-- Lista de eventos para editar -->
-    <div id="deleteEventsContainer" class="hidden">
-        <h2>Eliminar Eventos</h2>
-        <ul id="deleteEventList">
-            <!-- Los eventos se cargarán aquí dinámicamente -->
-        </ul>
-    </div>
-
-    <!-- Contenedor de eventos pendientes -->
-    <div id="pendingEventsContainer" class="hidden">
-        <h2>Eventos Pendientes</h2>
-        <ul id="pendingEventsList">
-            <!-- Los eventos pendientes se cargarán aquí -->
-        </ul>
-    </div>
-    <br>
-    <button onclick="window.location.href='/logout'">Volver</button>
-
+       <!-- Botones principales del administrador para manejo de eventos -->
+       <div id="adminEventActions">
+           <h2>Acciones</h2>
+           <button id="createEventButton" onclick="showCreateEventForm()">Crear Evento</button>
+           <button id="approveEventButton" onclick="showPendingEvents()">Aprobar/Denegrar Eventos</button>
+           <button id="editEventsButton">Ver y Editar Eventos</button>
+           <button id="deleteEventsButton" onclick="deleteEvents()">Eliminar Eventos</button>
+       </div>
+   
+       <!-- Formulario para crear un evento -->
+       <div id="eventFormContainer" class="card hidden">
+           <h2 id="formTitle">Crear Evento</h2>
+           <form id="eventForm" action="/eventRegister" method="POST" enctype="multipart/form-data">
+               <input type="hidden" name="id_evento" value="">
+               <input type="hidden" name="imagen_actual" value="">
+               <input type="text" name="titulo" placeholder="Título del evento" required>
+               <input type="date" name="fecha" required>
+               <input type="time" name="hora_inicio" required>
+               <input type="time" name="hora_fin" required>
+               <input type="text" name="ubicacion" placeholder="Ubicación o Enlace" required>
+               <input type="text" name="organizador" placeholder="Organizador" required>
+               <input type="file" name="imagen_url" accept="image/*" onchange="previewImage(event)">
+               <img id="imagePreview" style="display: none;">
+               <textarea name="descripcion" placeholder="Descripción" required></textarea>
+               <select name="categoria">
+                   <option value="Estudiantes">Evento para Estudiantes</option>
+                   <option value="Profesores">Evento para Profesores</option>
+                   <option value="Universidad">Evento para Comunidad Universitaria</option>
+               </select>
+               <div class="button-group">
+                   <button id="formSubmitButton" type="submit">Crear Evento</button>
+                   <button id="discardCreationButton" type="button" class="hidden" onclick="discardChanges()">Cancelar Creación</button>
+                   <button id="discardChangesButton" type="button" class="hidden" onclick="discardChanges()">Descartar Cambios</button>
+               </div>
+           </form>
+       </div>
+   
+       <!-- Contenedor de eventos -->
+       <div id="pendingEventsContainer" class="card hidden">
+           <h2>Eventos Pendientes</h2>
+           <ul id="pendingEventsList">
+               <!-- Eventos pendientes dinámicos -->
+           </ul>
+       </div>
+   
+       <div id="adminEventsContainer" class="card hidden">
+           <h2>Editar Eventos</h2>
+           <ul id="adminEventsList">
+               <!-- Lista de eventos para editar -->
+           </ul>
+       </div>
+   
+       <div id="deleteEventsContainer" class="card hidden">
+           <h2>Eliminar Eventos</h2>
+           <ul id="deleteEventList">
+               <!-- Lista de eventos para eliminar -->
+           </ul>
+       </div>
+   
+       <button class="volver-btn" onclick="window.location.href='/logout'">Volver</button>
+   
     
     <!------------------------------------------------------------------>
 <footer class="shared-footer">
@@ -111,17 +281,6 @@
 
 
 
-<style>
-    body{
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        height: 100%;
-    
-    }
-</style>
-
-
 
 <script>
 
@@ -138,7 +297,8 @@
     });
     //-------------------------------------------
 
-function resetForm() {
+
+    function resetForm() {
     const eventForm = document.getElementById('eventForm');
 
     // Restablecer todos los valores de los campos del formulario
@@ -171,21 +331,17 @@ function resetForm() {
     });
 }
 
-
-
-
-
         function showCreateEventForm() {
             
             resetForm(); // Limpia el formulario antes de mostrarlo
             // Mostrar el botón "Cancelar Creación"
             document.getElementById('eventFormContainer').classList.remove('hidden');
             document.getElementById('discardCreationButton').classList.remove('hidden');
+            document.getElementById('discardChangesButton').classList.remove('hidden'); // Aquí
             document.getElementById('adminEventsContainer').classList.add('hidden');
             document.getElementById('pendingEventsContainer').classList.add('hidden'); 
             document.getElementById('deleteEventsContainer').classList.add('hidden');
-            
-        }
+         }
 
         function resetForm() {
     const eventForm = document.getElementById('eventForm');
@@ -235,8 +391,12 @@ function resetForm() {
                     events.forEach(event => {
                         const listItem = document.createElement('li');
                         listItem.id = `event-${event.ID_EVENTO}`;
+
+                        const horaInicio = event.Hora_Inicio.slice(0, 5); // "HH:mm"
+                        const horaFin = event.Hora_Fin.slice(0, 5);  
+
                         listItem.innerHTML = `
-                            <strong>${event.Nombre}</strong> - ${event.Fecha} ${event.Hora_Inicio} a ${event.Hora_Fin}
+                            <strong>${event.Nombre}</strong> -- ${event.Fecha.split('T')[0]} de ${horaInicio} a ${horaFin}
                             <button onclick="updateEventStatus(${event.ID_EVENTO}, 'Aceptado')">Aprobar</button>
                             <button onclick="updateEventStatus(${event.ID_EVENTO}, 'Denegado')">Denegar</button>
                         `;
@@ -269,8 +429,12 @@ editEventsButton.addEventListener('click', () => {
 
             events.forEach(event => {
                 const listItem = document.createElement('li');
+
+                const horaInicio = event.Hora_Inicio.slice(0, 5); // "HH:mm"
+                const horaFin = event.Hora_Fin.slice(0, 5); 
+
                 listItem.innerHTML = `
-                    <strong>${event.Nombre}</strong> - ${event.Fecha} ${event.Hora_Inicio} a ${event.Hora_Fin} - ${event.Categoria}
+                    <strong>${event.Nombre}</strong> --  ${event.Fecha.split('T')[0]} de ${horaInicio} a ${horaFin} -- ${event.Categoria}
                     <button onclick="editEvent(${event.ID_EVENTO}, '${event.Nombre}', '${event.Descripcion}', '${event.Fecha}', '${event.Hora_Inicio}', '${event.Hora_Fin}', '${event.Ubicacion}', '${event.Organizador}', '${event.Categoria}', '${encodeURIComponent(event.imagen_url)}')">Editar</button>
                 `;
                 adminEventsList.appendChild(listItem);
@@ -404,9 +568,13 @@ function discardChanges() {
 
                     events.forEach(event => {
                         const listItem = document.createElement('li');
+
+                        const horaInicio = event.Hora_Inicio.slice(0, 5); // "HH:mm"
+                        const horaFin = event.Hora_Fin.slice(0, 5); 
+
                         listItem.id = `event-${event.ID_EVENTO}`;
                         listItem.innerHTML = `
-                            <strong>${event.Nombre}</strong> - ${event.Fecha} ${event.Hora_Inicio} a ${event.Hora_Fin} - ${event.Categoria}
+                            <strong>${event.Nombre}</strong> -- ${event.Fecha.split('T')[0]} de ${horaInicio} a ${horaFin} -- ${event.Categoria}
                             <button onclick="deleteEvent(${event.ID_EVENTO})">Eliminar</button>
                         `;
                         eventList.appendChild(listItem);

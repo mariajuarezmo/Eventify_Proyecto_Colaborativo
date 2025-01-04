@@ -26,11 +26,13 @@
     <div class="card">
         <h2>Cambia tu contraseña</h2>
         <form id="newPasswordForm">
-            <input class="input-field" type="password" placeholder="Nueva contraseña" required>
-            <input class="input-field" type="password" placeholder="Repite la nueva contraseña" required>
-            <button class="btn-primary">Guardar nueva contraseña</button>
+            <input id="newPassword" type="password" placeholder="Nueva contraseña" required>
+            <input id="confirmPassword" type="password" placeholder="Repite la nueva contraseña" required>
+            <p id="passwordError" style="color: red; display: none;">Las contraseñas no coinciden</p>
+            <button class="btn-primary" id="submitButton" type="submit" disabled>Guardar nueva contraseña</button>
         </form>
         <p><a href="PaginaInicial.html">Volver a la página inicial</a></p>
+        <div id="message"></div> <!-- Para mostrar mensajes de éxito o error -->
     </div>
 </div>
 
@@ -58,21 +60,90 @@
 
 
 
-    <script src="../js/newpass.js">
+    <script>
         
-    //BOTONES DEL HEADER-------------------------------------------
-    const login=document.getElementById("login-btn");
-    const registro= document.getElementById("register-btn");
+        //BOTONES DEL HEADER-------------------------------------------
+        const login=document.getElementById("login-btn");
+        const registro= document.getElementById("register-btn");
 
-    login.addEventListener('click', () => {
-        window.location.href="login.html"
-    });
+        login.addEventListener('click', () => {
+            window.location.href="login.html"
+        });
 
-    registro.addEventListener('click', () => {
-        window.location.href="registro.html"
-    });
-    //-------------------------------------------
+        registro.addEventListener('click', () => {
+            window.location.href="registro.html"
+        });
+        //-------------------------------------------
 
+        const newPasswordInput = document.getElementById("newPassword");
+        const confirmPasswordInput = document.getElementById("confirmPassword");
+        const passwordError = document.getElementById("passwordError");
+        const submitButton = document.getElementById("submitButton");
+
+        // Función para validar si las contraseñas coinciden
+        function validatePasswords() {
+            if (newPasswordInput.value === confirmPasswordInput.value && newPasswordInput.value !== "") { //para comprobar que las contraseñas coinciden y no es nulo
+                passwordError.style.display = "none";
+                submitButton.disabled = false; // Habilitar el botón si las contraseñas coinciden
+            } else {
+                passwordError.style.display = "block"; // Mostrar error si no coinciden
+                submitButton.disabled = true; // Deshabilitar el botón si no coinciden
+            }
+        }
+
+        // Añadir listeners para validar contraseñas en tiempo real
+        newPasswordInput.addEventListener("input", validatePasswords);
+        confirmPasswordInput.addEventListener("input", validatePasswords);
+
+        // Lógica para manejar el envío del formulario
+        document.getElementById("newPasswordForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const newPassword = newPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (newPassword !== confirmPassword) { //este funcion no es repetitivo, esto es para el envio de los datos a la bdd, el anterior era para frontend para habilitar el boton o no
+                passwordError.textContent = "Las contraseñas no coinciden.";
+                passwordError.style.display = "block";
+                return;
+            }
+
+            // Obtener el token desde la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get("token");
+
+            if (!token) {
+                document.getElementById("message").textContent = "El token es inválido";
+                document.getElementById("message").style.color = "red";
+                return;
+            }
+
+            try {
+                // Enviar nueva contraseña al backend
+                const response = await fetch("http://localhost:5501/update-password", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ token, newPassword }),
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || "Error al actualizar la contraseña.");
+                }
+
+                // Mostrar mensaje de éxito
+                document.getElementById("message").textContent = result.message;
+                document.getElementById("message").style.color = "green";
+            } catch (error) {
+                // Mostrar mensaje de error
+                console.error(error);
+                document.getElementById("message").textContent = error.message;
+                document.getElementById("message").style.color = "red";
+            }
+        });    
     </script>
 
     
@@ -120,7 +191,7 @@
     
 
         /* Inputs */
-        .input-field {
+        input {
             width: 80%;
             padding: 10px 15px;
             margin-bottom: 20px;
