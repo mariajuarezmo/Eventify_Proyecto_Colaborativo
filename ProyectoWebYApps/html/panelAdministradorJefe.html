@@ -26,6 +26,18 @@
             margin-bottom: 20px;
         }
 
+        #discardChangesButton {
+            color: white;
+            background-color: #dc3545;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        #discardChangesButton:hover {
+        background-color: #c82333;
+        }
+
         #adminUserActions button {
             background-color: #8178e7;
             color: white;
@@ -95,7 +107,8 @@
             background-color: #08552c;
         }
 
-        #editUserFormContainer button {
+
+        #saveChangesButton {
             background-color: #28a745;
             color: white;
             border: none;
@@ -104,7 +117,7 @@
             cursor: pointer;
         }
 
-        #editUserFormContainer button:hover {
+        #saveChangesButton:hover {
             background-color: #218838;
         }
 
@@ -126,6 +139,7 @@
         .volver-btn:hover {
             background-color: #fbb53d;
         }
+
     </style>
 </head>
 <body>
@@ -133,7 +147,9 @@
     <!----------------------------------------------------->
      <header class="shared-header">
         <span class="logo">
-            <img src="../img/logo_eventify.png" alt="Logo" width="170" height="50">
+            <a href="PaginaInicial.html" onclick="logoutAndRedirect(event)">
+                <img src="../img/logo_eventify.png" alt="Logo" width="170" height="50">
+            </a>
         </span>
         <nav class="nav">
             <button id="login-btn">Login</button>
@@ -176,7 +192,7 @@
  
      <div id="editUserFormContainer" class="card hidden">
          <h2>Editar Usuario</h2>
-         <form id="editUserForm" action="/updateUser" method="POST">
+         <form id="editUserForm" action="/adminJefe/updateUser" method="POST">
              <input type="hidden" name="id_usuario" id="editUserId">
              <input type="text" id="username" name="nombre" placeholder="Nombre de usuario" required>
              <input type="password" id="password" name="contraseña" placeholder="Contraseña" required>
@@ -189,7 +205,8 @@
                  <option value="Dirección">Dirección</option>
                  <option value="Admin">Admin</option>
              </select>
-             <button type="submit">Guardar Cambios</button>
+             <button id="saveChangesButton" type="submit" >Guardar Cambios</button>
+             <button id="discardChangesButton" type="button" onclick="discardChanges()">Descartar Cambios</button>
          </form>
      </div>
  
@@ -237,6 +254,8 @@
             document.getElementById('pendingRegistrations').classList.remove('hidden');
             document.getElementById('deleteUserContainer').classList.add('hidden');
             document.getElementById('editUsersContainer').classList.add('hidden');
+            document.getElementById('editUserFormContainer').classList.add('hidden');
+
 
 
             fetch('/adminJefe/pendingRegistrations')
@@ -296,6 +315,8 @@
             document.getElementById('deleteUserContainer').classList.remove('hidden');
             document.getElementById('pendingRegistrations').classList.add('hidden');
             document.getElementById('editUsersContainer').classList.add('hidden');
+            document.getElementById('editUserFormContainer').classList.add('hidden');
+
             
             fetch('/adminJefe/getAllUsers')
                 .then(response => response.json())
@@ -345,6 +366,7 @@
             document.getElementById('editUsersContainer').classList.remove('hidden');
             document.getElementById('deleteUserContainer').classList.add('hidden');
             document.getElementById('pendingRegistrations').classList.add('hidden');
+            document.getElementById('editUserFormContainer').classList.add('hidden');
             
             fetch('/adminJefe/getAllUsers')
                 .then(response => response.json())
@@ -373,20 +395,75 @@
 
 
         function editUser(id, nombre, contraseña, email, rol) {
-            document.getElementById('editUserFormContainer').classList.remove('hidden');
-            document.getElementById('editUsersContainer').classList.add('hidden');
-            document.getElementById('deleteUserContainer').classList.add('hidden');
-            document.getElementById('pendingRegistrations').classList.add('hidden');
-            
-            // Pasar los valores seleccionados al formulario
-            document.getElementById('editUserId').value = id;
-            document.getElementById('username').value = nombre;
-            document.getElementById('password').value = contraseña;
-            document.getElementById('email').value = email;
-            document.getElementById('role').value = rol;
+    const editUserFormContainer = document.getElementById('editUserFormContainer');
+    const discardChangesButton = document.getElementById('discardChangesButton');
+
+    // Mostrar el formulario de edición y el botón de descartar
+    editUserFormContainer.classList.remove('hidden');
+    discardChangesButton.classList.remove('hidden');
+
+    // Ocultar otros contenedores
+    document.getElementById('editUsersContainer').classList.add('hidden');
+    document.getElementById('deleteUserContainer').classList.add('hidden');
+    document.getElementById('pendingRegistrations').classList.add('hidden');
+
+    // Pasar los valores al formulario
+    document.getElementById('editUserId').value = id;
+    document.getElementById('username').value = nombre;
+    document.getElementById('password').value = contraseña;
+    document.getElementById('email').value = email;
+    document.getElementById('role').value = rol;
+}
+
+document.getElementById('editUserForm').addEventListener('submit', function (event) {
+    event.preventDefault(); // Evitar el comportamiento por defecto del formulario
+
+    const id = document.getElementById('editUserId').value;
+    const nombre = document.getElementById('username').value;
+    const contraseña = document.getElementById('password').value;
+    const email = document.getElementById('email').value;
+    const rol = document.getElementById('role').value;
+
+    // Crear el cuerpo de la solicitud
+    const formData = new URLSearchParams();
+    formData.append('id_usuario', id);
+    formData.append('nombre', nombre);
+    formData.append('contraseña', contraseña);
+    formData.append('email', email);
+    formData.append('rol', rol);
+
+    // Enviar la solicitud
+    fetch('/adminJefe/updateUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString(),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message); // Mostrar mensaje de éxito con alert
+                showEditUsers(); // Redirigir a la lista de usuarios para edición
+            } else {
+                alert(data.message); // Mostrar mensaje de error con alert
+            }
+        })
+        .catch(error => {
+            console.error('Error al actualizar el usuario:', error);
+            alert('Error al guardar los cambios. Inténtalo nuevamente.'); // Mostrar error con alert
+        });
+});
 
 
-        }
+function discardChanges() {
+    // Resetear el formulario
+    document.getElementById('editUserForm').reset();
+
+    // Ocultar el contenedor del formulario de edición
+    document.getElementById('editUserFormContainer').classList.add('hidden');
+
+    // Mostrar el contenedor de la lista de usuarios
+    document.getElementById('editUsersContainer').classList.remove('hidden');
+}
 
 
         // Cargar las solicitudes al cargar la página

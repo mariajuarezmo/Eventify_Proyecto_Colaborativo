@@ -25,6 +25,7 @@
      <div class="login-container">
         <div class="login-card">
             <h2>Inicio de Sesión</h2>
+            <div id="error-message" class="hidden"></div>
             <form id="loginForm" action="/login" method="POST">
                 <input type="text" id="loginUsername" name="nombre" placeholder="Nombre de usuario" required>
                 <input type="password" id="loginPassword" name="contraseña" placeholder="Contraseña" required>
@@ -72,10 +73,39 @@
         window.location.href="registro.html"
     });
     //-------------------------------------------
-    
+     
+    document.getElementById('loginForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // Evitar el envío normal del formulario
 
-    
+        const nombre = document.getElementById('loginUsername').value;
+        const contraseña = document.getElementById('loginPassword').value;
 
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nombre, contraseña })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Redirigir al usuario según el rol
+                window.location.href = result.redirectUrl;
+            } else {
+                // Mostrar mensaje de error
+                const errorMessageDiv = document.getElementById('error-message');
+                errorMessageDiv.textContent = result.message;
+                errorMessageDiv.classList.remove('hidden'); // Mostrar el mensaje de error
+                errorMessageDiv.style.display = 'block'; // Asegurar que sea visible
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
+    
 
 </script>
 
@@ -170,6 +200,32 @@
     text-decoration: underline;
 }
 
+#error-message {
+    color: rgb(193, 26, 26);
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    text-align: center;
+    display: none; /* Oculto por defecto */
+}
+.hidden {
+    display: none;
+}
+
+#error-message {
+    color: white;
+    background-color: rgba(255, 0, 0, 0.525);
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    text-align: center;
+    display: none; /* Oculto por defecto */
+}
+.hidden {
+    display: none;
+}
     
 </style>
 

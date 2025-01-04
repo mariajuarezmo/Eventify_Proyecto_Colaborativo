@@ -8,7 +8,7 @@ router.post('/login', (req, res) => {
     const { nombre, contraseña } = req.body;
 
     if (!nombre || !contraseña) {
-        return res.send("<script>alert('Todos los campos son obligatorios.'); window.history.back();</script>");
+        return res.json({ success: false, message: 'Todos los campos son obligatorios' });
     }
 
     const loginQuery = "SELECT * FROM Usuarios WHERE nombre = ?";
@@ -16,7 +16,7 @@ router.post('/login', (req, res) => {
         if (err) throw err;
 
         if (results.length === 0) {
-            return res.send("<script>alert('Usuario no registrado o contraseña incorrecta.'); window.history.back();</script>");
+            return res.json({ success: false, message: 'Usuario no registrado o contraseña incorrecta.' });
         }
 
         const user = results[0];
@@ -24,7 +24,7 @@ router.post('/login', (req, res) => {
             if (err) throw err;
 
             if (!match) {
-                return res.send("<script>alert('Usuario no registrado o contraseña incorrecta.'); window.history.back();</script>");
+                return res.json({ success: false, message: 'Usuario no registrado o contraseña incorrecta.' });
             }
 
             // Guardar datos del usuario en la sesión
@@ -38,15 +38,20 @@ router.post('/login', (req, res) => {
             console.log('Sesión iniciada:', req.session.user);
 
             const validRoles = ['Estudiante', 'Profesor', 'Coordinador', 'Dirección'];
+            let redirectUrl;
+
             if (validRoles.includes(user.rol)) {
-                return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/panelUsuario.html';</script>");
+                redirectUrl = '/panelUsuario.html';
             } else if (user.rol === 'Admin') {
-                return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/panelAdministrador.html';</script>");
+                redirectUrl = '/panelAdministrador.html';
             } else if (user.rol === 'AdminJefe') {
-                return res.send("<script>alert('Inicio de sesión exitoso.'); window.location.href='/panelAdministradorJefe.html';</script>");
+                redirectUrl = '/panelAdministradorJefe.html';
             } else {
-                return res.send("<script>alert('Rol desconocido.'); window.history.back();</script>");
+                return res.json({ success: false, message: 'Rol desconocido.' });
             }
+
+            // Respuesta exitosa con URL de redirección
+            return res.json({ success: true, redirectUrl });
         });
     });
 });

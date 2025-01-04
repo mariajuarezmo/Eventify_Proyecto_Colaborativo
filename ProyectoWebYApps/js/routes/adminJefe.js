@@ -145,14 +145,12 @@ router.delete('/deleteUser', (req, res) => {
     });
 });
 
-
-// Ruta para actualizar un usuario
 router.post('/updateUser', (req, res) => {
     const { id_usuario, nombre, contraseña, email, rol } = req.body;
 
     // Validar que los campos obligatorios estén presentes
     if (!id_usuario || !nombre || !contraseña || !email || !rol) {
-        return res.send("<script>alert('Todos los campos son obligatorios.'); window.history.back();</script>");
+        return res.status(400).json({ success: false, message: 'Todos los campos son obligatorios.' });
     }
 
     // Query para actualizar los datos del usuario
@@ -166,14 +164,14 @@ router.post('/updateUser', (req, res) => {
     con.query(updateUserQuery, [nombre, contraseña, email, rol, id_usuario], (err, result) => {
         if (err) {
             console.error('Error al actualizar el usuario:', err);
-            return res.send("<script>alert('Error interno al actualizar el usuario.'); window.history.back();</script>");
+            return res.status(500).json({ success: false, message: 'Error interno al actualizar el usuario.' });
         }
 
         if (result.affectedRows === 0) {
-            return res.send("<script>alert('Usuario no encontrado o no se pudo actualizar.'); window.history.back();</script>");
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado o no se pudo actualizar.' });
         }
 
-        res.send("<script>alert('Usuario actualizado con éxito.'); window.history.back();</script>");
+        res.json({ success: true, message: 'Usuario actualizado con éxito.' });
     });
 });
 

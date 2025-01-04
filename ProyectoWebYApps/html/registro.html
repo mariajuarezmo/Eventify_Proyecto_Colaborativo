@@ -24,6 +24,8 @@
    <div class="register-container">
         <div class="register-card">
             <h2>Registro</h2>
+            <div id="error-message" class="hidden"></div>
+            <br>
             <form id="registerForm" action="/register" method="POST">
                 <input type="text" id="username" name="nombre" placeholder="Nombre de usuario" required>
                 <input type="password" id="password" name="contraseña" placeholder="Contraseña" required>
@@ -165,6 +167,21 @@
 .register-card p a:hover {
     text-decoration: underline;
 }
+ /* Estilo para el mensaje de error */
+ #error-message {
+        color: rgb(193, 26, 26);
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        font-size: 14px;
+        text-align: center;
+        display: none; /* Oculto por defecto */
+    }
+    .hidden {
+        display: none;
+    }
+
+
 </style>
 
 <script>
@@ -181,28 +198,62 @@
         window.location.href="registro.html"
     });
     //-------------------------------------------
-    const registerButton = document.getElementById('registerButton');
-    // Registro de usuario
-    registerButton.addEventListener('click', () => {
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const role = document.getElementById('role').value;
+        // Manejar el evento de envío del formulario de registro
+        document.getElementById('registerForm').addEventListener('submit', async function(event) {
+    event.preventDefault(); // Evitar el envío normal del formulario
 
-    if (!username || !password || !role) {
-        alert('Por favor, completa todos los campos.');
+    // Obtener los valores de los campos del formulario
+    const nombre = document.getElementById('username').value.trim();
+    const contraseña = document.getElementById('password').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const rol = document.getElementById('role').value;
+
+    // Validar que todos los campos estén completos
+    const errorMessageDiv = document.getElementById('error-message');
+    if (!nombre || !contraseña || !email || !rol) {
+        errorMessageDiv.textContent = 'Todos los campos son obligatorios.';
+        errorMessageDiv.style.color = 'red';
+        errorMessageDiv.classList.remove('hidden'); // Mostrar el mensaje de error
         return;
     }
 
-    // Enviar datos al backend
-    fetch('http://localhost:3000/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre: username, contraseña: password, rol: role })
-    })
-        .then(response => response.json())
-        .then(data => alert(data.message))
-        .catch(error => console.error('Error:', error));
+    try {
+        // Realizar la solicitud al servidor
+        const response = await fetch('/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nombre, contraseña, email, rol }) // Enviar los datos como JSON
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Mostrar mensaje de éxito en lugar de alert
+            errorMessageDiv.textContent = result.message;
+            errorMessageDiv.style.color = 'green';
+            errorMessageDiv.style.display = 'block'; // Asegurar que el mensaje sea visible
+
+            // Opcional: Limpiar los campos del formulario después del registro exitoso
+            document.getElementById('registerForm').reset();
+        } else {
+            // Mostrar mensaje de error
+            errorMessageDiv.textContent = result.message;
+            errorMessageDiv.style.color = 'red';
+            errorMessageDiv.style.display = 'block'; // Asegurar que el mensaje sea visible
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        errorMessageDiv.textContent = 'Error al procesar la solicitud. Inténtalo nuevamente.';
+        errorMessageDiv.style.color = 'red';
+        errorMessageDiv.style.display = 'block'; // Asegurar que el mensaje sea visible
+    }
 });
+
+</script>
+
+
 </script>
 
 </html>

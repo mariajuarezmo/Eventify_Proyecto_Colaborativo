@@ -51,7 +51,7 @@ function bloquearRutasPorRol(req, res, next) {
 
 // Middleware para bloquear rutas sin sesión activa
 function bloquearRutasSinSesion(req, res, next) {
-    const rutasBloqueadasSinSesion = ['/panelUsuario.html', '/panelAdministrador.html', '/panelAdministradorJefe.html'];
+    const rutasBloqueadasSinSesion = ['/panelUsuario.html', '/panelAdministrador.html', '/panelAdministradorJefe.html','/resetpass.html', '/newpass.html'];
     const esRutaBloqueada = rutasBloqueadasSinSesion.some(ruta => req.path.startsWith(ruta));
 
     if (!req.session || !req.session.user) {
