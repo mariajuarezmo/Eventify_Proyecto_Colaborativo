@@ -65,7 +65,7 @@ h1 {
 
 /* Eventos por categoría */
 .event-estudiantes {
-    background-color: #7fafe1;
+    background-color: #4d9aec;
     color: rgb(0, 0, 0);
     padding: 10px;
     margin-bottom: 5px;
@@ -91,6 +91,77 @@ h1 {
     font-size: 0.9rem;
 }
 
+/* Contenedor del mapa de diseño */
+.legend-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+/* Elemento individual del mapa de diseño */
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+/* Línea de color para cada categoría */
+.legend-line {
+    width: 20px;
+    height: 10px;
+    border-radius: 5px;
+    margin-right: 8px;
+}
+
+.legend-line.estudiantes {
+    background-color: #4d9aec;
+}
+
+.legend-line.profesores {
+    background-color: #f5ff62;
+}
+
+.legend-line.universidad {
+    background-color: #00f439c7;
+}
+
+
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+    #calendar {
+        gap: 3px; /* Reducir espacio entre celdas */
+    }
+
+    #calendar .header {
+        font-size: 0.9rem; /* Reducir tamaño de texto */
+        padding: 8px; /* Reducir padding */
+    }
+
+    #calendar div {
+        font-size: 0.9rem; /* Reducir tamaño del texto */
+        padding: 10px; /* Reducir padding en las celdas */
+    }
+}
+
+@media (max-width: 480px) {
+    #calendar {
+        gap: 2px; /* Más compacto en dispositivos muy pequeños */
+    }
+
+    #calendar .header {
+        font-size: 0.8rem;
+        padding: 6px;
+    }
+
+    #calendar div {
+        font-size: 0.8rem;
+        padding: 6px;
+    }
+}
+
     </style>
 
 </head>
@@ -112,6 +183,26 @@ h1 {
 
 <main>
     <h1>Calendario</h1>
+
+     <!-- Mapa de diseño -->
+     <div class="legend-container">
+        <span class="legend-item">
+            <div class="legend-line estudiantes"></div>
+            Estudiantes
+        </span>
+        <span class="legend-item">
+            <div class="legend-line profesores"></div>
+            Profesores
+        </span>
+        <span class="legend-item">
+            <div class="legend-line universidad"></div>
+            Comunidad Universitaria
+        </span>
+    </div>
+    <div class="calendar-container">
+        <div id="calendar"></div>
+    </div>
+
     <div class="time-container">
         <p id="current-time"></p>
     </div>

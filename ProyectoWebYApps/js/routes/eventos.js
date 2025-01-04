@@ -54,7 +54,7 @@ router.post('/eventRegister', upload.single('imagen_url'), async (req, res) => {
     const { titulo, fecha, hora_inicio, hora_fin, ubicacion, organizador, descripcion, categoria } = req.body;
 
     if (!req.session || !req.session.user) {
-        return res.send("<script>alert('Debes iniciar sesión para crear un evento.'); window.location.href='/index.html';</script>");
+        return res.send("<script>alert('Debes iniciar sesión para crear un evento.'); window.location.href='/login.html';</script>");
     }
 
     if (!titulo || !fecha || !hora_inicio || !hora_fin || !ubicacion || !organizador || !descripcion || !categoria) {
@@ -288,7 +288,7 @@ router.get('/events', (req, res) => {
 router.get('/userEvents', (req, res) => {
     // Verificar si el usuario ha iniciado sesión
     if (!req.session || !req.session.user) {
-        return res.send("<script>alert('Debes iniciar sesión para ver tus eventos.'); window.location.href='/index.html';</script>");
+        return res.send("<script>alert('Debes iniciar sesión para ver tus eventos.'); window.location.href='/login.html';</script>");
     }
 
     const userId = req.session.user.id; // Obtener el ID del usuario desde la sesión
@@ -326,7 +326,7 @@ router.post('/updateEvent', upload.single('imagen_url'), (req, res) => {
 
     // Verificar si el usuario ha iniciado sesión
     if (!req.session || !req.session.user) {
-        return res.send("<script>alert('Debes iniciar sesión para editar eventos.'); window.location.href='/index.html';</script>");
+        return res.send("<script>alert('Debes iniciar sesión para editar eventos.'); window.location.href='/login.html';</script>");
     }
 
     const userId = req.session.user.id; // Obtener el ID del usuario desde la sesión
@@ -340,7 +340,7 @@ router.post('/updateEvent', upload.single('imagen_url'), (req, res) => {
         }
 
         if (results.length === 0) {
-            return res.send("<script>alert('Usuario no encontrado.'); window.location.href='/index.html';</script>");
+            return res.send("<script>alert('Usuario no encontrado.'); window.location.href='/paginaInicial.html';</script>");
         }
 
         const userRole = results[0].rol;

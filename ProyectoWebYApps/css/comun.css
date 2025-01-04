@@ -1,25 +1,29 @@
 /* -------------------------------- HEADER -------------------------------- */
+/* Header responsive */
 .shared-header {
     display: flex;
     justify-content: space-between;
-    z-index: 10; /* Eleva el header por encima del contenedor */
     align-items: center;
-    padding: 10px 20px;
+    padding: 10px 15px;
     background-color: #ffffff;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     position: relative;
 }
-
-.shared-header p {
-    display: inline-block;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    text-align: center;
+.nav {
+    display: flex; /* Flexbox para mantener los botones en horizontal */
+    gap: 10px; /* Espacio entre los botones */
+    align-items: center;
 }
 
-.shared-header .nav a {
-    margin: 0 10px;
+.shared-header .nav {
+    display: flex;
+    gap: 15px;
+}
+
+.nav button {
+    padding: 8px 15px;
     font-size: 14px;
-    color: #333;
+    border-radius: 5px;
 }
 
 .shared-header #register-btn {
@@ -50,17 +54,49 @@
     background-color: #49b9ed;
 }
 
+/* Estilos para pantallas pequeñas */
+@media (max-width: 768px) {
+    .shared-header {
+        flex-wrap: wrap; /* Permitir que los elementos se apilen en pantallas pequeñas */
+        justify-content: center;
+        padding: 10px;
+    }
+
+    .nav {
+        flex-wrap: nowrap; /* Evita que los botones se apilen */
+        justify-content: flex-end; /* Opcional: alinear los botones al final */
+    }
+
+    .nav button {
+        font-size: 12px; /* Ajustar tamaño del texto si es necesario */
+        padding: 8px 12px;
+        margin-left: 10px;
+    }
+
+    .logo img {
+        max-width: 150px;
+        height: auto;
+    }
+}
 
 
 
 /* -------------------------------- FOOTER -------------------------------- */
+/* Footer responsive */
 .shared-footer {
     background-color: #333333;
     color: #ffffff;
-    padding: 20px 10px;
+    padding: 15px 10px;
     text-align: center;
     font-size: 14px;
-    position: relative;
+}
+
+.shared-footer .footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
 }
 
 .shared-footer a {
@@ -72,24 +108,35 @@
     text-decoration: underline;
 }
 
-.shared-footer .footer-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
 .shared-footer .social-icons {
     display: flex;
     justify-content: center;
     gap: 15px;
+    flex-wrap: wrap; /* Permitir que los iconos se envuelvan si no caben en una fila */
 }
 
 .shared-footer .social-icons img {
-    cursor: pointer;
+    width: 24px;
+    height: 24px;
     transition: transform 0.3s;
 }
 
-.shared-footer .social-icons img:hover {
-    transform: scale(1.1);
+@media (max-width: 768px) {
+    .shared-footer {
+        font-size: 12px; /* Reducir tamaño del texto en pantallas pequeñas */
+        padding: 10px;
+    }
+
+    .shared-footer .footer-content {
+        gap: 5px;
+    }
+
+    .shared-footer .social-icons {
+        gap: 10px; /* Reducir el espacio entre iconos */
+    }
+
+    .shared-footer .social-icons img {
+        width: 20px; /* Iconos más pequeños */
+        height: 20px;
+    }
 }
