@@ -119,6 +119,22 @@
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     }
 
+    .denyButton, .deleteButton{
+        background-color: #c82333;
+    }
+
+    .denyButton:hover, .deleteButton:hover{
+        background-color: #f40101;
+    }
+
+    .checkButton{
+        background-color: #28a745;
+    }
+
+    .checkButton:hover{
+        background-color: #08552c;
+    }
+
     #pendingEventsContainer button,
     #adminEventsContainer button,
     #deleteEventsContainer button {
@@ -127,12 +143,15 @@
         margin-bottom: 10px;
         padding: 10px;
         width: 10%;
-        background-color: #1a4fcc;
+        
         color: white;
         border: none;
         border-radius: 5px;
         cursor: pointer;
         font-size: 12px;
+    }
+    #adminEventsContainer button{
+        background-color: #28a745;
     }
 
     #formSubmitButton {
@@ -146,7 +165,7 @@
     }
 
     #formSubmitButton:hover {
-        background-color: #218838;
+        background-color:#08552c;
     }
 
     #discardCreationButton, #discardChangesButton {
@@ -159,16 +178,13 @@
         font-size: 1em;
     }
 
+
     #discardCreationButton:hover, #discardChangesButton:hover {
         background-color: #c82333;
     }
 
-    #pendingEventsContainer button:hover{
-        background-color: #f8693e;
-
-    }
     #adminEventsContainer button:hover{
-        background-color: #218838;
+        background-color: #08552c;
 
     }
     #deleteEventsContainer button:hover {
@@ -408,8 +424,8 @@
 
                         listItem.innerHTML = `
                             <strong>${event.Nombre}</strong> -- ${event.Fecha.split('T')[0]} de ${horaInicio} a ${horaFin}
-                            <button onclick="updateEventStatus(${event.ID_EVENTO}, 'Aceptado')">Aprobar</button>
-                            <button onclick="updateEventStatus(${event.ID_EVENTO}, 'Denegado')">Denegar</button>
+                            <button class= "checkButton" onclick="updateEventStatus(${event.ID_EVENTO}, 'Aceptado')">Aprobar</button>
+                            <button class= "denyButton" onclick="updateEventStatus(${event.ID_EVENTO}, 'Denegado')">Denegar</button>
                         `;
                         pendingEventsList.appendChild(listItem);
                     });
@@ -593,7 +609,7 @@ function cancelCreation() {
                         listItem.id = `event-${event.ID_EVENTO}`;
                         listItem.innerHTML = `
                             <strong>${event.Nombre}</strong> -- ${event.Fecha.split('T')[0]} de ${horaInicio} a ${horaFin} -- ${event.Categoria}
-                            <button onclick="deleteEvent(${event.ID_EVENTO})">Eliminar</button>
+                            <button class= "deleteButton" onclick="deleteEvent(${event.ID_EVENTO})">Eliminar</button>
                         `;
                         eventList.appendChild(listItem);
                     });
