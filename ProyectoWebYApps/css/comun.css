@@ -7,7 +7,7 @@
     padding: 10px 15px;
     background-color: #ffffff;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    position: relative;
+
 }
 .nav {
     display: flex; /* Flexbox para mantener los botones en horizontal */
@@ -89,6 +89,7 @@
     padding: 15px 10px;
     text-align: center;
     font-size: 14px;
+
 }
 
 .shared-footer .footer-content {
@@ -97,6 +98,7 @@
     align-items: center;
     gap: 10px;
     text-align: center;
+    position: relative;
 }
 
 .shared-footer a {

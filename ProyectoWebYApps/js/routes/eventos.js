@@ -456,14 +456,16 @@ router.get('/event/:id', (req, res) => {
 router.post('/event/:id/register', (req, res) => {
     const eventId = req.params.id;
 
-    const query = `UPDATE Eventos SET num_asistentes = num_asistentes + 1 WHERE id = ?`;
+    // Incrementar el número de asistentes en la base de datos
+    const query = `UPDATE Eventos SET num_asistentes = num_asistentes + 1 WHERE ID_EVENTO = ?`;
+
     con.query(query, [eventId], (err) => {
         if (err) {
             console.error('Error al actualizar asistentes:', err);
             return res.status(500).send('Error interno.');
         }
 
-        res.send("<script>alert('Gracias por confirmar tu asistencia.'); window.location.href='/';</script>");
+        res.send("<script>alert('Gracias por confirmar tu asistencia.'); window.location.href='/paginaInicial.html';</script>");
     });
 });
 

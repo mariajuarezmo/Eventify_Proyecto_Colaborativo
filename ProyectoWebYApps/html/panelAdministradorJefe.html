@@ -7,146 +7,238 @@
     <link rel="stylesheet" href="../css/comun.css">
 
     <style>
-                body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            box-sizing: border-box;
-            min-height: 100vh;
-        }
+  html, body {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        padding: 0;
+    }
 
-        h1 {
-            text-align: center;
-            font-size: 2.5em;
-            margin: 20px 0;
-        }
+    main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin-bottom: 40px;
+        padding: 10px; /* Espaciado adicional para móviles */
+    }
 
-        #adminUserActions {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+    h1 {
+        text-align: center;
+        font-size: 2.5em;
+        margin: 20px 0;
+    }
 
-        #discardChangesButton {
-            color: white;
-            background-color: #dc3545;
-            border: none;
-            border-radius: 5px;
-            padding: 10px;
-            cursor: pointer;
-        }
-        #discardChangesButton:hover {
+    #adminUserActions {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    #discardChangesButton {
+        color: white;
+        background-color: #dc3545;
+        border: none;
+        border-radius: 5px;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    #discardChangesButton:hover {
         background-color: #c82333;
+    }
+
+    #adminUserActions button {
+        background-color: #8178e7;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+        font-size: 1em;
+    }
+
+    #adminUserActions button:hover {
+        background-color: #0056b3;
+    }
+
+    .card {
+        background: #f9f9f9;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        width: 90%; /* Ancho adaptable */
+        max-width: 650px;
+        margin: 20px auto;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    form input, form textarea, form select, form button {
+        width: 94%; /* Ocupa todo el ancho disponible */
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1em;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    ul li {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-wrap: wrap; /* Ajuste en pantallas pequeñas */
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    ul li div {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap; /* Ajusta botones en pantallas pequeñas */
+    }
+
+    ul li button {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        font-size: 0.9em;
+        cursor: pointer;
+        white-space: nowrap; /* Evita que el texto del botón se divida en varias líneas */
+    }
+
+    ul li .denybutton {
+        background-color: #c82333;
+        color: white;
+    }
+
+    ul li .denybutton:hover {
+        background-color: #f40101;
+    }
+
+    ul li .deleteButton {
+        background-color: #cc1a1a;
+        color: white;
+    }
+
+    ul li .deleteButton:hover {
+        background-color: #f40101;
+    }
+
+    ul li button:not(.denybutton):not(.deleteButton) {
+        background-color: #28a745;
+        color: white;
+    }
+
+    ul li button:not(.denybutton):not(.deleteButton):hover {
+        background-color: #218838;
+    }
+
+    #saveChangesButton {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    #saveChangesButton:hover {
+        background-color: #218838;
+    }
+
+    .volver-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px;
+        font-size: 15px;
+        border: none;
+        border-radius: 5px;
+        background-color: #f8693e;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        z-index: 1000;
+    }
+
+    .volver-btn:hover {
+        background-color: #fbb53d;
+    }
+
+    footer .footer-content {
+        text-align: center;
+        padding: 10px;
+        background: #333;
+        color: white;
+    }
+
+    footer .social-icons img {
+        margin: 0 5px;
+        width: 24px;
+        height: 24px;
+    }
+
+    /* Media Queries */
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 2em;
         }
 
         #adminUserActions button {
-            background-color: #8178e7;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px;
-        }
-
-        #adminUserActions button:hover {
-            background-color: #0056b3;
-        }
-
-        .card {
-            background: #f9f9f9;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            width: 85%;
-            max-width: 650px;
-            margin: 20px auto;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        form input, form textarea, form select, form button {
-            width: 95%;
-            margin-bottom: 10px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1em;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
+            font-size: 0.9em;
+            padding: 8px 10px;
         }
 
         ul li {
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            flex-direction: column; /* Apilar contenido */
+            align-items: flex-start;
         }
 
-        .denybutton, .deleteButton{
-            background-color: #c82333;
-        }
-
-        .denybutton:hover, .deleteButton:hover{
-            background-color:#f40101;
-        }
-
-        ul li button {
-            background-color: #25bd48;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 10px;
-            font-size: 12px;
-            margin: 7px;
-            cursor: pointer;
-            
-        }
-
-        ul li button:hover {
-            background-color: #08552c;
-        }
-
-
-        #saveChangesButton {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        #saveChangesButton:hover {
-            background-color: #218838;
+        ul li div {
+            justify-content: flex-start;
+            gap: 5px;
         }
 
         .volver-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 12px;
-            font-size: 15px;
-            border: none;
-            border-radius: 5px;
-            background-color: #f8693e;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            z-index: 1000;
+            font-size: 12px;
+            padding: 10px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        h1 {
+            font-size: 1.5em;
         }
 
-        .volver-btn:hover {
-            background-color: #fbb53d;
+        .card {
+            padding: 15px;
         }
+
+        form input, form textarea, form select, form button {
+            font-size: 0.9em;
+        }
+
+        ul li button {
+            font-size: 0.8em;
+        }
+    }
 
     </style>
 </head>
@@ -166,7 +258,7 @@
     </header>
      <!----------------------------------------------------->
 
-
+    <main>
      <h1>Panel del Administrador Jefe</h1>
 
      <!-- Botones principales del administrador jefe -->
@@ -219,7 +311,7 @@
      </div>
  
      <button class="volver-btn" onclick="window.location.href='/logout'">Volver</button>
- 
+    </main>
     <!------------------------------------------------------------------>
 <footer class="shared-footer">
     <div class="footer-content">
@@ -278,7 +370,7 @@
 
                     requests.forEach(request => {
                         const listItem = document.createElement('li');
-                        listItem.textContent = `${request.nombre} - ${request.rol}`;
+                        listItem.textContent = `${request.nombre} -- ${request.rol}   `;
 
                         const approveButton = document.createElement('button');
                         approveButton.textContent = 'Aceptar';

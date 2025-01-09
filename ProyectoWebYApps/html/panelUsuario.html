@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../css/comun.css">
 
     <style>
-        body {
+ body {
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
@@ -17,20 +17,19 @@
 
         h1 {
             text-align: center;
-            font-size: 2.5em;
+            font-size: 2em; /* Ajuste para móviles */
             margin: 20px 0;
         }
 
-        #userEventsContainer{
+        #userEventsContainer {
             display: flex;
             flex-direction: column;
             align-items: center;
             margin: 20px auto;
-            max-width: 600px; 
-            
+            max-width: 70%; /* Reducir ancho en pantallas pequeñas */
         }
 
-        #userEventsContainer button{
+        #userEventsContainer button {
             border: none;
             border-radius: 5px;
             background-color: rgba(255, 0, 0, 0.549);
@@ -38,12 +37,13 @@
             font-size: 15px;
         }
 
-        #userEventsList li{
-          margin-bottom: 10px;
-          border-radius: 5px;
-          background-color: #f9f9f9;
+        #userEventsList li {
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            padding: 10px; /* Añadido para mejorar legibilidad */
+            word-wrap: break-word; /* Evitar desbordamientos */
         }
-
 
         #userActions {
             text-align: center;
@@ -53,17 +53,15 @@
         #showEventsButton, #createEventButton {
             background-color: #007BFF;
             color: white;
-            padding: 10px 20px;
+            padding: 10px 15px; /* Ajuste para mejor usabilidad */
+            margin: 5px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 1em;
         }
 
-        #showEventsButton:hover {
-            background-color: #0056b3;
-        }
-
-        #createEventButton:hover {
+        #showEventsButton:hover, #createEventButton:hover {
             background-color: #0056b3;
         }
 
@@ -72,7 +70,7 @@
             flex-direction: column;
             align-items: center;
             margin: 20px auto;
-            max-width: 600px;
+            max-width: 90%;
         }
 
         .card {
@@ -85,7 +83,7 @@
         }
 
         form input, form textarea, form select, form button {
-            width: 95%;
+            width: 96%; /* Ajuste para dispositivos móviles */
             margin-bottom: 10px;
             padding: 10px;
             border: 1px solid #ddd;
@@ -99,15 +97,14 @@
             margin-bottom: 10px;
         }
 
-
         #formSubmitButton {
-        background-color: #28a745; /* Verde */
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 20px;
-        cursor: pointer;
-        font-size: 1em;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1em;
         }
 
         #formSubmitButton:hover {
@@ -115,27 +112,27 @@
         }
 
         #discardCreationButton, #discardChangesButton {
-        background-color: #dc3545; /* Rojo */
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 20px;
-        cursor: pointer;
-        font-size: 1em;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1em;
         }
 
         #discardCreationButton:hover, #discardChangesButton:hover {
-        background-color: #c82333;
+            background-color: #c82333;
         }
 
-        .hidden{
+        .hidden {
             display: none !important;
         }
 
         .volver-btn {
-            position: fixed; /* Fija el botón */
-            bottom: 20px; /* Espaciado desde la parte inferior */
-            right: 20px; /* Espaciado desde la derecha */
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
             padding: 12px;
             font-size: 15px;
             border: none;
@@ -144,13 +141,47 @@
             color: white;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            z-index: 1000; /* Asegura que esté sobre otros elementos */
+            z-index: 1000;
         }
 
         .volver-btn:hover {
             background-color: #fbb53d;
         }
-        
+
+        /* Media Queries para móviles */
+        @media screen and (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            #showEventsButton, #createEventButton {
+                font-size: 0.9em;
+                padding: 8px 12px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            form input, form textarea, form select, form button {
+                font-size: 0.9em;
+            }
+
+            #formSubmitButton, #discardCreationButton, #discardChangesButton {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+
+            .volver-btn {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            #userEventsContainer, .card-container {
+                max-width: 87%;
+                padding: 10px;
+            }
+        }
     </style>
 
 </head>

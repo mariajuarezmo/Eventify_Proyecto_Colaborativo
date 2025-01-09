@@ -8,13 +8,23 @@
 
     <style>
 
-body {
-        margin: 0;
-        padding: 0;
-        font-family: Arial, sans-serif;
-        box-sizing: border-box;
-        min-height: 100vh;
-    }
+        html, body {
+            height: 100%; /* Asegura que el body ocupe todo el alto de la ventana */
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+        }
+
+        main {
+            flex: 1; /* Esto hace que el main ocupe todo el espacio disponible */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centrar opcionalmente el contenido */
+            justify-content: center; /* Centrar verticalmente opcionalmente */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin-bottom: 40px;
+        }
 
     h1 {
         text-align: center;
@@ -127,9 +137,7 @@ body {
         margin-top: 10px;
         padding: 10px;
         width: auto; /* Ajustar al contenido */
-        background-color: #1a4fcc;
-        width: 10%;
-        
+        width: 10%; 
         color: white;
         border: none;
         border-radius: 5px;
@@ -157,9 +165,6 @@ body {
         background-color: #218838;
     }
 
-    #deleteEventsContainer button:hover {
-        background-color: #f40101;
-    }
 
     #formSubmitButton {
     background-color: #28a745;
@@ -172,6 +177,13 @@ body {
         color: white;
     }
 
+    .denybutton, .deleteButton{
+        background-color: #c82333;
+    }
+
+    .denybutton:hover, .deleteButton:hover{
+        background-color:#f40101;
+    }
 
     .checkButton{
         background-color: #28a745;
@@ -247,7 +259,7 @@ body {
         </nav>
     </header>
      <!----------------------------------------------------->
-
+        <main>
        <!-- Título del Panel -->
        <h1>Panel del Administrador</h1>
 
@@ -312,7 +324,7 @@ body {
    
        <button class="volver-btn" onclick="window.location.href='/logout'">Volver</button>
    
-    
+        </main>
     <!------------------------------------------------------------------>
 <footer class="shared-footer">
     <div class="footer-content">
@@ -451,8 +463,8 @@ body {
 
                         listItem.innerHTML = `
                             <strong>${event.Nombre}</strong>  ${event.Fecha.split('T')[0]} de ${horaInicio} a ${horaFin}
-                            <button class= "checkButton" onclick="updateEventStatus(${event.ID_EVENTO}, 'Aceptado')">Aprobar</button>
-                            <button class= "denyButton" onclick="updateEventStatus(${event.ID_EVENTO}, 'Denegado')">Denegar</button>
+                            <button class="checkButton" onclick="updateEventStatus(${event.ID_EVENTO}, 'Aceptado')">Aprobar</button>
+                            <button class="denybutton" onclick="updateEventStatus(${event.ID_EVENTO}, 'Denegado')">Denegar</button>
                         `;
                         pendingEventsList.appendChild(listItem);
                     });
