@@ -8,7 +8,7 @@
 
     <style>
 
-    body {
+body {
         margin: 0;
         padding: 0;
         font-family: Arial, sans-serif;
@@ -51,14 +51,14 @@
     }
 
     .card {
-        margin: 50px auto; /* Margen superior para separación del header */
-        max-width: 800px; /* Limitar el ancho del card */
+        margin: 50px auto;
+        max-width: 800px;
         padding: 20px;
         background: #fff;
         border-radius: 8px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         align-items: center;
-        }
+    }
 
     form input, form textarea, form select, form button {
         width: 95%;
@@ -67,7 +67,6 @@
         border: 1px solid #ddd;
         border-radius: 5px;
         font-size: 1em;
-        align-items: center;
     }
 
     #imagePreview {
@@ -99,7 +98,7 @@
         background-color: #fbb53d;
     }
 
-    /* Para contenedores de eventos */
+    /* Estilos para contenedores de eventos */
     #pendingEventsContainer ul,
     #adminEventsContainer ul,
     #deleteEventsContainer ul {
@@ -117,31 +116,18 @@
         background-color: #f9f9f9;
         border: 1px solid #ddd;
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .denyButton, .deleteButton{
-        background-color: #c82333;
-    }
-
-    .denyButton:hover, .deleteButton:hover{
-        background-color: #f40101;
-    }
-
-    .checkButton{
-        background-color: #28a745;
-    }
-
-    .checkButton:hover{
-        background-color: #08552c;
+        display: flex;
+        flex-wrap: wrap; /* Permitir que el contenido se ajuste */
+        align-items: center;
+        justify-content: space-between; /* Espaciado entre texto y botones */
     }
 
     #pendingEventsContainer button,
-    #adminEventsContainer button,
-    #deleteEventsContainer button {
+    #adminEventsContainer button {
         margin-top: 10px;
-        margin-left: 10px;
-        margin-bottom: 10px;
         padding: 10px;
+        width: auto; /* Ajustar al contenido */
+        background-color: #1a4fcc;
         width: 10%;
         
         color: white;
@@ -150,45 +136,86 @@
         cursor: pointer;
         font-size: 12px;
     }
-    #adminEventsContainer button{
-        background-color: #28a745;
-    }
 
-    #formSubmitButton {
-    background-color: #28a745; /* Verde */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 1em;
-    }
-
-    #formSubmitButton:hover {
-        background-color:#08552c;
-    }
-
-    #discardCreationButton, #discardChangesButton {
-        background-color: #dc3545; /* Rojo */
+    #deleteEventsContainer button{
+        margin-top: 10px;
+        padding: 10px;
+        width: auto; /* Ajustar al contenido */
+        background-color: #cc1a1a;
         color: white;
         border: none;
         border-radius: 5px;
-        padding: 10px 20px;
         cursor: pointer;
-        font-size: 1em;
+        font-size: 12px;
     }
 
-
-    #discardCreationButton:hover, #discardChangesButton:hover {
-        background-color: #c82333;
+    #pendingEventsContainer button:hover {
+        background-color: #f8693e;
     }
 
-    #adminEventsContainer button:hover{
-        background-color: #08552c;
-
+    #adminEventsContainer button:hover {
+        background-color: #218838;
     }
+
     #deleteEventsContainer button:hover {
         background-color: #f40101;
+    }
+
+    #formSubmitButton {
+    background-color: #28a745;
+    color: white;
+}
+
+    #discardCreationButton,
+    #discardChangesButton {
+        background-color: #dc3545;
+        color: white;
+    }
+
+
+    .checkButton{
+        background-color: #28a745;
+    }
+    .checkButton:hover{
+        background-color: #08552c;
+    }
+
+        #adminEventsContainer button{
+        background-color: #28a745;
+    }
+
+    /* Media queries para pantallas pequeñas */
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 1.8em;
+            margin: 10px 0;
+        }
+
+        #adminEventActions button {
+            width: 90%; /* Botones más anchos en móviles */
+            margin-bottom: 10px;
+        }
+
+        #pendingEventsContainer li,
+        #adminEventsContainer li,
+        #deleteEventsContainer li {
+            flex-direction: column; /* Cambiar a disposición vertical en móviles */
+            align-items: flex-start;
+        }
+
+        #pendingEventsContainer button,
+        #adminEventsContainer button,
+        #deleteEventsContainer button {
+            width: 100%; /* Botones ocupan todo el ancho */
+            margin-top: 5px; /* Separar botones en móviles */
+        }
+
+        .volver-btn {
+            bottom: 10px;
+            right: 10px;
+            padding: 10px;
+            font-size: 14px;
+        }
     }
 
     </style>
@@ -423,7 +450,7 @@
                         const horaFin = event.Hora_Fin.slice(0, 5);  
 
                         listItem.innerHTML = `
-                            <strong>${event.Nombre}</strong> -- ${event.Fecha.split('T')[0]} de ${horaInicio} a ${horaFin}
+                            <strong>${event.Nombre}</strong>  ${event.Fecha.split('T')[0]} de ${horaInicio} a ${horaFin}
                             <button class= "checkButton" onclick="updateEventStatus(${event.ID_EVENTO}, 'Aceptado')">Aprobar</button>
                             <button class= "denyButton" onclick="updateEventStatus(${event.ID_EVENTO}, 'Denegado')">Denegar</button>
                         `;
@@ -461,7 +488,7 @@ editEventsButton.addEventListener('click', () => {
                 const horaFin = event.Hora_Fin.slice(0, 5); 
 
                 listItem.innerHTML = `
-                    <strong>${event.Nombre}</strong> --  ${event.Fecha.split('T')[0]} de ${horaInicio} a ${horaFin} -- ${event.Categoria}
+                    <strong>${event.Nombre}</strong>  ${event.Fecha.split('T')[0]} de ${horaInicio} a ${horaFin} -- ${event.Categoria}
                     <button onclick="editEvent(${event.ID_EVENTO}, '${event.Nombre}', '${event.Descripcion}', '${event.Fecha}', '${event.Hora_Inicio}', '${event.Hora_Fin}', '${event.Ubicacion}', '${event.Organizador}', '${event.Categoria}', '${encodeURIComponent(event.imagen_url)}')">Editar</button>
                 `;
                 adminEventsList.appendChild(listItem);
@@ -608,8 +635,8 @@ function cancelCreation() {
 
                         listItem.id = `event-${event.ID_EVENTO}`;
                         listItem.innerHTML = `
-                            <strong>${event.Nombre}</strong> -- ${event.Fecha.split('T')[0]} de ${horaInicio} a ${horaFin} -- ${event.Categoria}
-                            <button class= "deleteButton" onclick="deleteEvent(${event.ID_EVENTO})">Eliminar</button>
+                            <strong>${event.Nombre}</strong> ${event.Fecha.split('T')[0]} de ${horaInicio} a ${horaFin} -- ${event.Categoria}
+                            <button id="deleteEventsContainer" onclick="deleteEvent(${event.ID_EVENTO})">Eliminar</button>
                         `;
                         eventList.appendChild(listItem);
                     });

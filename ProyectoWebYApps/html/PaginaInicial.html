@@ -110,26 +110,57 @@ button {
     justify-content: space-between;
     padding: 50px 20px;
     background-color: #bb95b941;
-    color: white;
+    color: rgb(0, 0, 0);
 }
 
-.contenedor-contenido{
-    max-width: 50%;
+.contenedor-contenido {
+    max-width: 100%;
 }
 
-.contenedor h1 {
-    font-size: 36px;
-    color: black;
-}
-
-.contenedor p {
-    margin: 20px 0;
-    color: black;
-}
-
-#imagen{
+#imagen {
     box-shadow: 10px 10px 11px rgba(0, 0, 0, 0.3);
+    max-width: 100%; /* Asegurar que no exceda su contenedor */
 }
+
+/* Estilos específicos para dispositivos móviles */
+@media (max-width: 768px) {
+    .contenedor {
+        flex-direction: column; /* Cambiar a disposición en columna en móviles */
+        text-align: center; /* Centrar el texto */
+        padding: 20px; /* Reducir el padding */
+    }
+
+    .contenedor-contenido {
+        max-width: 100%; /* Ocupa todo el ancho en móviles */
+    }
+
+    .contenedor h1 {
+        font-size: 28px; /* Reducir el tamaño del título */
+        margin-bottom: 10px; /* Espacio entre el título y el párrafo */
+    }
+
+    .contenedor p {
+        font-size: 16px; /* Ajustar el tamaño del texto */
+    }
+
+    #imagen {
+        width: 100%; /* Imagen ocupa todo el ancho */
+        max-width: 300px; /* Límite de tamaño máximo en móviles */
+        margin: 20px auto; /* Centramos la imagen */
+    }
+
+    .cont-buttons {
+        display: flex;
+        flex-direction: column; /* Botones en columna en móviles */
+        align-items: center; /* Centrar los botones */
+    }
+
+    .cont-buttons button {
+        width: 80%; /* Botones más anchos en móviles */
+        margin: 10px 0; /* Separar los botones */
+    }
+}
+
 
 .cont-buttons button {
     margin: 10px 10px 0 0;
@@ -147,10 +178,6 @@ button {
 #ver-evento {
     background-color: #005BB5;
     color: white;
-}
-
-.cont-img img {
-    max-width: 100%;
 }
 
 

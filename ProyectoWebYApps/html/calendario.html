@@ -22,19 +22,20 @@ h1 {
     text-align: center;
 }
 
-/* Calendario */
+/* Contenedor del calendario */
 .calendar-container {
-    margin: 40px auto;
+    margin: 20px auto;
     max-width: 1200px;
     background-color: white;
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    overflow-x: auto; /* Permite desplazamiento horizontal si es necesario */
 }
 
 #calendar {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, 1fr); /* 7 columnas para los días de la semana */
     gap: 5px;
     margin-top: 20px;
 }
@@ -83,7 +84,7 @@ h1 {
 }
 
 .event-universidad {
-    background-color: #00f439c7; /* Verde */
+    background-color: #00f439c7;
     color: rgb(0, 0, 0);
     padding: 10px;
     margin-bottom: 5px;
@@ -91,7 +92,7 @@ h1 {
     font-size: 0.9rem;
 }
 
-/* Contenedor del mapa de diseño */
+/* Mapa de diseño */
 .legend-container {
     display: flex;
     justify-content: center;
@@ -99,7 +100,6 @@ h1 {
     margin: 20px 0;
 }
 
-/* Elemento individual del mapa de diseño */
 .legend-item {
     display: flex;
     align-items: center;
@@ -107,7 +107,6 @@ h1 {
     font-weight: bold;
 }
 
-/* Línea de color para cada categoría */
 .legend-line {
     width: 20px;
     height: 10px;
@@ -127,41 +126,69 @@ h1 {
     background-color: #00f439c7;
 }
 
-
-
-/* Ajustes para pantallas pequeñas */
+/* Media queries para dispositivos móviles */
 @media (max-width: 768px) {
+    h1 {
+        font-size: 1.5rem; /* Reducir tamaño del título en móviles */
+    }
+
+    .calendar-container {
+        max-width: 100%; /* Ocupa todo el ancho del dispositivo */
+        padding: 10px; /* Reducir el padding en móviles */
+    }
+
     #calendar {
-        gap: 3px; /* Reducir espacio entre celdas */
+        grid-template-columns: repeat(7, 1fr); /* Mantener 7 columnas pero reducir escala */
+        gap: 3px;
+        transform: scale(0.9); /* Escalar el calendario para ajustarlo a pantallas pequeñas */
+        transform-origin: top center; /* Centrar el escalado */
     }
 
     #calendar .header {
-        font-size: 0.9rem; /* Reducir tamaño de texto */
-        padding: 8px; /* Reducir padding */
+        font-size: 0.8rem; /* Reducir tamaño de los encabezados */
+        padding: 8px;
     }
 
     #calendar div {
-        font-size: 0.9rem; /* Reducir tamaño del texto */
-        padding: 10px; /* Reducir padding en las celdas */
+        font-size: 0.8rem; /* Reducir texto en las celdas */
+        padding: 8px; /* Reducir padding en las celdas */
     }
 }
 
 @media (max-width: 480px) {
+    .calendar-container {
+        max-width: 100%; /* Ancho completo en pantallas muy pequeñas */
+        padding: 5px; /* Padding aún más reducido */
+    }
+
     #calendar {
-        gap: 2px; /* Más compacto en dispositivos muy pequeños */
+        transform: scale(0.8); /* Reducir más la escala en pantallas muy pequeñas */
+        transform-origin: top center;
     }
 
     #calendar .header {
-        font-size: 0.8rem;
+        font-size: 0.7rem; /* Reducir aún más el texto de encabezados */
         padding: 6px;
     }
 
     #calendar div {
-        font-size: 0.8rem;
-        padding: 6px;
+        font-size: 0.7rem; /* Reducir texto en las celdas */
+        padding: 6px; /* Reducir padding en las celdas */
+    }
+
+    .legend-container {
+        flex-wrap: wrap; /* Permitir que los elementos se ajusten en línea */
+        gap: 10px; /* Reducir el espacio entre elementos de la leyenda */
+    }
+
+    .legend-item {
+        font-size: 0.8rem; /* Reducir tamaño de texto en leyenda */
     }
 }
 
+
+
+</style>
     </style>
 
 </head>
