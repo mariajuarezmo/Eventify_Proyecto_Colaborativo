@@ -91,6 +91,10 @@
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         }
 
+        .denybutton, .deleteButton{
+            background-color: #c82333;
+        }
+
         ul li button {
             background-color: #25bd48;
             color: white;
@@ -278,6 +282,7 @@
 
                         const denyButton = document.createElement('button');
                         denyButton.textContent = 'Denegar';
+                        denyButton.className = 'denybutton'; // Añadir la clase denybutton
                         denyButton.onclick = () => processRegistration(request.id, 'denegar', listItem);
 
                         listItem.appendChild(approveButton);
@@ -333,7 +338,7 @@
                         listItem.id = `user-${user.id}`;
                         listItem.innerHTML = `
                             <strong>Nombre: </strong>${user.nombre}, <strong> Rol:</strong> ${user.rol}, <strong> Correo:</strong> ${user.correo}
-                            <button onclick="deleteUser(${user.id})">Eliminar</button>
+                            <button class="deleteButton" onclick="deleteUser(${user.id})">Eliminar</button>
                         `;
                         userList.appendChild(listItem);
                     });

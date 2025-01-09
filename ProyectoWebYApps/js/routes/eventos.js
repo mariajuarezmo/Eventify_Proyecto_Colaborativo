@@ -4,51 +4,6 @@ const router = express.Router(); // Usa router para manejar rutas
 const { upload } = require('../sesiones.js');
 
 
-// Ruta para obtener eventos aceptados y por suceder con el nombre del creador
-router.get('/events', (req, res) => {
-    const { category } = req.query;
-
-    let query = `
-        SELECT 
-            Eventos.Nombre AS Nombre_Evento, 
-            Eventos.Descripcion, 
-            Eventos.Fecha, 
-            Eventos.Hora_Inicio, 
-            Eventos.Hora_Fin, 
-            Eventos.Categoria, 
-            Eventos.Ubicacion, 
-            Eventos.Organizador, 
-            Eventos.imagen_url,
-            Eventos.QR,
-            Eventos.num_asistentes,
-            Usuarios.nombre AS Nombre_Creador
-        FROM 
-            Eventos
-        JOIN 
-            Usuarios 
-        ON 
-            Eventos.ID_USUARIO_CREADOR_EVENTO = Usuarios.id
-        WHERE 
-            Eventos.Estado = 'Aceptado' 
-            AND Eventos.Estado_Temporal = 'Por Suceder'
-    `;
-
-    const queryParams = [];
-
-    if (category) {
-        query += ` AND Eventos.Categoria = ?`;
-        queryParams.push(category);
-    }
-
-    con.query(query, queryParams, (err, results) => {
-        if (err) {
-            console.error('Error al obtener eventos:', err);
-            return res.status(500).json({ error: "Error al cargar los eventos." });
-        }
-        res.status(200).json(results);
-    });
-});
-
 // Ruta para registrar un evento
 router.post('/eventRegister', upload.single('imagen_url'), async (req, res) => {
     const { titulo, fecha, hora_inicio, hora_fin, ubicacion, organizador, descripcion, categoria } = req.body;
@@ -64,6 +19,7 @@ router.post('/eventRegister', upload.single('imagen_url'), async (req, res) => {
     if (!req.file) {
         return res.send("<script>alert('Debes subir una imagen para el evento.'); window.history.back();</script>");
     }
+
 
     const imagenPath = `/uploads/${req.file.filename}`;
     const userId = req.session.user.id;

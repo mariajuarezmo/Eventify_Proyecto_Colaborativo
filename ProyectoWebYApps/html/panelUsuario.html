@@ -99,29 +99,33 @@
             margin-bottom: 10px;
         }
 
-        .button-group {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-        }
-
-        .button-group button {
-            flex: 1;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-        }
 
         #formSubmitButton {
-            background-color: #28a745;
-            color: white;
+        background-color: #28a745; /* Verde */
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 1em;
+        }
+
+        #formSubmitButton:hover {
+            background-color: #218838;
         }
 
         #discardCreationButton, #discardChangesButton {
-            background-color: #dc3545;
-            color: white;
+        background-color: #dc3545; /* Rojo */
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 1em;
+        }
+
+        #discardCreationButton:hover, #discardChangesButton:hover {
+        background-color: #c82333;
         }
 
         .hidden{
@@ -213,7 +217,7 @@
                  <div class="button-group">
                      <button id="formSubmitButton" type="submit">Crear Evento</button>
                      <button id="discardCreationButton" type="button" onclick="cancelCreation()">Cancelar</button>
-                     <button id="discardChangesButton" type="button" onclick="discardChanges()">Descartar Cambios</button>
+                     <button id="discardChangesButton" type="button" onclick="discardChanges()" class="hidden">Descartar Cambios</button>
                  </div>
              </form>
          </div>
@@ -369,6 +373,32 @@
             document.getElementById('discardChangesButton').classList.add('hidden');
             document.getElementById('discardCreationButton').classList.add('hidden');
         }
+
+
+        document.getElementById('eventForm').addEventListener('submit', function(event) {
+        const fecha = document.querySelector('input[name="fecha"]').value;
+        const hora_inicio = document.querySelector('input[name="hora_inicio"]').value;
+        const hora_fin = document.querySelector('input[name="hora_fin"]').value;
+
+        const currentDate = new Date();
+        const eventDate = new Date(fecha);
+        const startTime = new Date(`${fecha}T${hora_inicio}`);
+        const endTime = new Date(`${fecha}T${hora_fin}`);
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (eventDate < today && startTime >= endTime) {
+            alert('La fecha del evento no puede ser anterior a la fecha actual y la hora de inicio debe ser anterior a la hora de fin.');
+            event.preventDefault();
+        } else if (eventDate < today) {
+            alert('La fecha del evento no puede ser anterior a la fecha actual.');
+            event.preventDefault();
+        } else if (startTime >= endTime) {
+            alert('La hora de inicio debe ser anterior a la hora de fin.');
+            event.preventDefault();
+        }
+    });
 
         // Previsualizar imagen
         function previewImage(event) {

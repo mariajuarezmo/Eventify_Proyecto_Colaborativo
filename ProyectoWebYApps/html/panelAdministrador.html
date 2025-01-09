@@ -239,7 +239,7 @@
                </select>
                <div class="button-group">
                    <button id="formSubmitButton" type="submit">Crear Evento</button>
-                   <button id="discardCreationButton" type="button" class="hidden" onclick="discardChanges()">Cancelar Creación</button>
+                   <button id="discardCreationButton" type="button" class="hidden" onclick="cancelCreation()">Cancelar Creación</button>
                    <button id="discardChangesButton" type="button" class="hidden" onclick="discardChanges()">Descartar Cambios</button>
                </div>
            </form>
@@ -520,7 +520,14 @@ function discardChanges() {
     document.getElementById('eventFormContainer').classList.add('hidden');
     // Mostrar la lista de eventos para editar
     document.getElementById('adminEventsContainer').classList.remove('hidden');
+
 }
+
+function cancelCreation() {
+            document.getElementById('eventFormContainer').classList.add('hidden');
+        }
+
+
 
 
 
@@ -612,6 +619,34 @@ function discardChanges() {
                 })
                 .catch(error => alert('Error al intentar eliminar el evento.'));
         }
+
+
+        document.getElementById('eventForm').addEventListener('submit', function(event) {
+        const fecha = document.querySelector('input[name="fecha"]').value;
+        const hora_inicio = document.querySelector('input[name="hora_inicio"]').value;
+        const hora_fin = document.querySelector('input[name="hora_fin"]').value;
+
+        const currentDate = new Date();
+        const eventDate = new Date(fecha);
+        const startTime = new Date(`${fecha}T${hora_inicio}`);
+        const endTime = new Date(`${fecha}T${hora_fin}`);
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (eventDate < today && startTime >= endTime) {
+            alert('La fecha del evento no puede ser anterior a la fecha actual y la hora de inicio debe ser anterior a la hora de fin.');
+            event.preventDefault();
+        } else if (eventDate < today) {
+            alert('La fecha del evento no puede ser anterior a la fecha actual.');
+            event.preventDefault();
+        } else if (startTime >= endTime) {
+            alert('La hora de inicio debe ser anterior a la hora de fin.');
+            event.preventDefault();
+        }
+
+        
+    });
 
     </script>
 </body>
