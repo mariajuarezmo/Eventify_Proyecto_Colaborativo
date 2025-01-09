@@ -62,7 +62,7 @@ router.post('/forgot-password', (req, res) => {
                             },
                         });
 
-                        const resetLink = `http://localhost:5501/reset-password?token=${token}`;
+                        const resetLink = `http://eventify.info/reset-password?token=${token}`;
                         console.log('Enviando correo con enlace de restablecimiento...');
                         transporter.sendMail(
                             {

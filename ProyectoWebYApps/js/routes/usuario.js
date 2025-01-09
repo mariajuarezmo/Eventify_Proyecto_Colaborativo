@@ -77,7 +77,7 @@ router.post('/updateEvent', upload.single('imagen_url'), (req, res) => {
     const imagen_url = req.file ? `/uploads/${req.file.filename}` : req.body.imagen_actual;
 
     if (!req.session || !req.session.user) {
-        return res.send("<script>alert('Debes iniciar sesión para editar eventos.'); window.location.href='/paginaInicial.html';</script>");
+        return res.send("<script>alert('Debes iniciar sesión para editar eventos.'); window.location.href='/index.html';</script>");
     }
 
     if (!id_evento || !titulo || !descripcion || !fecha || !hora_inicio || !hora_fin || !ubicacion || !organizador || !categoria || !imagen_url) {

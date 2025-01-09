@@ -217,7 +217,7 @@
  <!----------------------------------------------------->
  <header class="shared-header">
     <span class="logo">
-        <a href="PaginaInicial.html">
+        <a href="index.html">
             <img src="../img/logo_eventify.png" alt="Logo" width="170" height="50">
         </a>
     </span>
@@ -384,6 +384,8 @@
                     <li><strong>Organizador:</strong> ${event.Organizador}</li>
                     <li><strong>Creador del Evento:</strong> ${event.Nombre_Creador}</li>
                     <li><strong>Número de asistentes del evento:</strong> ${event.num_asistentes}</li>
+                    <li><strong>Descripción:</strong> ${event.Descripcion}</li>
+
                 </ul>
                 <button onclick="openModal('${event.QR}')">Atender</button>
             `;

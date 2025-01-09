@@ -190,7 +190,7 @@
      <!----------------------------------------------------->
      <header class="shared-header">
         <span class="logo">
-            <a href="PaginaInicial.html" onclick="logoutAndRedirect(event)">
+            <a href="index.html" onclick="logoutAndRedirect(event)">
                 <img src="../img/logo_eventify.png" alt="Logo" width="170" height="50">
             </a>
         </span>
@@ -200,7 +200,7 @@
                 event.preventDefault(); // Evitar la redirección inmediata
                 fetch('/logout', { method: 'GET' }) // Realizar el logout
                     .then(() => {
-                        window.location.href = 'PaginaInicial.html'; // Redirigir a la página inicial después del logout
+                        window.location.href = 'index.html'; // Redirigir a la página inicial después del logout
                     })
                     .catch(err => console.error('Error al cerrar sesión:', err));
             }

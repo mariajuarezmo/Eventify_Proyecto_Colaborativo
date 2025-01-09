@@ -23,7 +23,7 @@ router.get('/logout', (req, res) => {
         console.log('Sesión cerrada con éxito.');
 
         // Redirigir al archivo index.html
-        res.redirect('PaginaInicial.html');
+        res.redirect('index.html');
     });
 });
 module.exports= router;

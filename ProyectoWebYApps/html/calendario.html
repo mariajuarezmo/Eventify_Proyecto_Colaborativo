@@ -197,7 +197,7 @@ h1 {
  <!----------------------------------------------------->
  <header class="shared-header">
     <span class="logo">
-        <a href="PaginaInicial.html">
+        <a href="index.html">
             <img src="../img/logo_eventify.png" alt="Logo" width="170" height="50">
         </a>
     </span>
@@ -305,7 +305,7 @@ async function getCurrentDate() {
 // Obtener eventos desde el backend
 async function fetchEvents() {
     try {
-        const response = await fetch('http://localhost:5501/api/events'); // Llama a la API del backend
+        const response = await fetch('http://eventify.info/events2'); // Llama a la API del backend
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
         }

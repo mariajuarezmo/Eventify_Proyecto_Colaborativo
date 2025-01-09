@@ -20,21 +20,21 @@ router.post('/eventRegister', upload.single('imagen_url'), async (req, res) => {
         return res.send("<script>alert('Debes subir una imagen para el evento.'); window.history.back();</script>");
     }
 
-
     const imagenPath = `/uploads/${req.file.filename}`;
-    const userId = req.session.user.id;
-    const userRole = req.session.user.rol;
-    const estado = userRole === 'Admin' ? 'Aceptado' : 'Pendiente';
+    const userId = req.session.user.id; // ID del usuario que está creando el evento
+    const userRole = req.session.user.rol; // Rol del usuario (Admin, Estudiante, Profesor, etc.)
+    const estado = userRole === 'Admin' ? 'Aceptado' : 'Pendiente'; // Si es Admin, el estado es 'Aceptado'
     const estadoTemporal = 'Por Suceder';
+    const idAdminAprobador = userRole === 'Admin' ? userId : null; // Si es Admin, se guarda su ID como aprobador
 
     const insertEventQuery = `
-        INSERT INTO Eventos (Nombre, Descripcion, Estado, Fecha, Hora_Inicio, Hora_Fin, Categoria, Ubicacion, Organizador, ID_USUARIO_CREADOR_EVENTO, Estado_Temporal, imagen_url, num_asistentes)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+        INSERT INTO Eventos (Nombre, Descripcion, Estado, Fecha, Hora_Inicio, Hora_Fin, Categoria, Ubicacion, Organizador, ID_USUARIO_CREADOR_EVENTO, Estado_Temporal, imagen_url, num_asistentes, ID_ADMIN_APROBADOR)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
     `;
 
     con.query(
         insertEventQuery,
-        [titulo, descripcion, estado, fecha, hora_inicio, hora_fin, categoria, ubicacion, organizador, userId, estadoTemporal, imagenPath],
+        [titulo, descripcion, estado, fecha, hora_inicio, hora_fin, categoria, ubicacion, organizador, userId, estadoTemporal, imagenPath, idAdminAprobador],
         async (err, result) => {
             if (err) {
                 console.error('Error al registrar el evento:', err);
@@ -44,7 +44,7 @@ router.post('/eventRegister', upload.single('imagen_url'), async (req, res) => {
             const eventId = result.insertId; // Obtener el ID del evento recién creado
 
             // Generar QR con QuickChart.io
-            const qrData = `https://registroEventoEventify.com/event/${eventId}`;// URL para mostrar información del evento
+            const qrData = `http://128.140.112.133:8069/event/${eventId}`; // URL para mostrar información del evento
             const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(qrData)}&size=200`;
 
             // Actualizar la base de datos con la URL del QR
@@ -296,7 +296,7 @@ router.post('/updateEvent', upload.single('imagen_url'), (req, res) => {
         }
 
         if (results.length === 0) {
-            return res.send("<script>alert('Usuario no encontrado.'); window.location.href='/paginaInicial.html';</script>");
+            return res.send("<script>alert('Usuario no encontrado.'); window.location.href='/index.html';</script>");
         }
 
         const userRole = results[0].rol;
@@ -415,7 +415,7 @@ router.delete('/deleteUser', (req, res) => {
 router.get('/event/:id', (req, res) => {
     const eventId = req.params.id;
 
-    const query = `SELECT * FROM Eventos WHERE id = ?`;
+    const query = `SELECT * FROM Eventos WHERE ID_EVENTO = ?`;
     con.query(query, [eventId], (err, results) => {
         if (err || results.length === 0) {
             return res.status(404).send('Evento no encontrado.');
@@ -424,30 +424,98 @@ router.get('/event/:id', (req, res) => {
         const evento = results[0];
 
         res.send(`
-            <!DOCTYPE html>
+          <!DOCTYPE html>
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>${evento.Nombre}</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        background: linear-gradient(135deg,rgb(179, 226, 148),rgba(128, 122, 246, 0.76)); /* Fondo degradado sutil */
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        min-height: 100vh;
+                        margin: 0;
+                        
+                    }
+                    .card {
+                        background: white;
+                        border-radius: 10px;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        width: 90%;
+                        max-width: 500px;
+                        padding: 20px;
+                        margin: 20px;
+                        text-align: center;
+                        
+                        max-height: 450px;
+                    }
+
+                    #event-info {
+                        text-align: left;
+                    }
+
+
+                    h1 {
+                        font-size: 24px;
+                        margin-bottom: 10px;
+                        color: #333;
+                    }
+                    p {
+                        margin: 5px 0;
+                        color: #555;
+                    }
+                    strong {
+                        color: #222;
+                    }
+                    form {
+                        margin-top: 20px;
+                    }
+                    input[type="text"] {
+                        width: 90%;
+                        padding: 10px;
+                        margin: 10px 0;
+                        border: 1px solid #ccc;
+                        border-radius: 5px;
+                        font-size: 16px;
+                    }
+                    button {
+                        background: #5cb85c;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 5px;
+                        font-size: 16px;
+                        cursor: pointer;
+                        transition: background 0.3s;
+                    }
+                    button:hover {
+                        background: #4cae4c;
+                    }
+                </style>
             </head>
             <body>
+                <div class="card">
                 <h1>${evento.Nombre}</h1>
-                <p>${evento.Descripcion}</p>
-                <p><strong>Fecha:</strong> ${evento.Fecha}</p>
-                <p><strong>Hora:</strong> ${evento.Hora_Inicio} - ${evento.Hora_Fin}</p>
-                <p><strong>Ubicación:</strong> ${evento.Ubicacion}</p>
-                <p><strong>Organizador:</strong> ${evento.Organizador}</p>
-                <p><strong>Asistentes:</strong> ${evento.num_asistentes}</p>
+                    <div id="event-info">
+                        <p><strong>Fecha:</strong> ${evento.Fecha}</p>
+                        <p><strong>Hora:</strong> ${evento.Hora_Inicio} - ${evento.Hora_Fin}</p>
+                        <p><strong>Ubicación:</strong> ${evento.Ubicacion}</p>
+                        <p><strong>Organizador:</strong> ${evento.Organizador}</p>
+                        <p><strong>Asistentes:</strong> ${evento.num_asistentes}</p>
+                        <p>${evento.Descripcion}</p>
+                    </div>
 
-                <h2>Confirmar Asistencia</h2>
-                <form action="/event/${evento.id}/register" method="POST">
-                    <input type="text" name="nombre" placeholder="Tu nombre" required>
-                    <input type="text" name="apellidos" placeholder="Tus apellidos" required>
-                    <button type="submit">Confirmar</button>
-                </form>
-            </body>
-            </html>
+                    <h2>Confirmar Asistencia</h2>
+                    <form action="/event/${evento.ID_EVENTO}/register" method="POST">
+                        <input type="text" name="nombre" placeholder="Tu nombre" required>
+                        <input type="text" name="apellidos" placeholder="Tus apellidos" required>
+                        <button type="submit">Confirmar</button>
+                    </form>
+                </div>
         `);
     });
 });
@@ -465,7 +533,7 @@ router.post('/event/:id/register', (req, res) => {
             return res.status(500).send('Error interno.');
         }
 
-        res.send("<script>alert('Gracias por confirmar tu asistencia.'); window.location.href='/paginaInicial.html';</script>");
+        res.send("<script>alert('Gracias por confirmar tu asistencia.'); window.location.href='/index.html';</script>");
     });
 });
 

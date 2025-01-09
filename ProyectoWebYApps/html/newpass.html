@@ -11,7 +11,7 @@
 <!--------------------------------------------------->
 <header class="shared-header">
     <span class="logo">
-        <a href="PaginaInicial.html" onclick="logoutAndRedirect(event)">
+        <a href="index.html" onclick="logoutAndRedirect(event)">
             <img src="../img/logo_eventify.png" alt="Logo" width="170" height="50">
         </a>
     </span>
@@ -21,7 +21,7 @@
             event.preventDefault(); // Evitar la redirección inmediata
             fetch('/logout', { method: 'GET' }) // Realizar el logout
                 .then(() => {
-                    window.location.href = 'PaginaInicial.html'; // Redirigir a la página inicial después del logout
+                    window.location.href = 'index.html'; // Redirigir a la página inicial después del logout
                 })
                 .catch(err => console.error('Error al cerrar sesión:', err));
         }
@@ -42,7 +42,7 @@
             <p id="passwordError" style="color: red; display: none;">Las contraseñas no coinciden</p>
             <button class="btn-primary" id="submitButton" type="submit" disabled>Guardar nueva contraseña</button>
         </form>
-        <p><a href="PaginaInicial.html">Volver a la página inicial</a></p>
+        <p><a href="index.html">Volver a la página inicial</a></p>
         <div id="message"></div> <!-- Para mostrar mensajes de éxito o error -->
     </div>
 </div>
@@ -131,7 +131,7 @@
 
             try {
                 // Enviar nueva contraseña al backend
-                const response = await fetch("http://localhost:5501/update-password", {
+                const response = await fetch("http://eventify.info/update-password", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

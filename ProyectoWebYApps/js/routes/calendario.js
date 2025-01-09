@@ -3,7 +3,7 @@ const con = require('../bbdd');
 const router = express.Router();
 
 // Ruta para obtener eventos desde la base de datos
-router.get('/api/events', (req, res) => {
+router.get('/events2', (req, res) => {
     const query = `
         SELECT 
             Nombre AS titulo, 

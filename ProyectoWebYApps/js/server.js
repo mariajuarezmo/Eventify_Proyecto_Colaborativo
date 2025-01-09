@@ -62,7 +62,7 @@ app.use('/', calenderRouter);
 
 // Ruta principal para la página inicial
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../html/paginainicial.html'));
+    res.sendFile(path.join(__dirname, '../html/index.html'));
 });
 
 app.get('/login', (req, res) => {
@@ -81,6 +81,6 @@ app.listen(port, () => {
     // Importación dinámica de 'open'
     (async () => {
         const open = (await import('open')).default; // Carga dinámica del módulo
-        open(`http://localhost:${port}/paginainicial.html`); // Abre la página inicial en el navegador
+        open(`http://localhost:${port}/index.html`); // Abre la página inicial en el navegador
     })();
 });
