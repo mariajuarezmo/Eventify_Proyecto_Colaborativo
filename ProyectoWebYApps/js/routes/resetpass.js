@@ -62,11 +62,11 @@ router.post('/forgot-password', (req, res) => {
                             },
                         });
 
-                        const resetLink = `http://eventify.info/reset-password?token=${token}`;
+                        const resetLink = `http://www.eventify.info/reset-password?token=${token}`;
                         console.log('Enviando correo con enlace de restablecimiento...');
                         transporter.sendMail(
                             {
-                                from: '"Eventify Support" <contact@eventify.info>',
+                                from: '"Eventify Support" <contact@www.eventify.info>',
                                 to: email,
                                 subject: 'Restablecer la contraseña',
                                 html: `<p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p><a href="${resetLink}">Restablecer Contraseña</a>`,
